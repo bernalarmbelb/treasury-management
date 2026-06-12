@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\TransactionLog;
+use Faker\Factory as Faker;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -32,6 +33,20 @@ class TransactionLogSeeder extends Seeder
 
         foreach ($transactions as $transaction) {
             TransactionLog::create($transaction);
+        }
+
+        $faker = Faker::create();
+        $formTypes = ['Form 01', 'Form 02', 'Form 03'];
+        $statuses = ['Completed', 'Cancelled'];
+
+        for ($i = 0; $i < 60; $i++) {
+            TransactionLog::create([
+                'serial_number' => sprintf('324-5678-1234-%02d', $faker->numberBetween(3, 99)),
+                'payee' => $faker->lastName().', '.$faker->firstName().' '.$faker->randomLetter(),
+                'transacted_at' => $faker->dateTimeBetween('-3 years', 'now'),
+                'form_type' => $faker->randomElement($formTypes),
+                'status' => $faker->randomElement($statuses),
+            ]);
         }
     }
 }
