@@ -1,0 +1,269 @@
+@import 'bootstrap/dist/css/bootstrap.min.css';
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap');
+
+h1, h2, h3, h4, h5, h6, p, ul, ol, li, figure, blockquote {
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+/* ===== Define CSS variables for fonts and colors ===== */
+    --page-title: 'Obviously', sans-serif;
+    --page-subtitle: 'Manrope', sans-serif;
+
+    --font-family-primary: 'Obviously', sans-serif;
+    --font-family-secondary: 'Manrope', sans-serif;
+
+    --fonts-black: rgba(51, 51, 51, 1);
+    --fonts-black-80: rgba(51, 51, 51, 0.8);
+    --fonts-black-60: rgba(51, 51, 51, 0.6);
+    --fonts-black-50: rgba(51, 51, 51, 0.5);
+    --fonts-black-40: rgba(51, 51, 51, 0.4);
+    --fonts-black-20: rgba(51, 51, 51, 0.2);
+    --fonts-black-10: rgba(51, 51, 51, 0.1);
+
+
+    --fonts-white: rgba(255, 255, 255, 1);
+    --fonts-white-80: rgba(255, 255, 255, 0.8);
+    --fonts-white-60: rgba(255, 255, 255, 0.6);
+    --fonts-white-50: rgba(255, 255, 255, 0.5);
+    --fonts-white-40: rgba(255, 255, 255, 0.4);
+    --fonts-white-20: rgba(255, 255, 255, 0.2);
+    --fonts-white-10: rgba(255, 255, 255, 0.1);
+
+/* ===== Define CSS variables for colors ===== */
+    --background-color: rgba(237, 243, 249, 1);
+
+    --primary: rgba(66, 122, 181, 1);
+    --secondary: rgba(64, 106, 175, 1);
+    --accent: rgba(247, 221, 125, 1);
+    --accent-sub: rgba(247, 221, 125, 1);
+    --success: rgba(15, 169, 88, 1);
+    --danger: rgba(220, 53, 69, 1);
+    --warning: rgba(232, 78, 70, 1);
+    --info: rgba(255, 235, 0, 1);
+    --light: rgba(183, 187, 193, 1);
+    --dark: rgba(51, 51, 51, 1);
+
+    --table-cell: rgba(255, 255, 255, 1);
+    --table-border: rgba(217, 217, 217, 1);
+    --table-header: rgba(164, 164, 164, 1);
+
+/* ===== Define CSS variables for default buttons ===== */
+    --btn-primary-font: 'Roboto', sans-serif;
+
+    /* colors for different button states */
+    --btn-primary: rgba(24, 119, 242, 1);
+    --btn-primary-hover: rgba(7, 56, 121, 1);
+    --btn-primary-active: rgba(7, 56, 121, 1);
+
+    --btn-secondary: rgba(112, 182, 193, 1);
+    --btn-secondary-hover: rgba(39, 82, 89, 1);
+    --btn-secondary-active: rgba(39, 82, 89, 1);
+
+    --btn-accent: rgba(42, 187, 167, 1);
+    --btn-accent-hover: rgba(23, 104, 93, 1);
+    --btn-accent-active: rgba(23, 104, 93, 1);
+
+    --btn-success: rgba(15, 169, 88, 1);
+    --btn-success-hover: rgba(10, 117, 61, 1);
+    --btn-success-active: rgba(10, 117, 61, 1);
+
+    --btn-danger: rgba(220, 53, 69, 1);
+    --btn-danger-hover: rgba(191, 16, 45, 1);
+    --btn-danger-active: rgba(191, 16, 45, 1);
+
+    --btn-warning: rgba(232, 78, 70, 1);
+    --btn-warning-hover: rgba(205, 53, 45, 1);
+    --btn-warning-active: rgba(205, 53, 45, 1);
+
+    --btn-info: rgba(255, 235, 0, 1);
+    --btn-info-hover: rgba(202, 189, 32, 1);
+    --btn-info-active: rgba(202, 189, 32, 1);
+
+    --btn-light: rgba(183, 187, 193, 1);
+    --btn-light-hover: rgba(183, 187, 193, 1);
+    --btn-light-active: rgba(183, 187, 193, 1);
+
+    --btn-dark: rgba(51, 51, 51, 1);
+    --btn-dark-hover: rgba(143, 143, 143, 1);
+    --btn-dark-active: rgba(143, 143, 143, 1);
+}
+
+.logo-image {
+    width: auto;
+    height: 50px;
+    object-fit: contain;
+}
+.navigation-header {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    align-items: center;
+    border-bottom: 1px solid rgba(51, 51, 51, 0.25);
+    background: linear-gradient(180deg, #FFF -19.38%, #999 174.81%), #F0F2F5;
+    padding: 10px 20px;
+    color: var(--fonts-white);
+}
+
+.container-logo {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    align-items: center;
+}
+
+.container-title{
+    /* outline: 1px solid red; */
+    display: flex;
+    height: 83px;
+    padding: 0px 10px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.navigation-bar {
+    align-items: center;
+    background: var(--primary, #427AB5);
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    font-family: var(--font-family-secondary, 'Manrope', sans-serif);
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 400;
+    height: 50px;
+    letter-spacing: 0.1em;
+    line-height: normal;
+    min-height: 50px;
+    overflow-x: auto;
+    padding: 0 8px;
+    position: sticky;
+    scrollbar-width: none;
+    text-transform: none;
+    top: 0;
+    z-index: 1000;
+    width: 100%;
+}
+
+.nav-sticky-wrapper {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    /* outline: 1px solid red; */
+    margin: 0;
+}
+
+.nav-scroll-btn {
+    background: var(--primary);
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 24px;
+    height: 50px;
+    padding: 0 8px;
+    z-index: 1001;
+    display: none; /* hidden by default */
+}
+
+.navigation-bar a {
+    /* outline: 1px solid red; */
+    text-decoration: none;
+    color: var(--fonts-white);
+    align-items: center;
+    padding: 10px;
+    display: flex;
+    height: 100%;
+    width: fit-content;
+    white-space: nowrap;
+}
+.navigation-bar a:hover, .navigation-bar a.active {
+    color: var(--light);
+    font-weight: 400;
+    border-bottom: 5px solid var(--dark);
+}
+
+#mgmt-subnav {
+    display: none;
+}
+
+#mgmt-subnav.active {
+    display: flex;
+}
+
+body {
+    font-family: var(--font-family-secondary, 'Manrope', sans-serif);
+    /* background-color: var(--dark, #333); */
+    bounding-box: border-box;
+
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+
+}
+
+.main-container {
+    flex: 1;
+    padding: 24px 10px;
+    background-color: var(--background-color, #F0F2F5);
+    border: 1px solid var(--table-border, #D9D9D9);
+    padding: 0;
+}
+
+.btn{ align-items: center; border-radius: 8px; cursor: pointer; display: inline-flex; font-family: var(--btn-primary-font); font-size: 14px; font-style: normal; font-weight: 500; gap: 10px; justify-content: center; leading-trim: both; letter-spacing: 0.05em; line-height: normal; overflow: hidden; width: fit-content; height: 42px; padding: 16px 24px; text-align: center; text-decoration: none; text-edge: cap; text-overflow: ellipsis; text-transform: uppercase; transition: background-color 0.3s ease, color 0.3s ease; outline: none; border: none; 
+} 
+.btn-primary { background-color: var(--btn-primary); color: var(--fonts-white); }
+.btn-primary:hover { background-color: var(--btn-primary-hover); } 
+.btn-secondary { background-color: var(--btn-secondary); color: var(--fonts-white); }
+.btn-secondary:hover { background-color: var(--btn-secondary-hover); }
+.btn-accent{ background-color: var(--btn-accent); color: var(--fonts-black-80); }
+.btn-accent:hover { background-color: var(--btn-accent-hover); color: var(--fonts-white); }
+.btn-success { background-color: var(--btn-success); color: var(--fonts-white); }
+.btn-success:hover { background-color: var(--btn-success-hover); }
+.btn-danger { background-color: var(--btn-danger); color: var(--fonts-white); }
+.btn-danger:hover { background-color: var(--btn-danger-hover); }
+.btn-warning { background-color: var(--btn-warning); color: var(--fonts-white); }
+.btn-warning:hover { background-color: var(--btn-warning-hover); color: var(--fonts-white); }
+.btn-info { background-color: var(--btn-info); color: var(--fonts-black-80); }
+.btn-info:hover { background-color: var(--btn-info-hover); color: var(--fonts-white); }
+.btn-light { background-color: var(--btn-light); color: var(--fonts-black-80); }
+.btn-light:hover { background-color: var(--btn-light-hover); color: var(--fonts-white); }
+.btn-dark { background-color: var(--btn-dark); color: var(--fonts-white); }
+.btn-dark:hover { background-color: var(--btn-dark-hover); color: var(--fonts-white); }
+
+
+
+.page-title {
+    color: var(--fonts-black, #333);
+    font-family: var(--page-title);
+    font-size: clamp(14px, 1.5vw, 24px); /* min, preferred, max */
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    text-transform: uppercase;
+}
+
+.page-links {
+    color: var(--fonts-black, #333);
+    font-family: var(--page-subtitle);
+    font-size: clamp(8px, 1.5vw, 12px); /* min, preferred, max */
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.page-links a{
+    color: var(--dark);
+    text-decoration: none;
+}
+
+.page-links a.active{
+    color: var(--warning);
+    text-decoration: none;
+}
