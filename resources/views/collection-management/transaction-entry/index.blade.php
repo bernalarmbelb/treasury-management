@@ -8,6 +8,9 @@
         <x-header title="Transaction Entry"
             :tmpRoute="$tmpRoute"
             :routeName="$routeName"
+            parentTitle="Collections Management"
+            :parentRoute="route('collections')"
+            parentRouteName="collections"
         />
         <div class="nav-sticky-wrapper">
             <div class="" style="display:flex; width: 100%">
