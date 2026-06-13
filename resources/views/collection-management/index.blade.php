@@ -27,7 +27,7 @@
             </button>
 
             <form class="search-group" role="search" method="GET" id="transaction-search-form">
-                <input type="search" name="search" class="search-input" id="transaction-search-input" placeholder="Search Transaction" value="{{ request('search') }}" autocomplete="off">
+                <input type="search" name="search" class="search-input" id="transaction-search-input" placeholder="Search Payee" value="{{ request('search') }}" autocomplete="off">
                 <button type="submit" class="btn btn-light search-btn">
                     <x-bx-search class="icon" />
                     Search
@@ -48,15 +48,7 @@
                 const searchForm = document.getElementById('transaction-search-form');
                 let debounceTimer;
 
-                function reloadTable() {
-                    const params = new URLSearchParams(window.location.search);
-
-                    if (searchInput.value) {
-                        params.set('search', searchInput.value);
-                    } else {
-                        params.delete('search');
-                    }
-
+                function fetchAndRender(params) {
                     params.delete('page');
 
                     const baseUrl = searchForm.action.split('?')[0];
@@ -71,6 +63,18 @@
                         });
                 }
 
+                function reloadTable() {
+                    const params = new URLSearchParams(window.location.search);
+
+                    if (searchInput.value) {
+                        params.set('search', searchInput.value);
+                    } else {
+                        params.delete('search');
+                    }
+
+                    fetchAndRender(params);
+                }
+
                 searchInput.addEventListener('input', function () {
                     clearTimeout(debounceTimer);
                     debounceTimer = setTimeout(reloadTable, 300);
@@ -80,6 +84,30 @@
                     event.preventDefault();
                     clearTimeout(debounceTimer);
                     reloadTable();
+                });
+
+                container.addEventListener('click', function (event) {
+                    const link = event.target.closest('.sortable-header');
+
+                    if (!link) {
+                        return;
+                    }
+
+                    event.preventDefault();
+
+                    const linkUrl = new URL(link.href);
+                    const params = new URLSearchParams(window.location.search);
+
+                    params.set('sort', linkUrl.searchParams.get('sort'));
+                    params.set('direction', linkUrl.searchParams.get('direction'));
+
+                    if (searchInput.value) {
+                        params.set('search', searchInput.value);
+                    } else {
+                        params.delete('search');
+                    }
+
+                    fetchAndRender(params);
                 });
             })();
         </script>

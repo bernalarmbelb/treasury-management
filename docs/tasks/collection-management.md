@@ -134,3 +134,54 @@ data from a hardcoded array to a database table.
   height of the sticky header row, flush against the toolbar below,
   matching the reference layout. Verified via preview (non-scrolled and
   scrolled views).
+
+## 2026-06-13 02:05 — Sticky toolbar + table header, pagination spacing
+
+- Filter button, search bar, and the data table header now stay in view
+  while the table data is taller than the remaining viewport space.
+- `.collection-toolbar` (`resources/css/app.css`) is now
+  `position: sticky; top: 133px` (133px = main nav 50px + sub-header
+  83px), with its own background so it stays visible above the table as
+  the page scrolls.
+- Added a new `.table-scroll-area` wrapper around `.table-wrapper`
+  (`resources/views/collection-management/partials/transactions-table.blade.php`)
+  with `max-height: calc(100vh - 290px); overflow: auto`. `.data-table
+  thead th` is now `position: sticky; top: 0` relative to this scroll
+  area, so the table header stays pinned while rows scroll underneath it.
+  Pagination stays outside this scroll area so it's always visible.
+- Added `margin-top: 12px` to `.pagination-bar` to add spacing between
+  the table and the pagination controls.
+- Verified via preview: with 10 rows per page the table fits without an
+  inner scrollbar; with 50 rows per page the table area scrolls
+  internally with the header pinned, while the toolbar and page header
+  remain fixed and the pagination bar stays visible below with proper
+  spacing.
+
+## 2026-06-13 02:20 — Sortable columns and text-only action buttons
+
+- Table headers (Serial Number, Payee, Date, Time, Form Type, Status) are
+  now clickable and sort the table via the existing AJAX live-search
+  mechanism, with a sort-direction arrow icon (`bx-sort-alt-2` /
+  `bx-sort-up` / `bx-sort-down`) next to each label. Clicking toggles
+  ascending/descending; Date and Time both sort by `transacted_at`.
+- Backend (`routes/web.php`): `/collections` now accepts `sort` and
+  `direction` query params (whitelisted to `serial_number`, `payee`,
+  `transacted_at`, `form_type`, `status`; direction `asc`/`desc`,
+  default `transacted_at` desc), applied via `orderBy()`. Both values are
+  passed to the view and preserved across pagination via
+  `withQueryString()`.
+- Frontend
+  (`resources/views/collection-management/partials/transactions-table.blade.php`):
+  added a `$sortLink`/`$sortIcon` helper per column and wrapped each
+  header label in an `<a class="sortable-header">`.
+- JS (`resources/views/collection-management/index.blade.php`):
+  refactored the AJAX reload into a shared `fetchAndRender(params)`, and
+  added a delegated click handler on the table container for
+  `.sortable-header` links that merges the clicked column's `sort`/
+  `direction` into the current query params (preserving search) before
+  reloading.
+- Action buttons in the Actions column are now text-only ("Cancel" /
+  "View", `.action-btn`), icons removed for a cleaner look.
+- Verified via preview: clicking "Payee" sorts ascending then descending
+  with the arrow icon updating accordingly, and sorting combines
+  correctly with an active search term.

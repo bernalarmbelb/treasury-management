@@ -1,13 +1,40 @@
+@php
+    $sortLink = function (string $column) use ($sort, $direction) {
+        $newDirection = ($sort === $column && $direction === 'asc') ? 'desc' : 'asc';
+
+        return request()->fullUrlWithQuery(['sort' => $column, 'direction' => $newDirection, 'page' => null]);
+    };
+
+    $sortIcon = function (string $column) use ($sort, $direction) {
+        if ($sort !== $column) {
+            return ['sort-alt-2', ''];
+        }
+
+        return $direction === 'asc' ? ['sort-up', 'active'] : ['sort-down', 'active'];
+    };
+@endphp
+
+<div class="table-scroll-area">
 <div class="table-wrapper">
     <table class="data-table">
         <thead>
             <tr>
-                <th>Serial Number</th>
-                <th>Payee</th>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Form Type</th>
-                <th>Status</th>
+                @foreach ([
+                    ['serial_number', 'Serial Number'],
+                    ['payee', 'Payee'],
+                    ['transacted_at', 'Date'],
+                    ['transacted_at', 'Time'],
+                    ['form_type', 'Form Type'],
+                    ['status', 'Status'],
+                ] as [$column, $label])
+                    @php [$icon, $iconClass] = $sortIcon($column); @endphp
+                    <th>
+                        <a href="{{ $sortLink($column) }}" class="sortable-header">
+                            {{ $label }}
+                            <x-dynamic-component :component="'bx-' . $icon" class="sort-icon {{ $iconClass }}" />
+                        </a>
+                    </th>
+                @endforeach
                 <th class="col-actions">Actions</th>
             </tr>
         </thead>
@@ -26,11 +53,11 @@
                     </td>
                     <td class="col-actions">
                         <div class="table-actions">
-                            <button type="button" class="action-btn action-cancel" title="Cancel" aria-label="Cancel">
-                                <x-bx-x class="icon" />
+                            <button type="button" class="action-btn action-cancel" aria-label="Cancel">
+                                Cancel
                             </button>
-                            <button type="button" class="action-btn action-view" title="View" aria-label="View">
-                                <x-bx-show class="icon" />
+                            <button type="button" class="action-btn action-view" aria-label="View">
+                                View
                             </button>
                         </div>
                     </td>
@@ -42,6 +69,7 @@
             @endforelse
         </tbody>
     </table>
+</div>
 </div>
 
 <div class="pagination-bar">
