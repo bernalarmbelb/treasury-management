@@ -35,7 +35,7 @@
                         </a>
                     </th>
                 @endforeach
-                <th class="col-actions">Actions</th>
+                <th class="col-actions text-center">Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -80,6 +80,18 @@
         <form method="GET" class="per-page-form">
             @if (request('search'))
                 <input type="hidden" name="search" value="{{ request('search') }}">
+            @endif
+            @foreach (request('status', []) as $status)
+                <input type="hidden" name="status[]" value="{{ $status }}">
+            @endforeach
+            @foreach (request('form_type', []) as $formType)
+                <input type="hidden" name="form_type[]" value="{{ $formType }}">
+            @endforeach
+            @if (request('date_start'))
+                <input type="hidden" name="date_start" value="{{ request('date_start') }}">
+            @endif
+            @if (request('date_end'))
+                <input type="hidden" name="date_end" value="{{ request('date_end') }}">
             @endif
             <label for="per_page" class="per-page-label">Rows per page</label>
             <select name="per_page" id="per_page" class="form-select form-select-sm per-page-select" onchange="this.form.submit()">
