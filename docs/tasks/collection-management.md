@@ -157,6 +157,40 @@ data from a hardcoded array to a database table.
   remain fixed and the pagination bar stays visible below with proper
   spacing.
 
+## 2026-06-13 02:30 — Search placeholder text
+
+- Changed the search input placeholder from "Search Transaction" to
+  "Search Payee" (`resources/views/collection-management/index.blade.php`),
+  since search matches against the payee field.
+
+## 2026-06-13 02:40 — Filter icon to match Figma (first pass)
+
+- Replaced the filter button icon `<x-bx-filter-alt>` (outline) with
+  `<x-bxs-filter-alt>` (solid/filled funnel), and increased
+  `.filter-btn .icon` size from `20px` to `24px`
+  (`resources/css/app.css`).
+- Superseded by the next entry: the Figma icon (`mage:filter-fill`,
+  node `144:3082`/`144:3085` under
+  https://www.figma.com/design/zKN3sT9cEm13slzJrAD5XU/Prototype?node-id=148-3094)
+  is actually a "sliders/adjustments" icon (three horizontal bars with
+  round handles), not a funnel.
+
+## 2026-06-13 02:55 — Filter icon, exact Figma match
+
+- Replaced `<x-bxs-filter-alt>` with a new custom icon component
+  `resources/views/components/icons/filter-fill.blade.php`, an inline
+  SVG matching the exact "mage:filter-fill" path data from the Figma
+  filter button (node `148:3094`, "Filter" component, state=default).
+  Boxicons has no exact equivalent (closest is `bx-slider-alt`, but it
+  has 2 bars instead of 3).
+- Used in the filter button as `<x-icons.filter-fill class="icon" />`
+  (`resources/views/collection-management/index.blade.php`).
+- Set `.filter-btn .icon { color: #fff }` (`resources/css/app.css`) since
+  the Figma icon fill is white on the `#B7BBC1` button background (icon
+  uses `fill="currentColor"`).
+- Verified via preview: filter button now shows the white sliders icon
+  on the gray `42x42` button, matching the Figma design.
+
 ## 2026-06-13 02:20 — Sortable columns and text-only action buttons
 
 - Table headers (Serial Number, Payee, Date, Time, Form Type, Status) are

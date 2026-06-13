@@ -23,7 +23,7 @@
     <div class="collection-content">
         <div class="collection-toolbar">
             <button type="button" class="filter-btn" aria-label="Filter">
-                <x-bx-filter-alt class="icon" />
+                <x-icons.filter-fill class="icon" />
             </button>
 
             <form class="search-group" role="search" method="GET" id="transaction-search-form">
