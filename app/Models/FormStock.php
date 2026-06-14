@@ -23,4 +23,24 @@ class FormStock extends Model
     {
         return $this->hasMany(FormBatch::class);
     }
+
+    public function ctcIndividualTransactions(): HasMany
+    {
+        return $this->hasMany(CtcIndividualTransaction::class);
+    }
+
+    public function ctcCorporationTransactions(): HasMany
+    {
+        return $this->hasMany(CtcCorporationTransaction::class);
+    }
+
+    public function orRptTransactions(): HasMany
+    {
+        return $this->hasMany(OrRptTransaction::class);
+    }
+
+    public function orTransactions(): HasMany
+    {
+        return $this->hasMany(OrTransaction::class);
+    }
 }

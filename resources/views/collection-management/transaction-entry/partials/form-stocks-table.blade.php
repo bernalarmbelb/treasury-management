@@ -55,7 +55,16 @@
                                     Add new receipt
                                 </button>
                             @endif
-                            <a href="#" class="action-link" aria-label="Add Transaction">
+                            @php
+                                $addTransactionRoute = match ($form->form_code) {
+                                    'BIR0016' => route('transaction-entry.individual-cedula', $form->id),
+                                    'BIR0017' => route('transaction-entry.corporation-cedula', $form->id),
+                                    'Form 56' => route('transaction-entry.or-rpt', $form->id),
+                                    'Form 5IC' => route('transaction-entry.official-receipt', $form->id),
+                                    default => '#',
+                                };
+                            @endphp
+                            <a href="{{ $addTransactionRoute }}" class="action-link" aria-label="Add Transaction">
                                 <span class="action-icon-btn action-add-transaction">
                                     <x-bx-edit-alt class="icon" />
                                 </span>

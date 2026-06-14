@@ -23,7 +23,7 @@
 		<div class="" style="display:flex; width: 100%">
 			<button class="nav-scroll-btn nav-scroll-left" id="scrollLeft">&#8249;</button>
 			<nav class="navigation-bar" id="navigationBar">
-				<p><a href="{{ route('collections') }}" class=" {{ request()->routeIs('collections') ? 'active' : '' }} "> Collections Management </a></p>
+				<p><a href="{{ route('collections') }}" class=" {{ request()->routeIs('collections') || request()->routeIs('transaction-entry*') ? 'active' : '' }} "> Collections Management </a></p>
 
 				<p><a href="{{ route('official-receipts-accountable-forms') }}" class=" {{ request()->routeIs('official-receipts-accountable-forms') ? 'active' : '' }} ">Official Receipts & Accountable Forms</a></p>
 
