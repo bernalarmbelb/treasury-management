@@ -52,10 +52,6 @@
 
             <form class="search-group" role="search" method="GET" id="transaction-search-form">
                 <input type="search" name="search" class="search-input" id="transaction-search-input" placeholder="Search Payee" value="{{ request('search') }}" autocomplete="off">
-                <button type="submit" class="btn btn-light search-btn">
-                    <x-bx-search class="icon" />
-                    Search
-                </button>
             </form>
 
             <div class="date-filter-group {{ $dateFilterActive ? 'open' : '' }}" id="dateFilterGroup">

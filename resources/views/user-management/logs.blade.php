@@ -1,34 +1,46 @@
 <x-layout>
     @php
-        $tmpRoute = route('reporting-abstract');
-        $routeName = 'reporting-abstract';
+        $tmpRoute = route('user-management.logs');
+        $routeName = 'user-management.logs';
+        $parentTitle = 'User Management';
+        $parentRoute = route('user-management');
+        $parentRouteName = 'user-management';
     @endphp
 
     <div class="x-header-container sub-nav-sticky">
-        <x-header title="Reporting & Abstract"
+        <x-header title="Logs"
             :tmpRoute="$tmpRoute"
             :routeName="$routeName"
-        />
+            :parentTitle="$parentTitle"
+            :parentRoute="$parentRoute"
+            :parentRouteName="$parentRouteName"
+        >
+            <x-slot:actions>
+                @include('user-management.partials.sub-nav', ['active' => 'logs'])
+            </x-slot:actions>
+        </x-header>
     </div>
 
     <div class="collection-content">
-        <div class="collection-toolbar">
-            <form class="search-group" role="search" method="GET" id="reports-search-form">
-                <input type="search" name="search" class="search-input" id="reports-search-input" placeholder="Search Form" value="{{ request('search') }}" autocomplete="off">
+        <div class="um-toolbar collection-toolbar">
+            <form class="search-group" role="search" method="GET" id="um-logs-search-form">
+                <input type="search" name="search" class="search-input" id="um-logs-search-input" placeholder="Search User" value="{{ request('search') }}" autocomplete="off">
             </form>
+
+            <a href="{{ route('user-management.logs.export', [], false) }}" class="um-export-btn">Export Log</a>
         </div>
 
-        <div id="reports-table-container">
-            @include('reporting-abstract.partials.reports-table')
+        <div id="um-logs-table-container">
+            @include('user-management.partials.logs-table')
         </div>
     </div>
 
     @push('scripts')
         <script>
             (function () {
-                const container = document.getElementById('reports-table-container');
-                const searchInput = document.getElementById('reports-search-input');
-                const searchForm = document.getElementById('reports-search-form');
+                const container = document.getElementById('um-logs-table-container');
+                const searchInput = document.getElementById('um-logs-search-input');
+                const searchForm = document.getElementById('um-logs-search-form');
                 let debounceTimer;
 
                 function fetchAndRender(params) {
@@ -70,16 +82,25 @@
                 });
 
                 container.addEventListener('click', function (event) {
-                    const link = event.target.closest('.page-btn');
+                    const link = event.target.closest('.sortable-header');
 
-                    if (!link || link.tagName !== 'A') {
+                    if (!link) {
                         return;
                     }
 
                     event.preventDefault();
 
                     const linkUrl = new URL(link.href);
-                    const params = new URLSearchParams(linkUrl.search);
+                    const params = new URLSearchParams(window.location.search);
+
+                    params.set('sort', linkUrl.searchParams.get('sort'));
+                    params.set('direction', linkUrl.searchParams.get('direction'));
+
+                    if (searchInput.value) {
+                        params.set('search', searchInput.value);
+                    } else {
+                        params.delete('search');
+                    }
 
                     fetchAndRender(params);
                 });

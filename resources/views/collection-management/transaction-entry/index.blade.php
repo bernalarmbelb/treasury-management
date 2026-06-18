@@ -27,10 +27,6 @@
         <div class="collection-toolbar">
             <form class="search-group" role="search" method="GET" id="form-stock-search-form">
                 <input type="search" name="search" class="search-input" id="form-stock-search-input" placeholder="Search Form" value="{{ request('search') }}" autocomplete="off">
-                <button type="submit" class="btn btn-light search-btn">
-                    <x-bx-search class="icon" />
-                    Search
-                </button>
             </form>
         </div>
 
@@ -170,12 +166,22 @@
                         headers: { 'X-Requested-With': 'XMLHttpRequest' },
                         body: new FormData(modalForm),
                     })
-                        .then((response) => response.text())
+                        .then((response) => {
+                            if (!response.ok) {
+                                return response.json().then((data) => {
+                                    alert(data.message);
+                                    throw new Error(data.message);
+                                });
+                            }
+
+                            return response.text();
+                        })
                         .then((html) => {
                             container.innerHTML = html;
                             closeBatchModal();
                             showSuccessAlert(currentFormCode);
-                        });
+                        })
+                        .catch(() => {});
                 });
             })();
         </script>
