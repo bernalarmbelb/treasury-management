@@ -686,6 +686,70 @@ and `corporation-cedula.blade.php`):
   Management | Transactions Entry | Individual Cedula BIR0016" /
   "... | Corporation Cedula BIR0017".
 
+## 2026-06-15 — Individual Cedula serial number default + duplicate alert, PROCEED button restyle
+
+- **Serial number default value** (`individual-cedula.blade.php`,
+  `transaction-entry.individual-cedula` GET route): the certificate number
+  field (`#ctc-cert-no`) now defaults to `FormStock::nextAvailableSerialNumber()`
+  — the oldest unused serial number across the form's `FormBatch` records
+  (from Official Receipts & Accountable Forms), formatted to match that
+  batch's serial padding (e.g. `00002`). Falls back to `13476955` if no
+  batches exist. The field remains a plain editable `<input>`, so a field
+  collector holding a different batch can overwrite it.
+- **Duplicate serial number alert**: `transaction-entry.individual-cedula.store`
+  now checks whether a `CtcIndividualTransaction` with the same
+  `certificate_number` already exists for this form stock, and returns a 422
+  with `{ message: "Serial number {n} is already taken." }` instead of saving.
+  The "Print" handler in `individual-cedula.blade.php` now reads the JSON
+  response regardless of status and shows an `alert()` with that message on
+  422, instead of treating any non-2xx response as a generic save error.
+- **PROCEED button restyle** (`resources/css/app.css`, `.ctc-proceed-btn`,
+  shared by Individual Cedula and Corporation Cedula): restyled to match the
+  OR RPT "Add Entry" button (`.ctc-add-entry-btn`) — solid `#427AB5`
+  background, white text, Manrope 600 14px, with a `#355f8f` hover state —
+  replacing the previous soft-grey `#BFBFBF`/Obviously style. Position/size
+  (`absolute`, 150x42px) unchanged.
+
+### Verification
+- Verified via Claude Preview on `/collections/transaction-entry/1/individual-cedula`:
+  `#ctc-cert-no` defaults to `00002` (the oldest unused serial from the form's
+  batches), and `.ctc-proceed-btn` computed styles show
+  `background-color: rgb(66, 122, 181)`, `color: rgb(255, 255, 255)`,
+  `font-family: Manrope, sans-serif`, `font-weight: 600`.
+
+## 2026-06-15 — Appended source task notes (CM Serial Number Default + PROCEED button)
+
+# Tasks:
+- Collection Management:
+	- Serial Number Field Default Value.
+	- PROCEED BUTTON style and design update
+
+- Official Receipts & Accountable Forms:
+	- The View button should not have an uderline in the text.
+	- in report logs, ending serial number data should match the starting serial. for example, if I input 005 in the ending OR serial number from adding batch. the data in the table should be 2026-00005, since it only differs from the last 3 digit.
+
+- At finished task, append this Tasks, Description / Scenario / Events / Steps, and Notes and the last part of ORAF MD file and CM MD file.
+
+## Description / Scenario / Events / Steps:
+	1. CM -> We are going to make changes in the CM's Transaction Entry -> Individual Cedula BIR0016 serial number field. the serial number field default value must be the oldest Serial number that is not used. however, that field is still editable for the field collector who holds different batch of receipt.
+	2. CM ->We should alert the user if the Serial number that they are using / inputting is already taken.
+	3. CM ->Update the PROCEED BUTTON to match OR RPT add entry button.
+	4. ORAF Report logs -> there was a bug on the computation of starting qty. from 2026-00001 and 005, there should be 5 available serial number not 4.
+	5. ORAF Report logs -> Remaining count is not updating.
+	6. And also, in all module, added time should be in Philippine time.
+	7. ORAF -> View button, remove underline.
+
+## Notes
+	1. Serial number default value comes from the available serial number receipts from ORAF.
+	2. since in TRANSACTION ENTRY (CMTE) has "add new receipt", this should also be recorded in the report logs in ORAF.
+
+**Resolution**: All items above are implemented — see this section for the
+CM-side changes, and
+[official-receipt-accountable-forms.md](official-receipt-accountable-forms.md)
+("2026-06-15 — Bug fixes: startingQty, Remaining count, ending serial display,
+View underline, PH time") for the ORAF-side changes and the global
+Philippine-time fix (`config/app.php`).
+
 ## Follow-ups
 
 - Official Receipt (Form 5IC) changes are now tracked in
@@ -694,6 +758,346 @@ and `corporation-cedula.blade.php`):
 - "Add Transaction" action for forms other than Individual Cedula
   (`BIR0016`) and Corporation Cedula (`BIR0017`) is still a placeholder
   link/button — not yet wired to any functionality.
-- The certificate number prefix ("CCI2022"/"CCC2021") and default serial
-  numbers should eventually be sourced from the last form record in the
-  database instead of being hardcoded.
+## 2026-06-15 — Dynamic certificate prefix, stock validation, and Remaining-count fix
+
+The Individual Cedula (BIR0016) and Corporation Cedula (BIR0017) "Add
+Transaction" pages no longer hardcode `CCI2022`/`CCC2021` as the certificate
+prefix. The prefix and starting serial number are now derived from ORAF's
+available `FormBatch` stock, transactions are validated against that stock
+before saving, and the Report Logs "Remaining" count no longer decrements for
+transactions whose prefix doesn't match the batch.
+
+### Backend
+- `App\Models\FormBatch`:
+  - New `serialPrefix(): string` — the non-numeric portion of
+    `starting_serial_number` (e.g. `"2026-00001"` → `"2026-"`).
+  - New `expectedCertificatePrefix(): string` — form-type abbreviation
+    (`CCI` for `BIR0016`, `CCC` for `BIR0017`, `''` otherwise) concatenated
+    with `serialPrefix()` (e.g. `"CCI2026-"`).
+  - New `matchesCertificate(string $prefix, string $number): bool` — true if
+    `$prefix === expectedCertificatePrefix()` and `$number`'s trailing digits
+    fall within the batch's `serialRange()`.
+  - `serialRange()` changed from `private` to `public`.
+  - `transactionSerialNumbers()` (used by `usedQty()`/`remainingQty()`) now
+    filters BIR0016/BIR0017 transactions to only those whose
+    `certificate_prefix` equals `expectedCertificatePrefix()` via new private
+    `matchingCertificateNumbers()`, so transactions saved under a different
+    prefix no longer count against this batch's Remaining total.
+- `App\Models\FormStock`:
+  - Removed the old `nextAvailableSerialNumber()`.
+  - New `nextAvailableBatch(): ?FormBatch` — the oldest batch (by
+    `created_at`) that still has an unused serial number.
+  - New `hasAvailableSerial(string $prefix, string $number): bool` — true if
+    any batch's `matchesCertificate()` matches.
+- New migration
+  `2026_06_15_110000_add_certificate_prefix_to_ctc_transactions_tables.php`
+  adds a nullable `certificate_prefix` column to `ctc_individual_transactions`
+  and `ctc_corporation_transactions`. `App\Models\CtcIndividualTransaction`
+  and `App\Models\CtcCorporationTransaction` now include
+  `'certificate_prefix'` in `$fillable`.
+- `routes/web.php`:
+  - GET `transaction-entry.individual-cedula` and
+    `transaction-entry.corporation-cedula` now pass `nextSerialPrefix`
+    (`$batch?->expectedCertificatePrefix()`) and `nextSerialNumber`
+    (`$batch?->nextAvailableSerialNumber()`) from
+    `$formStock->nextAvailableBatch()`.
+  - POST handlers for both cedula types now, before saving:
+    1. Return 422 `"Serial number {prefix}{number} was not found in the
+       available stock. Cannot proceed."` if
+       `$formStock->hasAvailableSerial($prefix, $number)` is false.
+    2. Return 422 `"Serial number {prefix}{number} is already taken."` if a
+       transaction already exists for this form stock with the same
+       `certificate_prefix` + `certificate_number` (previously this check
+       only existed for Individual Cedula and only matched on
+       `certificate_number`).
+
+### Frontend
+- `individual-cedula.blade.php` / `corporation-cedula.blade.php`: the
+  `#ctc-cert-prefix` and `#ctc-cert-no` inputs now default to
+  `{{ $nextSerialPrefix ?? 'CCI2022' }}` / `{{ $nextSerialPrefix ?? 'CCC2021' }}`
+  and `{{ $nextSerialNumber ?? ... }}` respectively.
+- `corporation-cedula.blade.php`: the "Print" handler now matches
+  `individual-cedula.blade.php` — reads the JSON response regardless of
+  status and `alert()`s `data.message` on a non-OK (422) response instead of
+  throwing a generic "Save failed" error.
+- `resources/css/app.css`: `.ctc-cert-no-prefix-input` width increased from
+  `7ch` to `9ch` to fit longer dynamic prefixes like `CCI2026-`.
+
+### Data cleanup
+- Two stray `FormBatch` rows for `form_stock_id = 1` left over from earlier
+  dev/verification sessions (`id 8`, `starting_serial_number = "TEST001"`;
+  `id 11`, `starting_serial_number = "CCI2026-00006"`, already containing a
+  baked-in prefix) were deleted via `php artisan tinker`, since both produced
+  nonsensical `expectedCertificatePrefix()` values (`"CCITEST"` /
+  `"CCICCI2026-"`) and were being picked as the "oldest available batch".
+  Only batch `id 10` (`"2026-00001"`–`"005"`) remains for form_stock 1.
+
+### Verification
+- Verified via Claude Preview on `/collections/transaction-entry/1/individual-cedula`:
+  `#ctc-cert-prefix`/`#ctc-cert-no` default to `"CCI2026-"`/`"00001"`.
+- Verified `/collections/transaction-entry/2/corporation-cedula` (form_stock 2
+  has no `FormBatch` rows) falls back to `"CCC2021"`/`"00259338"`.
+- Verified via `php artisan tinker`: `FormStock::hasAvailableSerial('CCI2026-', '00001')`
+  → `true`, `('CCI2026-', '99999')` → `false`, `('CCI2022', '00001')` → `false`.
+- Submitted the individual-cedula form with `certificate_number = "99999"`
+  (out of range) → `422 {"message": "Serial number CCI2026-99999 was not
+  found in the available stock. Cannot proceed."}`.
+- Submitted with the default `"CCI2026-"`/`"00001"` → `200`, saved
+  successfully; Report Logs for the `2026-00001`–`2026-00005` batch now shows
+  `Used: 1`, `Remaining: 4` (previously `Used: 0`/`Remaining: 5` before this
+  fix, the legacy transactions with empty `certificate_prefix` were
+  incorrectly excluded — now correctly excluded, but the new matching
+  transaction correctly counts).
+- Reloading the page shows the default advanced to `"CCI2026-"`/`"00002"`.
+- Re-submitting `"CCI2026-"`/`"00001"` (now a duplicate) → `422 {"message":
+  "Serial number CCI2026-00001 is already taken."}`.
+
+## 2026-06-15 — Appended source task notes (Dynamic certificate prefix)
+
+# Tasks:
+- Collection Management:
+	- Serial Number Field Default Value.
+
+- Official Receipts & Accountable Forms:
+	-
+
+- At finished task, append this Tasks, Description / Scenario / Events / Steps, and Notes and the last part of ORAF MD file and CM MD file.
+
+## Description / Scenario / Events / Steps:
+	1. in the ORAF Report Logs the available serial number is 2026-00003, 2026-00004, 2026-00005, however the display default prefix value of serial number in CM -> Add Entry -> Form16 is always CCI2022, this should be fix to the first available serial number which it should be 2026, there is an alternative here where when we add batch number say for example the Starting Serial Number(SSN) is 2026-00008 the data will affix CCI for individual cedula, CCC for Corporation and so on. so the value of SSN will be CCI2026-00008.
+	2. if the inputted SN in the CM -> Add Entry is not in the Database(DB) the user cannot proceed.
+	3. SN remaining count shall not decrease if it is mismatched.
+		- the current system is deducting from 2026 even though the prefix is CCI2022.
+
+## Notes
+	1. Serial number default value comes from the available serial number receipts from ORAF.
+	2. since in TRANSACTION ENTRY (CMTE) has "add new receipt", this should also be recorded in the report logs in ORAF.
+
+**Resolution**: Items 1–3 are implemented for both Individual Cedula
+(BIR0016) and Corporation Cedula (BIR0017) — see the "2026-06-15 — Dynamic
+certificate prefix, stock validation, and Remaining-count fix" section above
+for the CM-side changes (`FormBatch::expectedCertificatePrefix()`,
+`matchesCertificate()`, `FormStock::nextAvailableBatch()`/
+`hasAvailableSerial()`, the new `certificate_prefix` column/migration, and the
+422 validation in `routes/web.php`), and
+[official-receipt-accountable-forms.md](official-receipt-accountable-forms.md)
+("2026-06-15 — Appended source task notes (Dynamic certificate prefix)") for
+the ORAF-side cross-reference. Note 2 (recording CMTE "add new receipt" in
+ORAF Report Logs) is informational and not yet scoped as an actionable item —
+left for a future task.
+
+## 2026-06-15 — Certificate prefix/number gap fix, availableQty(), batch-overlap validation
+
+### Frontend
+- `resources/views/collection-management/transaction-entry/individual-cedula.blade.php`
+  and `corporation-cedula.blade.php`: fixed the visible gap between the
+  certificate prefix and number fields (e.g. rendering as "CCI2026-    00002"
+  instead of "CCI2026-00002"). Both `#ctc-cert-prefix`/`#ctc-cert-no` (and the
+  matching `.ctc-cert-no-prefix-input`/`.ctc-cert-no-input` pair) now use a new
+  `autosizeCert()` JS helper that sets each input's `width` to its content
+  length in `ch` units on load and on every `input` event, so the two fields
+  render as one continuous string with no gap.
+- `resources/css/app.css`:
+  - `.ctc-cert-no`: `gap` changed from `8px` to `0`.
+  - `.ctc-cert-no-prefix-input`: `width` changed from `9ch` to `1ch` (now
+    auto-sized by JS), `text-align` changed from `center` to `right`.
+  - `.ctc-cert-no-input`: `flex` changed from `1` to `none`, added `width: 1ch`
+    (auto-sized by JS) and `padding: 0`, `text-align` changed from `center` to
+    `left`.
+  - `.ctcp-page .ctc-cert-no-prefix-input, .ctcp-page .ctc-cert-no-input`
+    (print-preview modal override): added `width: auto`, since the preview
+    modal's `<span>` elements share these classes but aren't auto-sized by the
+    new JS — without this they were clipped to `1ch`.
+
+### Backend
+- `App\Models\FormStock`: new `availableQty(): int` — when the form has
+  `FormBatch` records, returns the sum of each batch's `remainingQty()`
+  (matching the per-batch totals shown in ORAF Report Logs); otherwise falls
+  back to the stored `qty` column. Fixes the Qty. column showing a stale value
+  out of sync with Report Logs (e.g. BIR0016 showed `2` while its batches'
+  combined remaining was `4 + 2 = 6`).
+- `resources/views/collection-management/transaction-entry/partials/form-stocks-table.blade.php`:
+  the "Qty." column and the "Add new receipt" visibility check now both use
+  `$form->availableQty()` instead of the raw `qty` column.
+- `App\Models\FormBatch`: new `conflictingCertificate(): ?string` — returns
+  the formatted certificate (expected prefix + padded number, e.g.
+  `"CCI2026-00007"`) of an existing CMTE transaction whose serial number falls
+  inside this (possibly unsaved) batch's range, or `null` if none of the
+  batch's serial numbers have already been issued.
+- `App\Models\FormStock`: new
+  `conflictingCertificate(string $startingSerialNumber, string $endingSerialNumber): ?string`
+  — builds a temporary, unsaved `FormBatch` for the given range (with this
+  `FormStock` set as its `formStock` relation) and delegates to
+  `FormBatch::conflictingCertificate()`. Only checked for `BIR0016`/`BIR0017`
+  (forms with a certificate-prefix scheme); returns `null` for other form
+  codes.
+- `routes/web.php`: both `transaction-entry.batches.store` and
+  `official-receipts-accountable-forms.batches.store` now call
+  `$formStock->conflictingCertificate(...)` before `applyBatch()`. If a
+  conflict is found, the request returns `422` with
+  `{"message": "ALERT: {certificate} is already in used, change batch
+  receipt."}` and the batch is **not** created.
+
+### Frontend (Add New Batch modal)
+- `resources/views/collection-management/transaction-entry/index.blade.php`
+  and `resources/views/official-receipt-accountable-forms/index.blade.php`:
+  the "Add New Batch" / "Add new receipt" modal's submit handler now checks
+  `response.ok` before treating the response as the refreshed table HTML. On a
+  non-OK (`422`) response, it `alert()`s the returned `message` and leaves the
+  modal open with the entered values intact, so the user can correct the
+  serial range without losing their input. On success, behavior is unchanged
+  (table refreshes, modal closes, success toast shown).
+
+### Verification
+- Verified via Claude Preview at `/collections/transaction-entry/1/individual-cedula`
+  and `/collections/transaction-entry/2/corporation-cedula`: the certificate
+  prefix and number now render with a 0px gap (e.g. "CCI2026-00002" and
+  "CCC2021 00259338").
+- Verified via Claude Preview (`/official-receipts-accountable-forms` and
+  `/collections/transaction-entry`): both index tables' Qty. columns now show
+  `availableQty()` (BIR0016: `2` → `6`, and `5` → `8` after the new batch
+  created during item 3's verification below; Form 5IC: `0` → `25`), and the
+  "Add new receipt" action correctly disappears for rows where
+  `availableQty() > 0`.
+- Verified the batch-overlap check end-to-end:
+  - Via `php artisan tinker`: `FormStock::find(1)->conflictingCertificate('2026-00001', '002')`
+    → `"CCI2026-00001"` (an existing `CtcIndividualTransaction` with
+    `certificate_prefix = "CCI2026-"`, `certificate_number = "00001"` falls in
+    range `[1, 2]`); `conflictingCertificate('2026-00006', '008')` → `null` (no
+    transaction in range `[6, 8]`).
+  - Via Claude Preview: submitting the "Add New Batch" modal for BIR0016 with
+    SSN `2026-00001` / ESN `002` returned `422` and triggered
+    `alert("ALERT: CCI2026-00001 is already in used, change batch receipt.")`,
+    with the modal staying open and the entered values preserved.
+  - Submitting the same modal with a non-overlapping range (SSN `2026-00050` /
+    ESN `052`) succeeded normally — created `FormBatch` id `13`, refreshed the
+    table (BIR0016 Qty. `5` → `8`), closed the modal, and showed the success
+    toast.
+
+### Notes
+- Per the source task's item 2 constraint ("if we are testing, do not remove
+  the files in the log"), no `TransactionLog`/`FormBatch`/
+  `CtcIndividualTransaction` test data was deleted as part of this fix — the
+  Qty. mismatch was resolved purely via the computed `availableQty()` display,
+  with no changes to stored data. The new batch (`id 13`, `2026-00050`–`052`)
+  created while verifying item 3 was left in place as real data (it does not
+  overlap any existing serial number).
+
+## 2026-06-15 — Appended source task notes (Certificate display gap, Qty reconciliation, batch overlap validation)
+
+# Tasks:
+- Collection Management (CM):
+
+- Official Receipts & Accountable Forms (ORAF):
+
+- At finished task, append this Tasks, Description / Scenario / Events / Steps / Abbreviation, and Notes and the last part of ORAF MD file and CM MD file.
+
+## Abbreviation
+1. Collection Management -> CM
+2. Transaction Entry -> CMTE
+3. Transaction Logs -> CMTL
+4. Official Receipts & Accountable Forms -> ORAF
+5. Starting Serial Number -> SSN
+6. Ending Serial Number -> ESN
+
+## Description / Scenario / Events / Steps:
+1. fix the visual display of the serial number in the Home | Collections Management | Transactions Entry | Individual Cedula BIR0016 -> the suffix is too far away from the suffix, it looks like this "CCI2026-	00002".
+2. the QTY of individual cedula in CMTE and ORAF is 2, however when you view it, it has a starting qty = 5 & 2 and remaining 4 & 2 -> data does not match across the system. also, if we are testing, do not remove the files in the log.
+3. in the CM Transaction Logs (CMTL) if the serial number is used, it cannot be added again through ORAF add new batch, always make sure to cross check the data in all logs if the serial is used. for example, in CMTL there is a CCI2026-00007, if I add a batch receipt that has SSN CCI2026-00006 and ESN CCI2026-00008. the system should warn the user and the user cannot continue adding the batch except by fixing the input. warn can be "ALERT: CCI2026-00007 is already in used, change batch receipt."
+
+## Notes
+	1. Serial number default value comes from the available serial number receipts from ORAF.
+	2. since in TRANSACTION ENTRY (CMTE) has "add new receipt", this should also be recorded in the report logs in ORAF.
+
+**Resolution**: All three items are implemented — see the
+"2026-06-15 — Certificate prefix/number gap fix, availableQty(), batch-overlap
+validation" section above for the CM-side changes (certificate display fix,
+`FormStock::availableQty()`, `FormBatch::conflictingCertificate()`/
+`FormStock::conflictingCertificate()`, and the modal-validation wiring shared
+with ORAF), and
+[official-receipt-accountable-forms.md](official-receipt-accountable-forms.md)
+("2026-06-15 — Appended source task notes (Certificate display gap, Qty
+reconciliation, batch overlap validation)") for the ORAF-side cross-reference.
+Note 2 (recording CMTE "add new receipt" in ORAF Report Logs) remains
+informational and not yet scoped as an actionable item — left for a future
+task, as in prior rounds.
+
+## 2026-06-15 — Appended source task notes (User Management Module)
+
+# Tasks:
+- Creation of USER MANAGEMENT MODULE (UM)
+
+- At finished task, append this Tasks, Description / Scenario / Events /
+  Steps / Abbreviation, and Notes and the last part of UM MD file and CM MD
+  file.
+
+## Abbreviation
+1. Collection Management -> CM
+2. Transaction Entry -> CMTE
+3. Transaction Logs -> CMTL
+4. Official Receipts & Accountable Forms -> ORAF
+5. Starting Serial Number -> SSN
+6. Ending Serial Number -> ESN
+7. User Management -> UM
+
+## Description / Scenario / Events / Steps:
+1. User Management landing page -> Implement this design from Figma.
+   https://www.figma.com/design/zKN3sT9cEm13slzJrAD5XU/Prototype?node-id=555-10271&m=dev
+
+2. When **Edit** button is click -> Modal -> Implement this design from
+   Figma.
+   https://www.figma.com/design/zKN3sT9cEm13slzJrAD5XU/Prototype?node-id=567-10983&m=dev
+
+3. When **Reset Password** is click -> Modal -> Implement this design from
+   Figma.
+   https://www.figma.com/design/zKN3sT9cEm13slzJrAD5XU/Prototype?node-id=567-11030&m=dev
+   -> This is a user verification for the current logged in user. just to
+   confirm he wants to edit user.
+   -> After User Verification -> Implement this design from Figma.
+   https://www.figma.com/design/zKN3sT9cEm13slzJrAD5XU/Prototype?node-id=567-11111&m=dev
+   -> Email notification of reset password will be sent to the user (we can
+   ignore this for now as we are focusing on FE design and few BE).
+
+4. When **Disable / Activate** button is click -> Modal -> Implement this
+   design from Figma.
+   https://www.figma.com/design/zKN3sT9cEm13slzJrAD5XU/Prototype?node-id=572-11244&m=dev
+
+5. **UM Logs (UML)** -> Implement this design from Figma.
+   https://www.figma.com/design/zKN3sT9cEm13slzJrAD5XU/Prototype?node-id=602-6178&m=dev
+
+6. **UM Roles & Permission (UMRP)** -> Implement this design from Figma.
+   https://www.figma.com/design/zKN3sT9cEm13slzJrAD5XU/Prototype?node-id=586-3799&m=dev
+
+7. **UM Add User (UMAU)** -> Implement this design from Figma.
+   https://www.figma.com/design/zKN3sT9cEm13slzJrAD5XU/Prototype?node-id=584-11378&m=dev
+
+8. Make sure that the tables and button across whole system is uniform.
+
+9. Make sure that Breadcrumbs in navagation match the exact location and
+   uniform within across the system.
+
+## Notes
+1. Serial number default value comes from the available serial number
+   receipts from ORAF.
+2. since in TRANSACTION ENTRY (CMTE) has "add new receipt", this should also
+   be recorded in the report logs in ORAF.
+3. Starting Qty = is auto calculated from the batch upload.
+   - say for example, Starting OR Serial Number is CCI2022 13476951 and ending
+     is CCI2022 13477051 the starting qty. is 100.
+4. Used = determines how many forms are used in the batch series from
+   13476951 to 13477051.
+5. Remaining = Starting Qty - Used.
+6. Status = Complete if Remaining is 0.
+
+**Resolution**: The new User Management Module (UM) — user list, Add/Edit
+User, Reset Password, Disable/Activate/Archive, UM Logs (+CSV export), and
+Roles & Permission matrix — is implemented as a standalone module; see
+[user-management.md](user-management.md) for the full breakdown of all 8
+Figma screens, schema, routes, and verification. The only CM-side change is
+that the existing Transaction Entry "Add New Batch" POST routes (Individual
+Cedula `BIR0016` and Corporation Cedula `BIR0017`) now also call
+`ActivityLog::record('Collection Management - Add Entry')`, so these actions
+appear in the new UM Logs page. No other CM behavior changed. Notes 1 and 3–6
+remain covered by the CM-side sections above (serial number defaults,
+`availableQty()`, batch-overlap validation); Note 2 remains informational and
+not yet scoped, as in prior rounds.

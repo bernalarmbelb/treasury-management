@@ -24,5 +24,9 @@ class DatabaseSeeder extends Seeder
 
         $this->call(TransactionLogSeeder::class);
         $this->call(FormStockSeeder::class);
+        $this->call(RoleSeeder::class);
+        $this->call(UserManagementSeeder::class);
+        $this->call(RoleModulePermissionSeeder::class);
+        $this->call(ActivityLogSeeder::class);
     }
 }

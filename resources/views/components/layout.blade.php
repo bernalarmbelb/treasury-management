@@ -2,28 +2,68 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="csrf-token" content="{{ csrf_token() }}">
 	<title>Treasury Management System</title>
 	 @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body>
 	<nav class="navigation-header">
-		<a href="{{ route('home') }}">
+		<a href="{{ route('home') }}" class="nav-branding">
 			<img src="{{ asset('images/logo.webp') }}" alt="Logo" class="logo-image">
-		</a>
-			<div class="d-flex flex-column gap-0">
-				<span style="font-size: 12px; font-weight: 500; color: var(--fonts-black); margin: 0px;">Republic of the Philippines</span>
-				<span style="font-size: 14px; font-weight: 900; color: var(--fonts-black); margin: 0px;">MUNICIPALITY OF PRIETO DIAZ</span>
+			<div class="nav-branding-text">
+				<span class="nav-branding-sub">Republic of the Philippines</span>
+				<span class="nav-branding-name">MUNICIPALITY OF PRIETO DIAZ</span>
 			</div>
-		<div class="d-flex flex-column gap-0 ms-auto">
-			<span id="live-date" style="font-size: 12px; font-weight: 500; color: var(--fonts-black);"></span>
-			<span id="live-time" style="font-size: 12px; font-weight: 600; color: var(--fonts-black);"></span>
+		</a>
+
+		<div class="nav-profile">
+			<div class="nav-datetime">
+				<span id="live-date" class="nav-date"></span>
+				<span id="live-time" class="nav-time"></span>
+			</div>
+
+			<div class="nav-bell-wrapper" id="notifBellWrapper">
+				<button type="button" class="nav-bell-btn" id="notifBellBtn" aria-label="Notifications" aria-expanded="false">
+					<svg class="nav-bell-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+						<path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+					</svg>
+					<span class="nav-bell-badge" id="notifBadge" style="display:none;">0</span>
+				</button>
+				<div class="notif-dropdown" id="notifDropdown" aria-hidden="true">
+					<div class="notif-dropdown-header">
+						<span class="notif-dropdown-title">Notifications</span>
+						<span class="notif-dropdown-count" id="notifDropdownCount"></span>
+					</div>
+					<div class="notif-list" id="notifList">
+						<div class="notif-loading">Loading…</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="nav-user">
+				<div class="nav-user-avatar">
+					<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+						<path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+					</svg>
+				</div>
+				<div class="nav-user-info">
+					<span class="nav-user-name">{{ auth()->user()?->name }}</span>
+					<div class="nav-user-meta">
+						<span class="nav-user-role">{{ auth()->user()?->roles->first()?->name ?? 'User' }}</span>
+						<form method="POST" action="{{ route('logout') }}" style="display:inline;">
+							@csrf
+							<button type="submit" class="nav-logout-btn">Logout</button>
+						</form>
+					</div>
+				</div>
+			</div>
 		</div>
 	</nav>
 	<div class="nav-sticky-wrapper">
 		<div class="" style="display:flex; width: 100%">
 			<button class="nav-scroll-btn nav-scroll-left" id="scrollLeft">&#8249;</button>
 			<nav class="navigation-bar" id="navigationBar">
-				<p><a href="{{ route('collections') }}" class=" {{ request()->routeIs('collections') || request()->routeIs('transaction-entry*') ? 'active' : '' }} "> Collections Management </a></p>
+				<p><a href="{{ route('collections') }}" class=" {{ request()->routeIs('collections') || request()->routeIs('collections.view') || request()->routeIs('transaction-entry*') ? 'active' : '' }} "> Collections Management </a></p>
 
 				<p><a href="{{ route('official-receipts-accountable-forms') }}" class=" {{ request()->routeIs('official-receipts-accountable-forms') ? 'active' : '' }} ">Official Receipts & Accountable Forms</a></p>
 
@@ -33,7 +73,7 @@
 				
 				<p><a href="{{ route('cheque-management') }}" class=" {{ request()->routeIs('cheque-management') ? 'active' : '' }} ">Cheque Management</a></p>
 
-				<p><a href="{{ route('user-management') }}" class=" {{ request()->routeIs('user-management') ? 'active' : '' }} ">User Management</a></p>
+				<p><a href="{{ route('user-management') }}" class=" {{ request()->routeIs('user-management*') ? 'active' : '' }} ">User Management</a></p>
 
 				<p><a href="{{ route('records') }}" class=" {{ request()->routeIs('records') ? 'active' : '' }} ">Records</a></p>
 
@@ -48,5 +88,163 @@
 	</main>
 
 	@stack('scripts')
+
+	<script>
+	// ── Live clock ────────────────────────────────────────────────────────
+	(function () {
+		const dateEl = document.getElementById('live-date');
+		const timeEl = document.getElementById('live-time');
+		const days  = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+		const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+		function pad(n) { return n < 10 ? '0' + n : n; }
+
+		function tick() {
+			const now = new Date();
+			const d = now.getDay(), mo = now.getMonth(), dy = now.getDate(), yr = now.getFullYear();
+			let h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
+			const ampm = h >= 12 ? 'PM' : 'AM';
+			h = h % 12 || 12;
+			if (dateEl) dateEl.textContent = days[d] + ' - ' + months[mo] + ' ' + dy + ', ' + yr;
+			if (timeEl) timeEl.textContent = pad(h) + ':' + pad(m) + ':' + pad(s) + ' ' + ampm;
+		}
+
+		tick();
+		setInterval(tick, 1000);
+	})();
+
+	// ── Notification bell ────────────────────────────────────────────────
+	(function () {
+		const bellBtn    = document.getElementById('notifBellBtn');
+		if (!bellBtn) return;
+
+		const dropdown   = document.getElementById('notifDropdown');
+		const badge      = document.getElementById('notifBadge');
+		const list       = document.getElementById('notifList');
+		const countLabel = document.getElementById('notifDropdownCount');
+		const csrf       = () => document.querySelector('meta[name="csrf-token"]')?.content ?? '';
+		let isOpen = false;
+
+		function updateBadge(count) {
+			if (count > 0) {
+				badge.textContent = count > 99 ? '99+' : count;
+				badge.style.display = '';
+				bellBtn.classList.add('has-unread');
+			} else {
+				badge.style.display = 'none';
+				bellBtn.classList.remove('has-unread');
+			}
+			if (countLabel) {
+				countLabel.textContent = count > 0 ? count + ' new' : '';
+			}
+		}
+
+		function fetchCount() {
+			fetch('/notifications/count', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+				.then(r => r.json())
+				.then(d => updateBadge(d.count ?? 0))
+				.catch(() => {});
+		}
+
+		function tagFor(type) {
+			if (type === 'request_rejected') {
+				return '<span class="notif-type-tag notif-type-tag--rejected">Request Rejected</span>';
+			}
+			return '<span class="notif-type-tag">Cancel Request</span>';
+		}
+
+		function actionFor(type) {
+			if (type === 'request_rejected') return '<span class="notif-review-btn">View →</span>';
+			return '<span class="notif-review-btn">Review →</span>';
+		}
+
+		function renderNotifications(items) {
+			const hasUnseen = items.some(i => i.seen === false);
+			const emptyText = {{ auth()->user()?->hasRole('admin') ? 'true' : 'false' }}
+				? 'No pending requests'
+				: 'No new notifications';
+
+			if (!items.length) {
+				list.innerHTML =
+					'<div class="notif-empty">' +
+						'<svg class="notif-empty-icon" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>' +
+						'<span class="notif-empty-text">' + emptyText + '</span>' +
+					'</div>';
+				return;
+			}
+
+			list.innerHTML = items.map(function (item) {
+				const unseenClass = (item.seen === false) ? ' notif-item--unseen' : '';
+				return '<a href="' + item.url + '" class="notif-item' + unseenClass + '">' +
+					'<div class="notif-item-top">' +
+						tagFor(item.type) +
+						'<span class="notif-time">' + item.created_at + '</span>' +
+					'</div>' +
+					'<div class="notif-item-body">' +
+						'<div class="notif-desc">' +
+							'<span class="notif-serial">' + (item.serial || '—') + '</span>' +
+							'<span class="notif-payee">' + (item.payee || '—') + '</span>' +
+						'</div>' +
+						actionFor(item.type) +
+					'</div>' +
+				'</a>';
+			}).join('');
+		}
+
+		function markSeen() {
+			fetch('/notifications/mark-seen', {
+				method: 'POST',
+				headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrf() },
+			})
+			.then(() => updateBadge(0))
+			.catch(() => {});
+		}
+
+		function loadNotifications() {
+			list.innerHTML = '<div class="notif-loading">Loading…</div>';
+			fetch('/notifications', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+				.then(r => r.json())
+				.then(d => {
+					const items = d.items ?? [];
+					renderNotifications(items);
+					// Non-admin: mark unseen rejections as seen after viewing
+					const hasUnseen = items.some(i => i.seen === false);
+					if (hasUnseen) markSeen();
+				})
+				.catch(() => { list.innerHTML = '<div class="notif-loading">Could not load notifications.</div>'; });
+		}
+
+		function openDropdown() {
+			isOpen = true;
+			dropdown.classList.add('open');
+			bellBtn.setAttribute('aria-expanded', 'true');
+			dropdown.setAttribute('aria-hidden', 'false');
+			loadNotifications();
+		}
+
+		function closeDropdown() {
+			isOpen = false;
+			dropdown.classList.remove('open');
+			bellBtn.setAttribute('aria-expanded', 'false');
+			dropdown.setAttribute('aria-hidden', 'true');
+		}
+
+		bellBtn.addEventListener('click', function (e) {
+			e.stopPropagation();
+			isOpen ? closeDropdown() : openDropdown();
+		});
+
+		document.addEventListener('click', function (e) {
+			if (isOpen && !dropdown.contains(e.target) && e.target !== bellBtn) closeDropdown();
+		});
+
+		document.addEventListener('keydown', function (e) {
+			if (e.key === 'Escape' && isOpen) closeDropdown();
+		});
+
+		fetchCount();
+		setInterval(fetchCount, 30000);
+	})();
+	</script>
 </body>
 </html>

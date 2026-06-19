@@ -9,6 +9,7 @@ class CtcIndividualTransaction extends Model
 {
     protected $fillable = [
         'form_stock_id',
+        'certificate_prefix',
         'certificate_number',
         'year',
         'place_of_issue',

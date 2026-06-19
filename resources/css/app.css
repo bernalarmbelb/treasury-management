@@ -34,7 +34,7 @@ h1, h2, h3, h4, h5, h6, p, ul, ol, li, figure, blockquote {
     --fonts-white-10: rgba(255, 255, 255, 0.1);
 
 /* ===== Define CSS variables for colors ===== */
-    --background-color: rgba(237, 243, 249, 1);
+    --background-color: rgba(240, 242, 245, 1);
 
     --primary: rgba(66, 122, 181, 1);
     --secondary: rgba(64, 106, 175, 1);
@@ -929,6 +929,25 @@ body {
     font-size: 14px;
 }
 
+.module-filter-select {
+    box-sizing: border-box;
+    height: 42px;
+    min-width: 180px;
+    padding: 0 16px;
+    border: 1px solid #d0d8e4;
+    border-radius: 8px;
+    background-color: #ffffff;
+    color: var(--fonts-black-80);
+    font-family: var(--font-family-secondary, 'Manrope', sans-serif);
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.module-filter-select:focus {
+    outline: none;
+    border-color: var(--primary, #427AB5);
+}
+
 .search-input:focus {
     outline: none;
     border-color: var(--primary, #427AB5);
@@ -1034,16 +1053,16 @@ body {
 }
 
 .data-table thead th {
-    background-color: var(--primary, #427AB5);
+    background-color: #EAF1F8;
     font-family: var(--font-family-secondary, 'Obviously', sans-serif);
     font-weight: 600;
     font-size: 11px;
-    color: #ffffff;
+    color: var(--primary, #427AB5);
     letter-spacing: 1.2px;
     text-align: left;
     text-transform: uppercase;
     padding: 12px 10px;
-    border-bottom: 2px solid #2d5f9a;
+    border-bottom: 2px solid var(--primary, #427AB5);
     position: sticky;
     top: 0;
     z-index: 1;
@@ -1282,6 +1301,81 @@ body {
     opacity: 1;
 }
 
+/* ─── UM row actions: kebab menu ──────────────────────────────────────── */
+.um-actions-menu {
+    position: relative;
+    display: inline-flex;
+}
+
+.um-actions-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--fonts-black-80, #555);
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.um-actions-trigger:hover,
+.um-actions-trigger[aria-expanded="true"] {
+    background-color: rgba(66, 122, 181, 0.08);
+    border-color: rgba(66, 122, 181, 0.3);
+    color: var(--primary, #427AB5);
+}
+
+.um-actions-trigger .icon {
+    width: 18px;
+    height: 18px;
+}
+
+.um-actions-dropdown {
+    display: none;
+    flex-direction: column;
+    position: fixed;
+    min-width: 170px;
+    padding: 6px;
+    background: #fff;
+    border: 1px solid rgba(66, 122, 181, 0.2);
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    z-index: 1000;
+}
+
+.um-actions-dropdown.open {
+    display: flex;
+}
+
+.um-actions-item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 8px 10px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    font-family: var(--font-family-secondary, 'Manrope', sans-serif);
+    font-size: 12px;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.um-actions-item--view { color: var(--primary, #427AB5); }
+.um-actions-item--export { color: #449aa8; }
+.um-actions-item--cancel { color: #db7788; }
+.um-actions-item--unarchive { color: #198754; }
+.um-actions-item--archive { color: #7c3aed; }
+
+.um-actions-item:hover {
+    background-color: rgba(66, 122, 181, 0.08);
+}
+
 .qty-empty {
     color: #f0284a;
 }
@@ -1439,8 +1533,9 @@ body {
     width: 530px;
     max-width: calc(100vw - 40px);
     padding: 24px;
-    background-color: #EDF3F9;
-    box-shadow: 0px 4px 2px rgba(0, 0, 0, 0.25);
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 .form-batch-modal-header {
@@ -1457,11 +1552,16 @@ body {
     width: 24px;
     height: 24px;
     padding: 5px;
-    border: none;
+    border: 1px solid rgba(51, 51, 51, 0.15);
     border-radius: 50px;
-    background-color: var(--buttons-default-danger, #F0284A);
-    color: #fff;
+    background-color: rgba(51, 51, 51, 0.06);
+    color: #555;
     cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.form-batch-close-btn:hover {
+    background-color: rgba(51, 51, 51, 0.12);
 }
 
 .form-batch-close-btn .icon {
@@ -1507,8 +1607,8 @@ body {
     height: 17px;
     box-sizing: border-box;
     padding: 0 10px;
-    border: 1px solid #333;
-    background-color: var(--buttons-default-light, #B7BBC1);
+    border: 1px solid rgba(66, 122, 181, 0.3);
+    background-color: rgba(66, 122, 181, 0.08);
 }
 
 .form-batch-field-header p {
@@ -1518,7 +1618,7 @@ body {
     font-size: 10px;
     line-height: 1;
     text-transform: capitalize;
-    color: var(--fonts-black, #333);
+    color: var(--primary, #427AB5);
 }
 
 .form-batch-field-row {
@@ -1532,7 +1632,7 @@ body {
     min-width: 0;
     min-height: 42px;
     padding: 10px;
-    border: 1px solid #333;
+    border: 1px solid #d0d8e4;
     border-left-width: 0;
     background-color: #fff;
     font-family: var(--font-family-primary, 'Obviously', sans-serif);
@@ -1550,7 +1650,7 @@ body {
 }
 
 .form-batch-input:focus {
-    outline: 1px solid #333;
+    outline: 1px solid var(--primary, #427AB5);
     outline-offset: -1px;
 }
 
@@ -1581,12 +1681,17 @@ select.form-batch-input {
     padding: 16px 24px;
     border: none;
     border-radius: var(--button, 8px);
-    background-color: var(--buttons-soft-dark, #BFBFBF);
-    font-family: var(--font-family-primary, 'Obviously', sans-serif);
-    font-weight: 400;
+    background-color: var(--primary, #427AB5);
+    font-family: var(--font-family-secondary, 'Manrope', sans-serif);
+    font-weight: 600;
     font-size: 14px;
-    color: var(--fonts-black, #333);
+    color: #fff;
     cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.form-batch-save-btn:hover {
+    background-color: #355f8f;
 }
 
 .form-batch-alert-success {
@@ -2598,7 +2703,8 @@ select.form-batch-input {
     height: 26px;
     padding: 0 12px;
     margin-bottom: 10px;
-    background-color: var(--primary, #427AB5);
+    background-color: rgba(66, 122, 181, 0.08);
+    border: 1px solid rgba(66, 122, 181, 0.3);
 }
 
 .ctc-section-header p {
@@ -2608,7 +2714,7 @@ select.form-batch-input {
     font-size: 11px;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    color: #fff;
+    color: var(--primary, #427AB5);
 }
 
 .ctc-checkbox-row {
@@ -4205,6 +4311,367 @@ select.form-batch-input {
     text-align: right;
 }
 
+/* ── Reporting & Abstract Module (RAM) ───────────────────────────────── */
+.ra-coming-soon-tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 24px;
+    padding: 4px 12px;
+    border-radius: 8px;
+    background-color: rgba(136, 136, 136, 0.1);
+    border: 1px solid #c4c4c4;
+    color: var(--fonts-gray, #888);
+    font-family: var(--font-family-secondary, 'Manrope', sans-serif);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.ram-period-modal {
+    position: relative;
+    width: 520px;
+    border-radius: 20px;
+    padding: 32px 32px 28px;
+}
+
+#ramPeriodModalOverlay {
+    background-color: rgba(0, 0, 0, 0.75);
+}
+
+.ram-period-modal .form-batch-modal-header {
+    height: 0;
+}
+
+.ram-period-modal .form-batch-close-btn {
+    position: absolute;
+    top: -18px;
+    right: -18px;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background-color: #2b2b2b;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.ram-period-modal .form-batch-close-btn:hover {
+    background-color: #1a1a1a;
+}
+
+.ram-period-modal .form-batch-close-btn .icon {
+    width: 16px;
+    height: 16px;
+}
+
+.ram-period-modal .form-batch-modal-title {
+    font-family: var(--font-family-secondary, 'Manrope', sans-serif);
+    font-weight: 600;
+    font-size: 21px;
+    text-transform: none;
+    color: #1f2937;
+    line-height: 1.3;
+}
+
+.ram-period-modal .orabf-export-subtitle {
+    margin-top: 2px;
+}
+
+.ram-period-modal .orabf-export-divider {
+    height: 1px;
+    background-color: #e5e7eb;
+}
+
+.ram-period-modal .orabf-export-range-label {
+    color: #374151;
+}
+
+.ram-period-modal .form-batch-input {
+    border-radius: 8px;
+}
+
+.ram-period-modal .orabf-export-range-arrow {
+    color: #9ca3af;
+}
+
+.ram-period-modal .orabf-export-range-arrow .icon {
+    width: 16px;
+    height: 16px;
+}
+
+#ramPeriodForm {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+}
+
+/* Preview modal shell — mirrors the ORAF report-preview pattern under a
+   namespaced class so the original ORAF print styles stay untouched. */
+.ram-preview-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+    z-index: 1200;
+    overflow-y: auto;
+    padding: 32px 24px 48px;
+}
+
+.ram-preview-overlay.open {
+    display: flex;
+}
+
+.ram-preview-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    max-width: 900px;
+}
+
+.ram-preview-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.ram-preview-topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ram-preview-close-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    color: #fff;
+    font-family: var(--font-family-secondary, 'Manrope', sans-serif);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 16px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background-color 0.15s;
+}
+
+.ram-preview-close-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.ram-preview-close-btn .icon {
+    width: 16px;
+    height: 16px;
+}
+
+.ram-preview-print-btn {
+    display: flex;
+    align-items: center;
+    background-color: rgba(66, 122, 181, 0.08);
+    border: 1px solid #427AB5;
+    color: #427AB5;
+    font-family: var(--font-family-secondary, 'Manrope', sans-serif);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 20px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background-color 0.15s;
+}
+
+.ram-preview-print-btn:hover {
+    background-color: rgba(66, 122, 181, 0.15);
+}
+
+.ram-preview-export-btn {
+    margin-top: 0;
+}
+
+/* Paper document */
+.ram-report-paper {
+    background: #d9d9d9;
+    border: 1px solid #333;
+    width: 100%;
+    overflow: hidden;
+    padding-bottom: 24px;
+}
+
+.ram-report-doc-header {
+    padding: 16px 17px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    text-align: center;
+}
+
+.ram-report-title {
+    font-family: 'Archivo', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #333;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.ram-report-office {
+    font-family: 'Archivo', sans-serif;
+    font-size: 10px;
+    font-weight: 400;
+    color: #333;
+    margin: 0;
+}
+
+.ram-report-period-label {
+    font-family: 'Archivo', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    color: #333;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.ram-report-officer-row {
+    display: flex;
+    border-top: 1px solid #333;
+    border-bottom: 1px solid #333;
+    margin: 0 17px;
+}
+
+.ram-report-officer-col {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 6px 10px;
+    flex: 1;
+}
+
+.ram-report-officer-col--right {
+    border-left: 1px solid #333;
+    align-items: flex-end;
+}
+
+.ram-report-officer-name {
+    font-family: 'Archivo', sans-serif;
+    font-size: 9px;
+    font-weight: 700;
+    color: #333;
+    text-transform: uppercase;
+    display: block;
+    width: 100%;
+    min-height: 13px;
+    outline: none;
+    -webkit-user-modify: read-write-plaintext-only;
+    border: none;
+    background: transparent;
+    padding: 0;
+    cursor: text;
+}
+
+.ram-report-officer-name:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.ram-report-officer-name:empty::before {
+    content: attr(data-placeholder);
+    color: #aaa;
+    font-weight: 400;
+    font-style: italic;
+    text-transform: none;
+}
+
+.ram-report-officer-label {
+    font-family: 'Archivo', sans-serif;
+    font-size: 8px;
+    font-weight: 400;
+    color: #555;
+}
+
+.ram-report-section-heading {
+    margin: 16px 17px 0;
+    font-family: 'Archivo', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: #333;
+    text-transform: uppercase;
+}
+
+.ram-report-table-wrap {
+    overflow-x: auto;
+    padding: 8px 17px 0;
+}
+
+.ram-report-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Archivo', sans-serif;
+    font-size: 9px;
+    color: #333;
+    table-layout: fixed;
+}
+
+.ram-report-table th {
+    border: 1px solid #333;
+    padding: 6px 6px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 9px;
+    line-height: 1.3;
+    vertical-align: middle;
+    height: 36px;
+    background: #d9d9d9;
+    white-space: normal;
+}
+
+.ram-report-table td {
+    border: 1px solid #333;
+    padding: 4px 6px;
+    font-size: 9px;
+    height: 21px;
+    line-height: 1.2;
+    vertical-align: middle;
+    background: #d9d9d9;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-break: break-all;
+}
+
+.ram-report-table td.rp-num {
+    text-align: right;
+}
+
+.ram-report-empty {
+    text-align: center;
+    padding: 20px !important;
+    font-style: italic;
+    color: #666;
+    white-space: normal !important;
+}
+
+.ram-report-total-row td {
+    border: 1px solid #333;
+    font-family: 'Archivo', sans-serif;
+    font-size: 9px;
+    font-weight: 700;
+    color: #333;
+    height: 21px;
+    padding: 4px 6px;
+    background: #d9d9d9;
+}
+
 .ctcp-rpt-blank--wide {
     min-width: 200px;
 }
@@ -4582,7 +5049,8 @@ select.form-batch-input {
     padding: 24px;
     box-sizing: border-box;
     background-color: #fff;
-    box-shadow: 0px 4px 2px rgba(0, 0, 0, 0.25);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 .ctc-add-entry-close-row {
@@ -4600,12 +5068,17 @@ select.form-batch-input {
     width: 24px;
     height: 24px;
     padding: 0;
-    border: none;
+    border: 1px solid rgba(51, 51, 51, 0.15);
     border-radius: 50px;
-    background-color: var(--buttons-default-danger, #F0284A);
-    color: #fff;
+    background-color: rgba(51, 51, 51, 0.06);
+    color: #555;
     cursor: pointer;
     flex-shrink: 0;
+    transition: background-color 0.15s ease;
+}
+
+.ctc-add-entry-close-btn:hover {
+    background-color: rgba(51, 51, 51, 0.12);
 }
 
 .ctc-add-entry-close-btn .icon {
@@ -4618,7 +5091,7 @@ select.form-batch-input {
     height: 42px;
     box-sizing: border-box;
     padding: 10px;
-    border: 1px solid var(--fonts-black, #333);
+    border: 1px solid #d0d8e4;
     background-color: #fff;
     font-family: var(--font-family-primary, 'Obviously', sans-serif);
     font-weight: 400;
@@ -4627,7 +5100,7 @@ select.form-batch-input {
 }
 
 .ctc-add-entry-field:focus {
-    outline: 1px solid var(--fonts-black, #333);
+    outline: 1px solid var(--primary, #427AB5);
     outline-offset: -1px;
 }
 
@@ -4675,6 +5148,7 @@ select.form-batch-input {
     padding: 16px 24px;
     box-sizing: border-box;
     border: none;
+    border-radius: 8px;
     background-color: var(--primary, #427AB5);
     font-family: var(--font-family-secondary, 'Manrope', sans-serif);
     font-weight: 600;
@@ -4792,12 +5266,13 @@ select.form-batch-input {
     min-width: 150px;
     height: 42px;
     padding: 16px 24px;
-    border: none;
-    background-color: var(--dark, #333);
+    border: 1px solid var(--primary, #427AB5);
+    border-radius: 8px;
+    background-color: rgba(66, 122, 181, 0.08);
     font-family: var(--font-family-secondary, 'Manrope', sans-serif);
     font-weight: 600;
     font-size: 14px;
-    color: #fff;
+    color: var(--primary, #427AB5);
     cursor: pointer;
     text-decoration: none;
     box-sizing: border-box;
@@ -4805,12 +5280,12 @@ select.form-batch-input {
 }
 
 .um-export-btn:hover {
-    background-color: #555;
+    background-color: rgba(66, 122, 181, 0.15);
 }
 
 /* Status column text (Figma: Activated = blue, Disable = red) */
 .um-status-activated {
-    color: var(--primary, #427AB5);
+    color: var(--success, #198754);
     font-weight: 600;
 }
 
@@ -4879,7 +5354,8 @@ select.form-batch-input {
     box-sizing: border-box;
     padding: 0 10px;
     margin-bottom: 8px;
-    background-color: var(--primary, #427AB5);
+    background-color: rgba(66, 122, 181, 0.08);
+    border: 1px solid rgba(66, 122, 181, 0.3);
 }
 
 .um-modal-section-header p {
@@ -4889,7 +5365,7 @@ select.form-batch-input {
     font-size: 10px;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    color: #fff;
+    color: var(--primary, #427AB5);
 }
 
 .um-modal-section-header + .um-field-box {
@@ -4938,7 +5414,7 @@ select.form-batch-input {
     width: 100%;
     min-height: 42px;
     padding: 10px;
-    border: 1px solid #333;
+    border: 1px solid #d0d8e4;
     border-top-width: 0;
     background-color: #fff;
     box-sizing: border-box;
@@ -4984,16 +5460,14 @@ select.form-batch-input {
 
 /* Primary action button (matches OR RPT "ADD ENTRY" button) */
 .um-save-btn {
-    /* outline: 1px solid red; */
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
-    /* max-width: 120px; */
-    /* min-width: 150px; */
     height: 42px;
     padding: 16px 24px;
     border: none;
+    border-radius: 8px;
     background-color: var(--primary, #427AB5);
     font-family: var(--font-family-secondary, 'Manrope', sans-serif);
     font-weight: 600;
@@ -5051,6 +5525,7 @@ select.form-batch-input {
     height: 42px;
     padding: 16px 24px;
     border: none;
+    border-radius: 8px;
     font-family: var(--font-family-secondary, 'Manrope', sans-serif);
     font-weight: 600;
     font-size: 14px;
@@ -5097,13 +5572,14 @@ select.form-batch-input {
     align-items: center;
     padding: 0 10px;
     margin-bottom: 8px;
-    background-color: var(--primary, #427AB5);
+    background-color: rgba(66, 122, 181, 0.08);
+    border: 1px solid rgba(66, 122, 181, 0.3);
     font-family: var(--font-family-secondary, 'Manrope', sans-serif);
     font-size: 10px;
     font-weight: 700;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    color: #fff;
+    color: var(--primary, #427AB5);
 }
 
 .um-reset-result-value {
@@ -5111,7 +5587,7 @@ select.form-batch-input {
     align-items: center;
     min-height: 42px;
     padding: 10px;
-    border: 1px solid #333;
+    border: 1px solid #d0d8e4;
     background-color: #fff;
     box-sizing: border-box;
 }
@@ -5129,50 +5605,54 @@ select.form-batch-input {
 /* Roles & Permission matrix (Figma node 586:3799) */
 .um-role-tabs {
     display: flex;
-    width: content-fit;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
 }
 
 .um-role-tab {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 12px;
-    border: none;
-    background-color: var(--btn-secondary, #70b6c1);
+    padding: 8px 20px;
+    border: 1px solid #8ab5cc;
+    border-radius: 8px;
+    background-color: #B8D4E3;
     font-family: var(--font-family-secondary, 'Manrope', sans-serif);
     font-size: 12px;
     font-weight: 600;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: #fff;
+    color: var(--primary, #427AB5);
     text-decoration: none;
     cursor: pointer;
     transition: background-color 0.15s ease;
-    width: content-fit;
-    /* outline: 1px solid red; */
+    white-space: nowrap;
 }
 
 .um-role-tab:first-child {
-    flex: 0 0 120px;
+    flex: 0 0 auto;
 }
 
 .um-role-tab:not(:first-child) {
-    /* flex: 1 0 0; */
-    /* outline: 1px solid red; */
-    width: content-fit;
-    padding: 0 24px;
+    width: auto;
+    padding: 8px 20px;
 }
 
 .um-role-tab:hover {
-    background-color: var(--btn-secondary-hover, #275259);
+    background-color: rgba(66, 122, 181, 0.15);
 }
 
 .um-role-tab.active {
-    background-color: var(--dark, #333);
+    background-color: var(--primary, #427AB5);
+    color: #ffffff;
 }
 
 .um-permission-section {
     margin-bottom: 16px;
+    border: 1px solid rgba(66, 122, 181, 0.2);
+    border-radius: 8px;
+    overflow: hidden;
 }
 
 .um-permission-table {
@@ -5183,25 +5663,34 @@ select.form-batch-input {
 }
 
 .um-permission-table thead th {
-    background-color: var(--table-header, #a4a4a4);
-    color: var(--fonts-black, #333);
-    font-weight: 700;
+    font-weight: 600;
     font-size: 11px;
-    letter-spacing: 0.05em;
+    letter-spacing: 1.2px;
     text-align: left;
-    text-transform: none;
-    padding: 8px 10px;
-    border-bottom: 1px solid var(--table-border, #D9D9D9);
+    text-transform: uppercase;
+    padding: 12px 10px;
+}
+
+.um-permission-table thead tr:first-child th {
+    background-color: #2C4A6E;
+    color: #ffffff;
+    border-bottom: 2px solid #1d3450;
+}
+
+.um-permission-table thead tr:last-child th {
+    background-color: rgba(201, 162, 39, 0.12);
+    color: #8B6914;
+    border-bottom: 2px solid rgba(201, 162, 39, 0.4);
 }
 
 .um-permission-table tbody td {
     padding: 8px 10px;
-    border-bottom: 1px solid var(--table-border, #D9D9D9);
+    border-bottom: 1px solid rgba(66, 122, 181, 0.12);
     vertical-align: middle;
 }
 
 .um-permission-table tbody tr:nth-child(even) td {
-    background-color: var(--table-cell-alt, #f7f8fa);
+    background-color: rgba(66, 122, 181, 0.03);
 }
 
 .um-permission-table .um-permission-module {
@@ -6010,8 +6499,9 @@ select.form-batch-input {
 }
 
 .mc-send-modal {
-    background: var(--bg-light, #edf3f9);
-    box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -6026,8 +6516,8 @@ select.form-batch-input {
 }
 
 .mc-send-close-btn {
-    background: var(--btn-danger, #f0284a);
-    border: none;
+    background: rgba(51, 51, 51, 0.06);
+    border: 1px solid rgba(51, 51, 51, 0.15);
     border-radius: 50%;
     width: 24px;
     height: 24px;
@@ -6035,8 +6525,13 @@ select.form-batch-input {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    color: #fff;
+    color: #555;
     padding: 4px;
+    transition: background-color 0.15s ease;
+}
+
+.mc-send-close-btn:hover {
+    background: rgba(51, 51, 51, 0.12);
 }
 
 .mc-send-close-btn .icon {
@@ -6050,8 +6545,8 @@ select.form-batch-input {
 }
 
 .mc-send-bar {
-    background: #333;
-    border: 1px solid #333;
+    background: rgba(66, 122, 181, 0.08);
+    border: 1px solid rgba(66, 122, 181, 0.3);
     display: flex;
     align-items: center;
     padding: 4px 10px;
@@ -6062,14 +6557,14 @@ select.form-batch-input {
     font-family: 'Aptos', 'Manrope', sans-serif;
     font-weight: 700;
     font-size: 10px;
-    color: #fff;
+    color: var(--primary, #427AB5);
     text-transform: capitalize;
     white-space: nowrap;
 }
 
 .mc-send-input {
     background: #fff;
-    border: 1px solid #333;
+    border: 1px solid #d0d8e4;
     border-top: none;
     padding: 10px;
     font-family: var(--font-family-primary, 'Obviously', sans-serif);
@@ -6087,7 +6582,7 @@ select.form-batch-input {
 
 .mc-send-textarea {
     background: #fff;
-    border: 1px solid #333;
+    border: 1px solid #d0d8e4;
     border-top: none;
     padding: 10px;
     font-family: var(--font-family-primary, 'Obviously', sans-serif);
@@ -6131,12 +6626,12 @@ select.form-batch-input {
 }
 
 .mc-send-btn--send {
-    background: var(--btn-primary, #1877F2);
+    background: var(--primary, #427AB5);
     color: #fff;
 }
 
 .mc-send-btn--send:hover {
-    background: #1464cc;
+    background: #355f8f;
 }
 
 /* ─── Collection Management — View Page ───────────────────────────────────── */

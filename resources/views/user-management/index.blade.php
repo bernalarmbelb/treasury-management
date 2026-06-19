@@ -111,6 +111,53 @@
                     fetchAndRender(params);
                 });
 
+                /* ===== Row actions: kebab dropdown menu ===== */
+                function closeAllActionDropdowns() {
+                    container.querySelectorAll('.um-actions-dropdown.open').forEach(function (dropdown) {
+                        dropdown.classList.remove('open');
+                        dropdown.previousElementSibling.setAttribute('aria-expanded', 'false');
+                    });
+                }
+
+                container.addEventListener('click', function (event) {
+                    const trigger = event.target.closest('.um-actions-trigger');
+
+                    if (trigger) {
+                        const dropdown = trigger.nextElementSibling;
+                        const isOpen = dropdown.classList.contains('open');
+
+                        closeAllActionDropdowns();
+
+                        if (!isOpen) {
+                            const rect = trigger.getBoundingClientRect();
+                            dropdown.style.top = (rect.bottom + 4) + 'px';
+                            dropdown.style.left = 'auto';
+                            dropdown.style.right = (window.innerWidth - rect.right) + 'px';
+                            dropdown.classList.add('open');
+                            trigger.setAttribute('aria-expanded', 'true');
+                        }
+                        return;
+                    }
+
+                    if (event.target.closest('.um-actions-item')) {
+                        closeAllActionDropdowns();
+                    }
+                });
+
+                document.addEventListener('click', function (event) {
+                    if (!event.target.closest('.um-actions-menu')) {
+                        closeAllActionDropdowns();
+                    }
+                });
+
+                document.addEventListener('keydown', function (event) {
+                    if (event.key === 'Escape') {
+                        closeAllActionDropdowns();
+                    }
+                });
+
+                window.addEventListener('scroll', closeAllActionDropdowns, true);
+
                 /* ===== Bulk select & bulk actions ===== */
                 function getRowCheckboxes() {
                     return Array.from(container.querySelectorAll('.um-row-checkbox'));

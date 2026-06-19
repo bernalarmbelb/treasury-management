@@ -39,15 +39,16 @@
         </thead>
         <tbody>
             @forelse ($forms as $form)
+                @php $availableQty = $form->availableQty(); @endphp
                 <tr>
-                    <td class="{{ $form->qty == 0 ? 'qty-empty' : '' }}">{{ $form->qty }}</td>
+                    <td class="{{ $availableQty == 0 ? 'qty-empty' : '' }}">{{ $availableQty }}</td>
                     <td>{{ $form->form_name }}</td>
                     <td>{{ $form->form_code }}</td>
                     <td>{{ $form->added_date->format('F j, Y') }}</td>
                     <td>{{ $form->added_by }}</td>
                     <td class="col-actions">
                         <div class="table-actions-entry">
-                            @if ($form->qty == 0)
+                            @if ($availableQty == 0)
                                 <button type="button" class="action-link js-add-receipt" aria-label="Add new receipt" data-form-stock-id="{{ $form->id }}" data-form-code="{{ $form->form_code }}">
                                     <span class="action-icon-btn action-add-receipt">
                                         <x-bx-archive class="icon" />
@@ -55,12 +56,14 @@
                                     Add new receipt
                                 </button>
                             @endif
+                            @if ($availableQty > 0)
                             @php
                                 $addTransactionRoute = match ($form->form_code) {
                                     'BIR0016' => route('transaction-entry.individual-cedula', $form->id),
                                     'BIR0017' => route('transaction-entry.corporation-cedula', $form->id),
                                     'Form 56' => route('transaction-entry.or-rpt', $form->id),
                                     'Form 5IC' => route('transaction-entry.official-receipt', $form->id),
+                                    'Form 10' => route('transaction-entry.marriage-certificate', $form->id),
                                     default => '#',
                                 };
                             @endphp
@@ -70,6 +73,7 @@
                                 </span>
                                 Add Transaction
                             </a>
+                        @endif
                         </div>
                     </td>
                 </tr>

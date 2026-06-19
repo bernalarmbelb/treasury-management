@@ -55,7 +55,7 @@
                     <div class="form-batch-field-header">
                         <p>Ending OR Serial Number</p>
                     </div>
-                    <input type="text" name="ending_serial_number" class="form-batch-input form-batch-input-full" placeholder="Input the last 3 digit of OR serial number" required>
+                    <input type="text" name="ending_serial_number" class="form-batch-input form-batch-input-full" placeholder="Input whole OR serial number" required>
                 </div>
             </div>
 

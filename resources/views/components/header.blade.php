@@ -13,3 +13,9 @@
 		</p>
 	</div>
 </nav>
+
+@isset($actions)
+	<div class="um-header-actions">
+		{{ $actions }}
+	</div>
+@endisset

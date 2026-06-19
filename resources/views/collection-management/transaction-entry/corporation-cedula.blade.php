@@ -27,8 +27,8 @@
                 <p>Corporation</p>
             </div>
             <div class="ctc-field ctc-cert-no" style="left:650px; top:40px; width:272px; height:58px;">
-                <input type="text" class="ctc-cert-no-prefix-input" id="ctc-cert-prefix" name="certificate_prefix" value="CCC2021">
-                <input type="text" class="ctc-cert-no-input" id="ctc-cert-no" name="certificate_number" value="00259338">
+                <input type="text" class="ctc-cert-no-prefix-input" id="ctc-cert-prefix" name="certificate_prefix" value="{{ $nextSerialPrefix ?? 'CCC2021' }}">
+                <input type="text" class="ctc-cert-no-input" id="ctc-cert-no" name="certificate_number" value="{{ $nextSerialNumber ?? '00259338' }}">
             </div>
             <div class="ctc-field ctc-divider" style="left:650px; top:98px; width:272px; height:5px;"></div>
             <div class="ctc-field ctc-copy-label" style="left:650px; top:103px; width:272px; height:21px;">
@@ -219,6 +219,17 @@
                 input.addEventListener('input', () => toggleEmpty(input));
             });
 
+            // Certificate prefix/number: size each input to its content so the
+            // two fields render as one continuous string with no gap between them.
+            const autosizeCert = (input) => {
+                input.style.width = Math.max(input.value.length, 1) + 'ch';
+            };
+
+            form.querySelectorAll('.ctc-cert-no-prefix-input, .ctc-cert-no-input').forEach((input) => {
+                autosizeCert(input);
+                input.addEventListener('input', () => autosizeCert(input));
+            });
+
             // TIN boxes: auto-advance focus between the 15 single-digit inputs.
             const tinCells = Array.from(form.querySelectorAll('.ctc-tin-cell'));
             tinCells.forEach((cell, index) => {
@@ -332,11 +343,13 @@
                     headers: { 'X-Requested-With': 'XMLHttpRequest' },
                     body: new FormData(form),
                 })
-                    .then((response) => {
-                        if (!response.ok) throw new Error('Save failed');
-                        return response.json();
-                    })
-                    .then((data) => {
+                    .then((response) => response.json().then((data) => ({ ok: response.ok, data })))
+                    .then(({ ok, data }) => {
+                        if (!ok) {
+                            alert(data.message || 'Something went wrong while saving. Please try again.');
+                            return;
+                        }
+
                         closePreview();
                         window.print();
                         window.location.href = data.redirect;
