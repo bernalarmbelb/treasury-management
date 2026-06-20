@@ -50,9 +50,6 @@
                         <div class="table-actions-entry">
                             @if ($availableQty == 0)
                                 <button type="button" class="action-link js-add-receipt" aria-label="Add new receipt" data-form-stock-id="{{ $form->id }}" data-form-code="{{ $form->form_code }}">
-                                    <span class="action-icon-btn action-add-receipt">
-                                        <x-bx-archive class="icon" />
-                                    </span>
                                     Add new receipt
                                 </button>
                             @endif
@@ -68,9 +65,6 @@
                                 };
                             @endphp
                             <a href="{{ $addTransactionRoute }}" class="action-link" aria-label="Add Transaction">
-                                <span class="action-icon-btn action-add-transaction">
-                                    <x-bx-edit-alt class="icon" />
-                                </span>
                                 Add Transaction
                             </a>
                         @endif

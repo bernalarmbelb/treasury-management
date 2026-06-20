@@ -5,12 +5,13 @@
     @endphp
 
     <div class="x-header-container sub-nav-sticky">
-        <x-header title="Report Logs"
+        <x-header title="{{ $formStock->form_name }} - {{ $formStock->form_code }}"
             :tmpRoute="$tmpRoute"
             :routeName="$routeName"
             parentTitle="Official Receipt & Accountable Forms"
             :parentRoute="route('official-receipts-accountable-forms')"
             parentRouteName="official-receipts-accountable-forms"
+            extraTitle="Report Logs"
         />
     </div>
 
@@ -35,6 +36,7 @@
                 let debounceTimer;
 
                 function fetchAndRender(params) {
+                    closeAssignedToMenu();
                     params.delete('page');
 
                     const baseUrl = searchForm.action.split('?')[0];
@@ -94,6 +96,146 @@
                     }
 
                     fetchAndRender(params);
+                });
+
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+                function saveAssignedTo(batchId, value) {
+                    return fetch(`/official-receipts-accountable-forms/batches/${batchId}/assign`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken,
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
+                        body: JSON.stringify({ assigned_to: value }),
+                    });
+                }
+
+                let openAssignedTo = null;
+
+                function closeAssignedToMenu() {
+                    if (!openAssignedTo) {
+                        return;
+                    }
+
+                    const { menu, control, trigger } = openAssignedTo;
+                    menu.classList.add('is-hidden');
+                    menu.style.position = '';
+                    menu.style.top = '';
+                    menu.style.left = '';
+                    menu.style.minWidth = '';
+                    control.appendChild(menu);
+                    trigger.classList.remove('is-open');
+                    openAssignedTo = null;
+                }
+
+                function openAssignedToMenu(trigger) {
+                    const control = trigger.closest('.assigned-to-control');
+                    const menu = control.querySelector('.assigned-to-menu');
+
+                    closeAssignedToMenu();
+
+                    const rect = trigger.getBoundingClientRect();
+                    document.body.appendChild(menu);
+                    menu.classList.remove('is-hidden');
+                    menu.style.position = 'fixed';
+                    menu.style.minWidth = rect.width + 'px';
+                    menu.style.left = rect.left + 'px';
+                    menu.style.top = (rect.bottom + 4) + 'px';
+
+                    const menuRect = menu.getBoundingClientRect();
+                    if (menuRect.bottom > window.innerHeight - 8 && rect.top - menuRect.height - 4 > 0) {
+                        menu.style.top = (rect.top - menuRect.height - 4) + 'px';
+                    }
+
+                    trigger.classList.add('is-open');
+                    openAssignedTo = { menu, control, trigger };
+                }
+
+                function showDropdownMode(control) {
+                    control.querySelector('.assigned-to-trigger').classList.remove('is-hidden');
+                    control.querySelector('.assigned-to-other-wrap').classList.add('is-hidden');
+                }
+
+                function showOtherMode(control) {
+                    control.querySelector('.assigned-to-trigger').classList.add('is-hidden');
+                    control.querySelector('.assigned-to-other-wrap').classList.remove('is-hidden');
+                }
+
+                document.addEventListener('click', function (event) {
+                    const trigger = event.target.closest('.assigned-to-trigger');
+                    const option = event.target.closest('.assigned-to-option');
+                    const backBtn = event.target.closest('.assigned-to-other-back');
+
+                    if (trigger) {
+                        const alreadyOpen = openAssignedTo && openAssignedTo.trigger === trigger;
+                        closeAssignedToMenu();
+
+                        if (!alreadyOpen) {
+                            openAssignedToMenu(trigger);
+                        }
+
+                        return;
+                    }
+
+                    if (option) {
+                        const menu = option.closest('.assigned-to-menu');
+                        const control = (openAssignedTo && openAssignedTo.menu === menu)
+                            ? openAssignedTo.control
+                            : option.closest('.assigned-to-control');
+                        const batchId = control.dataset.batchId;
+
+                        menu.querySelectorAll('.assigned-to-option').forEach(function (opt) {
+                            opt.classList.toggle('is-selected', opt === option);
+                        });
+
+                        closeAssignedToMenu();
+
+                        if (option.dataset.value === '__other__') {
+                            const otherInput = control.querySelector('.assigned-to-other-input');
+                            showOtherMode(control);
+                            otherInput.value = '';
+                            otherInput.focus();
+                            return;
+                        }
+
+                        control.querySelector('.assigned-to-trigger-label').textContent = option.dataset.value || 'Unassigned';
+                        showDropdownMode(control);
+                        saveAssignedTo(batchId, option.dataset.value);
+                        return;
+                    }
+
+                    if (backBtn) {
+                        const control = backBtn.closest('.assigned-to-control');
+                        showDropdownMode(control);
+                        return;
+                    }
+
+                    if (!event.target.closest('.assigned-to-control') && !event.target.closest('.assigned-to-menu')) {
+                        closeAssignedToMenu();
+                    }
+                });
+
+                container.addEventListener('focusout', function (event) {
+                    const input = event.target.closest('.assigned-to-other-input');
+
+                    if (!input) {
+                        return;
+                    }
+
+                    saveAssignedTo(input.dataset.batchId, input.value.trim());
+                });
+
+                container.addEventListener('keydown', function (event) {
+                    const input = event.target.closest('.assigned-to-other-input');
+
+                    if (!input || event.key !== 'Enter') {
+                        return;
+                    }
+
+                    event.preventDefault();
+                    input.blur();
                 });
             })();
         </script>

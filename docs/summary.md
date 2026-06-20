@@ -266,3 +266,27 @@ Created commit `fb1cd3e` ("UI refresh: ghost-outline buttons, modern table, sear
 **Files:** `routes/web.php`, `resources/views/records/index.blade.php` (new), `resources/views/records/partials/records-table.blade.php` (new), `resources/css/app.css`, `composer.json`/`composer.lock`, `docs/tasks/records.md` (new)
 
 **Resolution:** Confirmed by the user ("done").
+
+## 2026-06-20 — Treasurer's Monthly Report rebuild + ORAF-RL "Assigned To" / breadcrumb / CMTE icon removal
+
+**Phase A (completed earlier):** Rebuilt the Treasurer's Monthly Report of Accountability export in the RAM module to match a real reference `.xlsx` file — fixed form code/name, borders, italics, wrap/alignment, and applied landscape orientation, custom margins, 8.5"×13" paper size, and specific fonts/sizes. Documented in `docs/tasks/reporting-abstract.md`.
+
+**Phase B (this session, in progress):** Implemented the new-task.md item "updating ORAF-RL table" (3 sub-parts):
+
+1. **ASSIGNED TO column** on the Report Logs table — added an `assigned_to` column to `form_batches` (migration + model), a new `PATCH` route to save it, and a custom modern dropdown (not native `<select>`) listing registered collectors with an "Other (specify)…" option that swaps to a single bordered text input (with a back-icon button) for barangay/off-list names. Iterated through two rounds of UI polish: smaller Manrope-font sizing matching the existing "Rows per page" select, then a full custom-dropdown rebuild to fix the classic native-select look and the "two stacked bars" Other-mode look.
+2. **4-segment breadcrumb** — extended `x-header`/`components/header.blade.php` with an `extraTitle` slot; Report Logs now shows `Home | Official Receipt & Accountable Forms | Report Logs | Marriage License - Form 10`.
+3. **CMTE icon removal** — stripped the `<x-bx-archive>`/`<x-bx-edit-alt>` icons from the Transaction Entry Actions buttons (text-only now), and removed the now-dead `.action-icon-btn` CSS.
+
+**Bug fixed along the way:** the dropdown menu was getting clipped by the table's `overflow:auto` scroll container. Fixed by portaling the menu to `document.body` with `position: fixed` (computed from the trigger's bounding rect, flipping above the trigger when there's no room below), and correcting the option-click handler to track the menu/control via a closure reference instead of `closest()` (which breaks once the menu is detached into `body`).
+
+All three sub-tasks are implemented and verified live via the preview browser (login workaround, AJAX save, persistence across reload, portal positioning, DB checks via tinker).
+
+**Still pending:** confirmation to finalize the docs — append Tasks/Description/Abbreviation/Notes to `docs/tasks/official-receipt-accountable-forms.md` (ORAF-RL) and `docs/tasks/collection-management-transaction-entry.md` (CMTE icon removal), and alphabetize the Abbreviation list in `new-task.md`, per the project's completion convention.
+
+## 2026-06-20 — Per-collector Treasurer's Monthly Report + CRAAF rebuild (RAM)
+
+`new-task.md` Tasks item 2: plan + build the data for the Treasurer's Monthly Report and CRAAF. User chose **per-collector** for both and supplied two real reference files (`Treasurers_Monthly_Report_Dec2025.xlsx`, `CRAAP_January2024.xlsx`), inspected with openpyxl as ground truth. Both files are one row **per ORAF batch**, grouped by form, with the **collector in REMARKS** — fed by the `form_batches.assigned_to` column.
+
+- `routes/web.php`: replaced the per-form detailed builder with a shared `ram_per_collector_rows()` engine (one row per batch, grouped by form, collector in Remarks); rebuilt `ram_build_treasurers_monthly_detailed()` (Total) and `ram_build_craaf()` (B-TOTAL) on it; **RAAF Section C untouched**. Issued/Remaining are now period-scoped via `TransactionLog` serial-range matching; batches not yet purchased as of period end are excluded. Reworked `export_treasurers_monthly_xlsx()` to the new files' header layout cell-for-cell and routed CRAAF through it too.
+- **Brgy A.F. / Checks Issued / Cash Tickets** (from the client brief) flagged as out of scope — no data sources exist; the CRAAP reference has no such rows either. Barangay collectors still surface in Remarks.
+- Verified: `php -l` clean; both `.xlsx` generated against real data and diffed with openpyxl; rows reconcile per batch (Cleofe Villanueva: Received 5 = Issued 4 + Remaining 1; June 2026 totals 67/26/32); preview JS already renders the grouped header + B-TOTAL. Documented in `docs/tasks/reporting-abstract.md`; Abbreviation list in `new-task.md` alphabetized (added CRAAF, RAAF). Confirmed by the user ("yes").

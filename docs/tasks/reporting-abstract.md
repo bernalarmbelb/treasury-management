@@ -377,3 +377,115 @@ by-cell against the real reference file. The other 4 reports
 (Abstract/Summary of CTC, RAAF, CRAAF) are unchanged and still use the
 original simpler builder/export. Awaiting the user's templates for the
 remaining reports before repeating this process.
+
+## 2026-06-20 — Per-collector Treasurer's Monthly + CRAAF rebuild against new reference files
+
+**Context**: `new-task.md` Tasks item 2 asked to "Plan on what/how data to be
+put in" the Treasurer's Monthly Report and CRAAF based on current data, being
+precise about client expectations. After surfacing the gap between the
+existing implementations and the new client brief
+("Treasurer's Monthly = per collector summary", "CRAAF = different
+accountable forms incl. brgy A.F. / checks issued / cash tickets"), the user
+chose **"per collector — new reference file"** for both and supplied two real
+sample files:
+- `Treasurers_Monthly_Report_Dec2025.xlsx`
+- `CRAAP_January2024.xlsx`
+
+Both were inspected directly with openpyxl (values, merges, fonts, borders,
+alignment, page setup) as ground truth, not guessed from screenshots.
+
+### What the reference files actually are
+Despite the earlier Treasurer's Monthly being system-wide (one row per form
+code), **both new files are organised the same way**: one row **per ORAF
+batch/lot**, grouped by form, with the **FORMS** label shown only on the
+group's first row, the **collector name in the REMARKS column**
+(`DOMALAON/GF`, `ENDAYA/GF`, `STOCKS`, `BT-BRILLANTE`, `BRGY STOCK`…), and a
+Quantity + Inclusive Serial No. pair under each of On hand last Report /
+Recieved Since / Issued Since / Remaining on Hand. CRAAP is identical plus a
+consolidated **B-TOTAL** row. This is exactly the "per collector" view the
+`form_batches.assigned_to` column (added the prior session) was meant to feed.
+
+### Data model / builder changes (`routes/web.php`)
+- Removed the per-form helpers `ram_treasurers_monthly_detailed_row()` and
+  `ram_batch_range_label()` (no longer used).
+- Added `ram_form_label()` (FORMS-column wording, e.g. `BIR F. 0016 (CTC)` /
+  `BIR F. 0017 (CORP)`, others fall back to the stored form name),
+  `ram_serial_range_label()` (compact reference-style range — start in full,
+  hyphen, then only the differing trailing digits of the end, e.g.
+  `13474472` + `13474500` → `13474472-500`), and `ram_per_collector_section()`
+  (the shared two-row grouped section shape).
+- Added `ram_per_collector_rows($from, $to, $totalLabel)` — the shared engine
+  emitting one row per batch, grouped by form, collector in Remarks. Bucketing:
+  - **On Hand Last Report** — batches purchased before the period (full range).
+  - **Recieved Since** — batches purchased within the period (full range).
+  - **Issued Since** — serials of the batch issued **within the period**,
+    matched to the batch by serial-number range against `TransactionLog`
+    (period-scoped, not all-time), assumed consumed in order from the batch
+    start.
+  - **Remaining on Hand** — unused tail as of period end, or `NONE`.
+  - Batches not yet purchased as of period end are excluded; forms with no
+    batch trail are skipped (nothing to attribute to a collector). Totals sum
+    the 4 Quantity columns; caller supplies the label (`Total` vs `B-TOTAL`).
+- `ram_build_treasurers_monthly_detailed()` now just calls
+  `ram_per_collector_rows(..., 'Total')`.
+- `ram_build_craaf()` rebuilt to call `ram_per_collector_rows(..., 'B-TOTAL')`
+  with the same grouped section (previously it reused the simpler system-wide
+  `ram_build_treasurers_monthly()`); **RAAF Section C still uses the original
+  simpler builder, untouched.**
+
+### Export changes (`routes/web.php`)
+- The export route now routes **both** `treasurers-monthly` and `craaf`
+  through `export_treasurers_monthly_xlsx()`, building a reference-style
+  `From <MONTH> 1 TO <MONTH> <lastday>, <year>` period line.
+- `export_treasurers_monthly_xlsx()` reworked to match the new files'
+  header layout cell-for-cell: title 12pt bold; the `From … TO …` period line
+  (replacing the old province/"For the period of" lines); a single officer
+  row (values row 4 with medium bottom borders, italic 9pt labels row 5,
+  `OF` in G4); the two-row group header at rows 7–8 using the files' exact
+  wording (incl. the `Recieved` spelling and `Inclusive Serial Nos.`);
+  Roboto 9 data rows with bold left-aligned form-group labels, centered
+  Quantity + Remarks, left serial ranges; reference column widths
+  (A20/B9/C20/…/J22); landscape, Folio, margins 0.5/0.2/0.2/0.2.
+
+### CRAAF "Brgy A.F. / Checks Issued / Cash Tickets"
+Flagged to the user: none of these exist as data (no barangay-A.F. form, no
+cheque model, no cash-ticket form), and the CRAAP reference itself has no such
+rows — it lists only forms with an actual batch trail. Barangay collectors
+still appear naturally in Remarks (e.g. `Barangay Cabid-an`). Explicit Brgy
+A.F. / Cash Ticket sections would require new data sources first.
+
+### Verification
+- `php -l routes/web.php` clean.
+- Generated both `.xlsx` files against real seeded data via a throwaway
+  Laravel-boot script and inspected actual cell attributes with openpyxl
+  (merges, fonts, borders, alignment, page setup, column widths) — matches the
+  reference structure. Each row reconciles per batch (e.g. Cleofe Villanueva:
+  Received 5 = Issued 4 + Remaining 1); June 2026 totals Received 67 /
+  Issued 26 / Remaining 32. Real collector names surface in Remarks from
+  `form_batches.assigned_to` (Jose Ramirez, Barangay Cabid-an, Juan Dela Cruz),
+  falling back to the batch's `added_by` / `STOCKS`.
+- Confirmed the preview JS (`renderSections()` in
+  `reporting-abstract/index.blade.php`) already handles the grouped shape:
+  CRAAF now renders the two-row grouped header (was flat), continuation rows
+  render empty FORMS cells, and the footer shows `B-TOTAL`. No live-browser
+  run this round (Herd-served app + documented preview login/screenshot
+  friction); verification was openpyxl + data reconciliation + frontend code
+  review.
+
+### Tasks (append per rule 11)
+- [x] Inspect both new reference files (`Treasurers_Monthly_Report_Dec2025`,
+      `CRAAP_January2024`) with openpyxl as ground truth
+- [x] Rebuild Treasurer's Monthly as a per-collector, per-batch listing
+      grouped by form with the collector in Remarks
+- [x] Rebuild CRAAF to the same per-collector listing + a B-TOTAL row
+      (leaving RAAF Section C's simpler builder untouched)
+- [x] Period-scope Issued/Remaining (match batches to TransactionLog by serial
+      range; exclude batches not yet purchased as of period end)
+- [x] Match both exports to the new reference header layout cell-for-cell and
+      route CRAAF through the dedicated exporter
+- [x] Verify both reports against real seeded data (openpyxl + reconciliation)
+
+**Resolution**: Per-collector Treasurer's Monthly Report and CRAAF rebuilt and
+verified against the two new reference files. Brgy A.F. / Checks Issued / Cash
+Tickets remain out of scope pending real data sources. Confirmed by the user
+("yes").

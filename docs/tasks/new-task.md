@@ -36,29 +36,31 @@ hbv .
 
 ## Abbreviation
 1. Collection Management -> CM
-2. Ending Serial Number -> ESN
-3. Login Module -> LM
-4. Official Receipts & Accountable Forms -> ORAF
-5. Reporting and Abstract -> RA
-6. Starting Serial Number -> SSN
-7. Transaction Entry -> CMTE
-8. Transaction Entry - Marriage Certificate -> CMTE-MC
-9. Transaction Logs -> CMTL
-10. User Management -> UM
-11. User Management Add User -> UMAU
-12. User Management Landing Page -> UMLP
-13. User Management Logs -> UML
-14. User Management Roles and Permission -> UMRP
-15. Official Receipts & Accountable Forms - Report Logs -> ORAF-RL
+2. Consolidated Report of Accountability for Accountable Forms -> CRAAF
+3. Ending Serial Number -> ESN
+4. Login Module -> LM
+5. Official Receipts & Accountable Forms -> ORAF
+6. Official Receipts & Accountable Forms - Report Logs -> ORAF-RL
+7. Report of Accountability for Accountable Forms -> RAAF
+8. Reporting and Abstract -> RA
+9. Starting Serial Number -> SSN
+10. Transaction Entry -> CMTE
+11. Transaction Entry - Marriage Certificate -> CMTE-MC
+12. Transaction Logs -> CMTL
+13. User Management -> UM
+14. User Management Add User -> UMAU
+15. User Management Landing Page -> UMLP
+16. User Management Logs -> UML
+17. User Management Roles and Permission -> UMRP
 
 # Tasks Description / Scenario / Events / Steps:
-1. Creating the Reporting & Abstract Module (RAM)
-	- For context, RAM auto generate the selected abstract, to have a better idea on this before planning, review the contents of newtask-tmpfiles folder and match what abstract can already be created in the list available in the system.
-	- Plan on how will you present the FE of each Abstract when Generate Report button is clicked.
-	- When an export button is clicked, you must export the file in excel and preformat the layout to match the structure in the files of newtask-tmpfiles.
-	- note that this report will also be printed in a physical paper.
+1. Read summary.md first to have a context on the last session.
+2. Plan on what/how data to be put in "Treasurer's Monthly Report of Accountability for Accountable Forms" & "Consolidated Report of Accountability for Accountable Forms (CRAAF)" based on the current data that we have.
+
+	- Treasurer's Monthly Report of Accountability for Accountable Forms - per collector summary of accountable form
+	- Consolidated Report of Accountability for Accountable Forms (CRAAF) - summary of different accountable forms included brgy A.F. checks issued and cash tickets
+	- determine the data that needs to be inputted in these two abstract, we need to be precise on client's request as to what be expected in these report.
 
 > At finished task, append this Tasks, Description / Scenario / Events / Steps / Abbreviation, and Notes and the last part of corresponding MD file for example, if the module we are editing is User Management, put append at user-management.md. But before you do this, confirmed with me if all Description / Scenario / Events / Steps are done, If I did not confirmed, double check the new-task.md file and make necessary changes and then ask me for confirmation again. Sort Abbreviation in Alphabetical Order. Do not erase the notes on this file.
 
 ## Update
-1. on RAM change the Generate Report into a button.

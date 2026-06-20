@@ -13,6 +13,7 @@ class FormBatch extends Model
         'purchase_date',
         'starting_serial_number',
         'ending_serial_number',
+        'assigned_to',
         'added_by',
     ];
 

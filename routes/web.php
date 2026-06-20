@@ -878,6 +878,7 @@ Route::get('/official-receipts-accountable-forms/{formStock}/report-logs', funct
         'perPage' => $perPage,
         'sort' => $sort,
         'direction' => $direction,
+        'collectors' => \App\Models\User::whereHas('roles', fn ($q) => $q->where('slug', 'collector'))->orderBy('name')->pluck('name'),
     ];
 
     if ($request->ajax()) {
@@ -886,6 +887,16 @@ Route::get('/official-receipts-accountable-forms/{formStock}/report-logs', funct
 
     return view('official-receipt-accountable-forms.report-logs', $data);
 })->name('official-receipts-accountable-forms.report-logs');
+
+Route::patch('/official-receipts-accountable-forms/batches/{batch}/assign', function (\Illuminate\Http\Request $request, \App\Models\FormBatch $batch) {
+    $validated = $request->validate([
+        'assigned_to' => ['nullable', 'string', 'max:150'],
+    ]);
+
+    $batch->update(['assigned_to' => $validated['assigned_to'] ?: null]);
+
+    return response()->json(['assigned_to' => $batch->assigned_to]);
+})->name('official-receipts-accountable-forms.batches.assign');
 
 Route::get('/official-receipts-accountable-forms/{formStock}/preview', function (\Illuminate\Http\Request $request, \App\Models\FormStock $formStock) {
     $validated = $request->validate([
@@ -1086,10 +1097,14 @@ Route::get('/reporting-abstract/{report}/export', function (\Illuminate\Http\Req
 
     \App\Models\ActivityLog::record('Reporting & Abstract - Export Report - ' . $built['title'] . ' - ' . $periodLabel);
 
-    if ($report === 'treasurers-monthly') {
+    if (in_array($report, ['treasurers-monthly', 'craaf'], true)) {
+        $monthNames = ['', 'JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
+        $headerPeriod = 'From  ' . $monthNames[$validated['from_month']] . ' 1 TO '
+            . $monthNames[$validated['to_month']] . ' ' . $toDate->day . ', ' . $validated['to_year'];
+
         return export_treasurers_monthly_xlsx(
             $built,
-            $periodLabel,
+            $headerPeriod,
             $validated['officer_name'] ?? null,
             $validated['designation'] ?? null,
             $filename
@@ -1366,91 +1381,63 @@ function ram_build_treasurers_monthly(\Illuminate\Support\Carbon $from, \Illumin
 }
 
 /**
- * Inclusive serial number range covered by a set of batches, e.g.
- * "2026-00001 – 2026-00010", or "—" when the set is empty. Used by the
- * detailed Treasurer's Monthly Report breakdown to show a serial range for
- * each of the 4 sections (not just On Hand Last Report).
+ * Form label as it appears in the FORMS column of the Treasurer's Monthly /
+ * CRAAF reports, matching the government template wording (e.g.
+ * "BIR F. 0016 (CTC)"); other forms fall back to their stored form name.
  */
-function ram_batch_range_label(\Illuminate\Support\Collection $batches): string
+function ram_form_label(\App\Models\FormStock $formStock): string
 {
-    return $batches->isEmpty()
-        ? '—'
-        : $batches->first()->starting_serial_number . ' – ' . $batches->last()->displayEndingSerialNumber();
+    return match ($formStock->form_code) {
+        'BIR0016' => 'BIR F. 0016 (CTC)',
+        'BIR0017' => 'BIR F. 0017 (CORP)',
+        default => $formStock->form_name,
+    };
 }
 
 /**
- * Detailed per-form breakdown matching the real "Treasurer's Monthly
- * Report" Excel template exactly (verified against a reference file):
- * each of the 4 sections gets both a Quantity and an "Inclusive Serial
- * No." figure. "Issued Since" range uses the first/last TransactionLog
- * serial number actually recorded in the period (usage isn't necessarily
- * contiguous, unlike a batch range); "Remaining on Hand" range is the
- * combined range of every batch on the books as of period end — an
- * approximation, not the precise subset of serials still unused.
+ * Inclusive serial range in the reference file's compact form — the start
+ * serial in full, a hyphen, then only the trailing digits of the end serial
+ * that differ from the start (e.g. "13474472" + "13474500" => "13474472-500",
+ * matching how the municipality writes ranges by hand).
  */
-function ram_treasurers_monthly_detailed_row(\App\Models\FormStock $formStock, \Illuminate\Support\Carbon $from, \Illuminate\Support\Carbon $to): array
+function ram_serial_range_label(string $start, string $end): string
 {
-    $batches = $formStock->batches;
-    $batchesBefore = $batches->filter(fn ($b) => $b->purchase_date && $b->purchase_date->lt($from))->values();
-    $batchesWithin = $batches->filter(fn ($b) => $b->purchase_date && $b->purchase_date->between($from, $to))->values();
-    $batchesUpToEnd = $batches->filter(fn ($b) => $b->purchase_date && $b->purchase_date->lte($to))->values();
-
-    $receivedBefore = $batchesBefore->sum(fn ($b) => $b->startingQty());
-    $receivedSince  = $batchesWithin->sum(fn ($b) => $b->startingQty());
-
-    $issuedBefore = \App\Models\TransactionLog::where('form_type', $formStock->form_code)->where('transacted_at', '<', $from)->count();
-    $issuedLogsSince = \App\Models\TransactionLog::where('form_type', $formStock->form_code)
-        ->whereBetween('transacted_at', [$from, $to])
-        ->orderBy('transacted_at')
-        ->get();
-    $issuedSince = $issuedLogsSince->count();
-
-    if ($batches->isEmpty()) {
-        $onHandQty = $formStock->qty;
-        $onHandRange = '—';
-        $receivedRange = '—';
-        $remainingRange = '—';
-    } else {
-        $onHandQty = max(0, $receivedBefore - $issuedBefore);
-        $onHandRange = ram_batch_range_label($batchesBefore);
-        $receivedRange = ram_batch_range_label($batchesWithin);
-        $remainingRange = ram_batch_range_label($batchesUpToEnd);
+    if ($start === '' || $end === '') {
+        return '—';
     }
 
-    $remainingQty = max(0, $onHandQty + $receivedSince - $issuedSince);
+    $i = 0;
+    $min = min(strlen($start), strlen($end));
+    while ($i < $min && $start[$i] === $end[$i]) {
+        $i++;
+    }
 
-    $issuedRange = $issuedLogsSince->isEmpty()
-        ? '—'
-        : $issuedLogsSince->first()->serial_number . ' – ' . $issuedLogsSince->last()->serial_number;
+    $endShort = substr($end, $i);
 
-    $remarks = $batchesWithin->pluck('added_by')->filter()->unique()->implode(', ');
-
-    return [
-        'form' => $formStock->form_code,
-        'on_hand_qty' => $onHandQty,
-        'on_hand_range' => $onHandRange,
-        'received_qty' => $receivedSince,
-        'received_range' => $receivedRange,
-        'issued_qty' => $issuedSince,
-        'issued_range' => $issuedRange,
-        'remaining_qty' => $remainingQty,
-        'remaining_range' => $remainingRange,
-        'remarks' => $remarks ?: '—',
-    ];
+    return $start . '-' . ($endShort === '' ? $end : $endShort);
 }
 
 /**
- * Treasurer's Monthly Report of Accountability for Accountable Forms,
- * rebuilt to mirror the real government Excel template exactly: a two-row
- * grouped header (Quantity + Inclusive Serial No. under each of On Hand
- * Last Report / Received Since / Issued Since / Remaining on Hand) and an
- * unbolded Total row summing the 4 Quantity columns. Used for both the
- * preview modal and the dedicated export (export_treasurers_monthly_xlsx())
- * so what's previewed/printed matches what's downloaded. This is separate
- * from ram_build_treasurers_monthly() above, which CRAAF and RAAF's
- * Section C still use unchanged (simpler flat-column shape).
+ * Per-collector accountability rows shared by the Treasurer's Monthly Report
+ * and CRAAF, matching the real government Excel templates
+ * (Treasurers_Monthly_Report and CRAAP reference files): one row per ORAF
+ * batch, grouped by form (the form label shows only on the group's first
+ * row), with the collector in Remarks (form_batches.assigned_to, falling
+ * back to who added the batch / "STOCKS"), and a Quantity + Inclusive Serial
+ * No. pair under each of On Hand Last Report / Received Since / Issued Since
+ * / Remaining on Hand. Bucketing rules, derived from how the reference files
+ * are kept:
+ *   - On Hand Last Report: batches purchased before the period (full range).
+ *   - Received Since: batches purchased within the period (full range).
+ *   - Issued Since: serials of the batch issued within the period (matched to
+ *     the batch by serial-number range against TransactionLog), assumed taken
+ *     in order from the batch start.
+ *   - Remaining on Hand: the unused tail as of the period end, or "NONE".
+ * Forms with no batch trail are skipped (there is nothing to attribute to a
+ * collector). Returns [$rows, $totals] with $totals summing the 4 Quantity
+ * columns; the caller supplies the totals label ("Total" vs "B-TOTAL").
  */
-function ram_build_treasurers_monthly_detailed(\Illuminate\Support\Carbon $from, \Illuminate\Support\Carbon $to): array
+function ram_per_collector_rows(\Illuminate\Support\Carbon $from, \Illuminate\Support\Carbon $to, string $totalLabel): array
 {
     $rows = [];
     $totalOnHand = 0;
@@ -1458,55 +1445,133 @@ function ram_build_treasurers_monthly_detailed(\Illuminate\Support\Carbon $from,
     $totalIssued = 0;
     $totalRemaining = 0;
 
+    $trailingNumber = function (?string $serial): int {
+        preg_match('/(\d+)$/', (string) $serial, $m);
+        return (int) ($m[1] ?? 0);
+    };
+
     foreach (\App\Models\FormStock::orderBy('form_name')->get() as $formStock) {
-        $r = ram_treasurers_monthly_detailed_row($formStock, $from, $to);
+        // Only batches that exist as of the period end can be accounted for.
+        $batches = $formStock->batches()
+            ->oldest('purchase_date')
+            ->get()
+            ->filter(fn ($b) => ! $b->purchase_date || $b->purchase_date->lte($to))
+            ->values();
+        if ($batches->isEmpty()) {
+            continue;
+        }
 
-        $rows[] = [
-            $r['form'],
-            $r['on_hand_qty'],
-            $r['on_hand_range'],
-            $r['received_qty'],
-            $r['received_range'],
-            $r['issued_qty'],
-            $r['issued_range'],
-            $r['remaining_qty'],
-            $r['remaining_range'],
-            $r['remarks'],
-        ];
+        // Issued serials for this form recorded on or before the period end,
+        // matched to a batch by serial-number range and split into "issued
+        // before the period" vs "issued within the period".
+        $logs = \App\Models\TransactionLog::where('form_type', $formStock->form_code)
+            ->where('transacted_at', '<=', $to)
+            ->get()
+            ->map(fn ($l) => ['n' => $trailingNumber($l->serial_number), 'within' => $l->transacted_at->betweenIncluded($from, $to)]);
 
-        $totalOnHand += $r['on_hand_qty'];
-        $totalReceived += $r['received_qty'];
-        $totalIssued += $r['issued_qty'];
-        $totalRemaining += $r['remaining_qty'];
+        $first = true;
+        foreach ($batches as $batch) {
+            [$startNum, $endNum] = $batch->serialRange();
+            $prefix = $batch->serialPrefix();
+            preg_match('/(\d+)$/', $batch->starting_serial_number, $m);
+            $pad = strlen($m[1] ?? '');
+            $fmt = fn (int $n) => $prefix . str_pad((string) $n, $pad, '0', STR_PAD_LEFT);
+
+            $fullRange = ram_serial_range_label($batch->starting_serial_number, $batch->displayEndingSerialNumber());
+
+            $purchasedBefore = $batch->purchase_date && $batch->purchase_date->lt($from);
+            $purchasedWithin = $batch->purchase_date && $batch->purchase_date->between($from, $to);
+
+            $starting = $batch->startingQty();
+
+            $inRange = $logs->filter(fn ($x) => $x['n'] >= $startNum && $x['n'] <= $endNum);
+            $issuedToEnd = $inRange->count();
+            $issuedWithin = $inRange->where('within', true)->count();
+            $remaining = max(0, $starting - $issuedToEnd);
+
+            // Serials are assumed consumed in order from the batch start; the
+            // in-period issuances are the most recent slice of that run.
+            $issuedRange = $issuedWithin > 0
+                ? ram_serial_range_label($fmt($startNum + $issuedToEnd - $issuedWithin), $fmt($startNum + $issuedToEnd - 1))
+                : '';
+            $remainingRange = $remaining > 0 ? ram_serial_range_label($fmt($startNum + $issuedToEnd), $fmt($endNum)) : 'NONE';
+
+            $rows[] = [
+                $first ? ram_form_label($formStock) : '',
+                $purchasedBefore ? $starting : '',
+                $purchasedBefore ? $fullRange : '',
+                $purchasedWithin ? $starting : '',
+                $purchasedWithin ? $fullRange : '',
+                $issuedWithin > 0 ? $issuedWithin : '',
+                $issuedRange,
+                $remaining > 0 ? $remaining : '',
+                $remainingRange,
+                $batch->assigned_to ?: ($batch->added_by ?: 'STOCKS'),
+            ];
+
+            $first = false;
+            $totalOnHand += $purchasedBefore ? $starting : 0;
+            $totalReceived += $purchasedWithin ? $starting : 0;
+            $totalIssued += $issuedWithin;
+            $totalRemaining += $remaining;
+        }
     }
+
+    $totals = [$totalLabel, $totalOnHand, '', $totalReceived, '', $totalIssued, '', $totalRemaining, '', ''];
+
+    return [$rows, $totals];
+}
+
+/**
+ * The two-row grouped section shape (groups + leaf columns + rows + totals)
+ * shared by the Treasurer's Monthly Report and CRAAF, so the preview header
+ * and the dedicated export render identically for both.
+ */
+function ram_per_collector_section(array $rows, array $totals): array
+{
+    return [
+        'heading' => null,
+        'groups' => [
+            ['label' => 'Forms', 'colspan' => 1],
+            ['label' => 'On Hand Last Report', 'colspan' => 2, 'subcolumns' => ['Quantity', 'Inclusive Serial No.']],
+            ['label' => 'Received Since', 'colspan' => 2, 'subcolumns' => ['Quantity', 'Inclusive Serial No.']],
+            ['label' => 'Issued Since', 'colspan' => 2, 'subcolumns' => ['Quantity', 'Inclusive Serial No.']],
+            ['label' => 'Remaining on Hand', 'colspan' => 2, 'subcolumns' => ['Quantity', 'Inclusive Serial No.']],
+            ['label' => 'Remarks', 'colspan' => 1],
+        ],
+        'columns' => [
+            ['label' => 'Forms', 'align' => 'left'],
+            ['label' => 'Quantity', 'align' => 'right'],
+            ['label' => 'Inclusive Serial No.', 'align' => 'left'],
+            ['label' => 'Quantity', 'align' => 'right'],
+            ['label' => 'Inclusive Serial No.', 'align' => 'left'],
+            ['label' => 'Quantity', 'align' => 'right'],
+            ['label' => 'Inclusive Serial No.', 'align' => 'left'],
+            ['label' => 'Quantity', 'align' => 'right'],
+            ['label' => 'Inclusive Serial No.', 'align' => 'left'],
+            ['label' => 'Remarks', 'align' => 'left'],
+        ],
+        'rows' => $rows,
+        'totals' => $totals,
+    ];
+}
+
+/**
+ * Treasurer's Monthly Report of Accountability for Accountable Forms — a
+ * per-collector listing (one row per ORAF batch, grouped by form, collector
+ * in Remarks) matching the Treasurers_Monthly_Report reference file. Used
+ * for both the preview modal and the dedicated export
+ * (export_treasurers_monthly_xlsx()) so what's previewed/printed matches the
+ * download. Separate from ram_build_treasurers_monthly() above, which RAAF's
+ * Section C still uses unchanged (simpler flat-column shape).
+ */
+function ram_build_treasurers_monthly_detailed(\Illuminate\Support\Carbon $from, \Illuminate\Support\Carbon $to): array
+{
+    [$rows, $totals] = ram_per_collector_rows($from, $to, 'Total');
 
     return [
         'title' => "Treasurer's Monthly Report of Accountability for Accountable Forms",
-        'sections' => [[
-            'heading' => null,
-            'groups' => [
-                ['label' => 'Forms', 'colspan' => 1],
-                ['label' => 'On Hand Last Report', 'colspan' => 2, 'subcolumns' => ['Quantity', 'Inclusive Serial No.']],
-                ['label' => 'Received Since', 'colspan' => 2, 'subcolumns' => ['Quantity', 'Inclusive Serial No.']],
-                ['label' => 'Issued Since', 'colspan' => 2, 'subcolumns' => ['Quantity', 'Inclusive Serial No.']],
-                ['label' => 'Remaining on Hand', 'colspan' => 2, 'subcolumns' => ['Quantity', 'Inclusive Serial No.']],
-                ['label' => 'Remarks', 'colspan' => 1],
-            ],
-            'columns' => [
-                ['label' => 'Forms', 'align' => 'left'],
-                ['label' => 'Quantity', 'align' => 'right'],
-                ['label' => 'Inclusive Serial No.', 'align' => 'left'],
-                ['label' => 'Quantity', 'align' => 'right'],
-                ['label' => 'Inclusive Serial No.', 'align' => 'left'],
-                ['label' => 'Quantity', 'align' => 'right'],
-                ['label' => 'Inclusive Serial No.', 'align' => 'left'],
-                ['label' => 'Quantity', 'align' => 'right'],
-                ['label' => 'Inclusive Serial No.', 'align' => 'left'],
-                ['label' => 'Remarks', 'align' => 'left'],
-            ],
-            'rows' => $rows,
-            'totals' => ['Total', $totalOnHand, '', $totalReceived, '', $totalIssued, '', $totalRemaining, '', ''],
-        ]],
+        'sections' => [ram_per_collector_section($rows, $totals)],
     ];
 }
 
@@ -1527,7 +1592,7 @@ function export_treasurers_monthly_xlsx(array $built, string $periodLabel, ?stri
     $left = \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT;
     $thin = ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN];
 
-    foreach (['A' => 17.8, 'B' => 8.9, 'C' => 20.8, 'D' => 8.9, 'E' => 20.8, 'F' => 8.9, 'G' => 20.8, 'H' => 8.9, 'I' => 20.8, 'J' => 24.1] as $col => $width) {
+    foreach (['A' => 20.0, 'B' => 9.0, 'C' => 20.0, 'D' => 9.0, 'E' => 20.0, 'F' => 9.0, 'G' => 20.0, 'H' => 9.0, 'I' => 20.0, 'J' => 22.0] as $col => $width) {
         $sheet->getColumnDimension($col)->setWidth($width);
     }
     $spreadsheet->getDefaultStyle()->getFont()->setName('Roboto');
@@ -1537,84 +1602,88 @@ function export_treasurers_monthly_xlsx(array $built, string $periodLabel, ?stri
         ->setPaperSize(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::PAPERSIZE_FOLIO);
     $sheet->getPageMargins()->setTop(0.5)->setBottom(0.2)->setLeft(0.2)->setRight(0.2);
 
+    $vCenter = \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER;
+    $medium = ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM];
+
     $sheet->setCellValue('A1', strtoupper($built['title']));
     $sheet->mergeCells('A1:J1');
-    $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+    $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(12);
     $sheet->getStyle('A1')->getAlignment()->setHorizontal($center);
 
-    $sheet->setCellValue('A2', 'Province of Sorsogon, Municipality of Prieto-Diaz');
+    $sheet->setCellValue('A2', $periodLabel);
     $sheet->mergeCells('A2:J2');
-    $sheet->getStyle('A2')->getFont()->setSize(11)->setItalic(true);
+    $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(11);
     $sheet->getStyle('A2')->getAlignment()->setHorizontal($center);
 
-    $sheet->setCellValue('A3', 'For the period of ' . strtoupper($periodLabel));
-    $sheet->mergeCells('A3:J3');
-    $sheet->getStyle('A3')->getFont()->setBold(true)->setSize(12);
-    $sheet->getStyle('A3')->getAlignment()->setHorizontal($center);
-
+    // Officer / Designation / Province row (values on row 4, italic labels on row 5).
     $officerCols = [
-        ['A5', 'B5', 'A6', 'B6', strtoupper($officerName ?: ''), 'Name of Officer'],
-        ['D5', 'E5', 'D6', 'E6', strtoupper($designation ?: ''), 'Official Designation'],
-        ['I5', 'J5', 'I6', 'J6', 'PRIETO DIAZ, SORSOGON', 'Province or City'],
+        ['A4:C4', 'A5:C5', strtoupper($officerName ?: ''), 'Name of Officer'],
+        ['D4:F4', 'D5:F5', strtoupper($designation ?: ''), 'Official Designation'],
+        ['H4:J4', 'H5:J5', 'PRIETO DIAZ, SORSOGON', 'Province or City'],
     ];
-    foreach ($officerCols as [$valueStart, $valueEnd, $labelStart, $labelEnd, $value, $label]) {
-        $sheet->mergeCells("{$valueStart}:{$valueEnd}");
-        $sheet->setCellValue($valueStart, $value);
-        $sheet->getStyle("{$valueStart}:{$valueEnd}")->applyFromArray([
+    foreach ($officerCols as [$valueRange, $labelRange, $value, $label]) {
+        $sheet->mergeCells($valueRange);
+        $sheet->setCellValue(explode(':', $valueRange)[0], $value);
+        $sheet->getStyle($valueRange)->applyFromArray([
             'font' => ['bold' => true, 'size' => 11],
-            'alignment' => ['horizontal' => $center],
-            'borders' => ['bottom' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]],
+            'alignment' => ['horizontal' => $center, 'vertical' => $vCenter],
+            'borders' => ['bottom' => $medium],
         ]);
 
-        $sheet->mergeCells("{$labelStart}:{$labelEnd}");
-        $sheet->setCellValue($labelStart, $label);
-        $sheet->getStyle($labelStart)->getFont()->setSize(9)->setItalic(true);
-        $sheet->getStyle($labelStart)->getAlignment()->setHorizontal($center);
+        $sheet->mergeCells($labelRange);
+        $sheet->setCellValue(explode(':', $labelRange)[0], $label);
+        $sheet->getStyle($labelRange)->getFont()->setSize(9)->setItalic(true);
+        $sheet->getStyle($labelRange)->getAlignment()->setHorizontal($center);
     }
+    $sheet->setCellValue('G4', 'OF');
+    $sheet->getStyle('G4')->getFont()->setBold(true)->setSize(11);
+    $sheet->getStyle('G4')->getAlignment()->setHorizontal($center)->setVertical($vCenter);
 
-    $sheet->mergeCells('A8:A9');
-    $sheet->setCellValue('A8', 'Forms');
+    // Two-row grouped column header (row 7 group labels over row 8 sub-headers),
+    // matching the reference file's exact wording (incl. its "Recieved" spelling).
+    $sheet->mergeCells('A7:A8');
+    $sheet->setCellValue('A7', 'FORMS');
 
-    $groupCols = ['B' => 'On Hand Last Report', 'D' => 'Received Since', 'F' => 'Issued Since', 'H' => 'Remaining on Hand'];
+    $groupCols = ['B' => 'On hand last Report', 'D' => 'Recieved Since', 'F' => 'Issued Since', 'H' => 'Remaining on Hand'];
     foreach ($groupCols as $startCol => $label) {
         $endCol = chr(ord($startCol) + 1);
-        $sheet->mergeCells("{$startCol}8:{$endCol}8");
-        $sheet->setCellValue("{$startCol}8", $label);
-        $sheet->setCellValue("{$startCol}9", 'Quantity');
-        $sheet->setCellValue("{$endCol}9", 'Inclusive Serial No.');
+        $sheet->mergeCells("{$startCol}7:{$endCol}7");
+        $sheet->setCellValue("{$startCol}7", $label);
+        $sheet->setCellValue("{$startCol}8", 'Quantity');
+        $sheet->setCellValue("{$endCol}8", 'Inclusive Serial Nos.');
     }
 
-    $sheet->mergeCells('J8:J9');
-    $sheet->setCellValue('J8', 'Remarks');
+    $sheet->mergeCells('J7:J8');
+    $sheet->setCellValue('J7', 'REMARKS');
 
-    $sheet->getStyle('A8:J9')->applyFromArray([
-        'font' => ['bold' => true, 'size' => 11],
-        'alignment' => ['horizontal' => $center, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER],
+    $sheet->getStyle('A7:J8')->applyFromArray([
+        'font' => ['bold' => true, 'size' => 10],
+        'alignment' => ['horizontal' => $center, 'vertical' => $vCenter, 'wrapText' => true],
         'borders' => ['allBorders' => $thin],
     ]);
-    $sheet->getStyle('B9:I9')->getFont()->setBold(false)->setItalic(true)->setSize(10);
+    $sheet->getStyle('B8:I8')->getFont()->setSize(9);
 
-    $vCenter = \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER;
-    $vTop = \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_TOP;
     $quantityCols = [1, 3, 5, 7];
 
     $section = $built['sections'][0];
-    $row = 10;
+    $row = 9;
     foreach ($section['rows'] as $dataRow) {
         foreach ($dataRow as $i => $value) {
             $col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($i + 1);
             $sheet->setCellValue("{$col}{$row}", $value);
             $isQuantity = in_array($i, $quantityCols, true);
+            $isRemarks = $i === 9;
             $sheet->getStyle("{$col}{$row}")->getAlignment()->applyFromArray([
-                'horizontal' => $isQuantity ? $center : $left,
-                'vertical' => $isQuantity ? $vCenter : $vTop,
-                'wrapText' => true,
+                'horizontal' => ($isQuantity || $isRemarks) ? $center : $left,
+                'vertical' => $vCenter,
             ]);
         }
         $sheet->getStyle("A{$row}:J{$row}")->applyFromArray([
-            'font' => ['name' => 'Roboto', 'size' => 10],
+            'font' => ['name' => 'Roboto', 'size' => 9],
             'borders' => ['allBorders' => $thin],
         ]);
+        // Form-group label cell (column A) is bold in the reference.
+        $sheet->getStyle("A{$row}")->getFont()->setBold(true);
         $row++;
     }
 
@@ -1622,10 +1691,12 @@ function export_treasurers_monthly_xlsx(array $built, string $periodLabel, ?stri
         foreach ($section['totals'] as $i => $value) {
             $col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($i + 1);
             $sheet->setCellValue("{$col}{$row}", $value);
+            $isQuantity = in_array($i, $quantityCols, true);
+            $sheet->getStyle("{$col}{$row}")->getAlignment()->setHorizontal($isQuantity ? $center : $left);
         }
         $sheet->getStyle("A{$row}")->getAlignment()->setHorizontal($right);
         $sheet->getStyle("A{$row}:J{$row}")->applyFromArray([
-            'font' => ['name' => 'Roboto', 'size' => 10],
+            'font' => ['name' => 'Roboto', 'size' => 9, 'bold' => true],
             'borders' => ['allBorders' => $thin],
         ]);
     }
@@ -1640,15 +1711,22 @@ function export_treasurers_monthly_xlsx(array $built, string $periodLabel, ?stri
 }
 
 /**
- * Consolidated Report of Accountability for Accountable Forms — same
- * breakdown as the Treasurer's Monthly Report with a B-TOTAL row appended.
+ * Consolidated Report of Accountability for Accountable Forms (CRAAF) — the
+ * same per-collector batch listing as the Treasurer's Monthly Report, with a
+ * consolidated B-TOTAL row, matching the CRAAP reference file. The
+ * "Brgy A.F. / Checks Issued / Cash Tickets" line items called out in the
+ * client brief are not yet modelled in this system (no barangay-A.F. form,
+ * no cheque data source, no cash-ticket form), so they do not appear here —
+ * only forms that have an actual ORAF batch trail are listed.
  */
 function ram_build_craaf(\Illuminate\Support\Carbon $from, \Illuminate\Support\Carbon $to): array
 {
-    $built = ram_build_treasurers_monthly($from, $to, withTotals: true);
-    $built['title'] = 'Consolidated Report of Accountability for Accountable Forms (CRAAF)';
+    [$rows, $totals] = ram_per_collector_rows($from, $to, 'B-TOTAL');
 
-    return $built;
+    return [
+        'title' => 'Consolidated Report of Accountability for Accountable Forms (CRAAF)',
+        'sections' => [ram_per_collector_section($rows, $totals)],
+    ];
 }
 
 /**

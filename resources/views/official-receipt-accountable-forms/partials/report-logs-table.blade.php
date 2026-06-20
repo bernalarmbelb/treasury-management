@@ -32,6 +32,7 @@
                         </a>
                     </th>
                 @endforeach
+                <th>Assigned To</th>
                 <th>Used</th>
                 <th>Remaining</th>
                 @foreach ([
@@ -62,6 +63,37 @@
                     <td>{{ $batch->startingQty() }}</td>
                     <td>{{ $batch->starting_serial_number }}</td>
                     <td>{{ $batch->displayEndingSerialNumber() }}</td>
+                    @php
+                        $collectorNames = ($collectors ?? collect())->all();
+                        $isOtherAssignee = $batch->assigned_to && ! in_array($batch->assigned_to, $collectorNames, true);
+                    @endphp
+                    <td class="assigned-to-cell">
+                        <div class="assigned-to-control" data-batch-id="{{ $batch->id }}">
+                            <button type="button" class="assigned-to-trigger {{ $isOtherAssignee ? 'is-hidden' : '' }}" data-batch-id="{{ $batch->id }}">
+                                <span class="assigned-to-trigger-label">{{ $batch->assigned_to ?: 'Unassigned' }}</span>
+                                <x-bx-chevron-down class="icon assigned-to-chevron" />
+                            </button>
+                            <div class="assigned-to-menu is-hidden" role="listbox">
+                                <button type="button" class="assigned-to-option {{ ! $batch->assigned_to ? 'is-selected' : '' }}" data-value="">Unassigned</button>
+                                @foreach ($collectors ?? [] as $collector)
+                                    <button type="button" class="assigned-to-option {{ $batch->assigned_to === $collector ? 'is-selected' : '' }}" data-value="{{ $collector }}">{{ $collector }}</button>
+                                @endforeach
+                                <button type="button" class="assigned-to-option assigned-to-option-other {{ $isOtherAssignee ? 'is-selected' : '' }}" data-value="__other__">Other (specify)&hellip;</button>
+                            </div>
+                            <div class="assigned-to-other-wrap {{ $isOtherAssignee ? '' : 'is-hidden' }}">
+                                <input
+                                    type="text"
+                                    class="assigned-to-other-input"
+                                    data-batch-id="{{ $batch->id }}"
+                                    placeholder="Collector or barangay name"
+                                    value="{{ $isOtherAssignee ? $batch->assigned_to : '' }}"
+                                >
+                                <button type="button" class="assigned-to-other-back" data-batch-id="{{ $batch->id }}" aria-label="Choose from list">
+                                    <x-bx-list-ul class="icon" />
+                                </button>
+                            </div>
+                        </div>
+                    </td>
                     <td>{{ $batch->usedQty() }}</td>
                     <td>{{ $batch->remainingQty() }}</td>
                     <td>{{ $batch->created_at->format('F j, Y') }}</td>
@@ -75,7 +107,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="9" class="table-empty">No batches found.</td>
+                    <td colspan="10" class="table-empty">No batches found.</td>
                 </tr>
             @endforelse
         </tbody>
