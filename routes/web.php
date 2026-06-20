@@ -395,31 +395,116 @@ Route::post('/collections/transaction-entry/{formStock}/or-rpt', function (\Illu
         'treasurer_deputy' => ['nullable', 'string'],
         'basic_tax' => ['nullable', 'boolean'],
         'special_education_fund' => ['nullable', 'boolean'],
+
+        'entries' => ['required', 'array', 'min:1'],
+        'entries.*.tax_declaration_number' => ['required', 'string'],
+        'entries.*.declared_owner' => ['required', 'string'],
+        'entries.*.location' => ['required', 'string'],
+        'entries.*.lot_block_number' => ['nullable', 'string'],
+        'entries.*.assessed_value_land' => ['nullable', 'numeric', 'min:0'],
+        'entries.*.assessed_value_improvement' => ['nullable', 'numeric', 'min:0'],
+        'entries.*.assessed_value_total' => ['required', 'numeric', 'min:0'],
+        'entries.*.tax_due' => ['required', 'numeric', 'min:0'],
+        'entries.*.payment_scheme' => ['required', 'in:full,installment'],
+        'entries.*.installment_quarter' => ['nullable', 'integer', 'between:1,4'],
+        'entries.*.discount' => ['nullable', 'numeric', 'min:0'],
+        'entries.*.penalty_percent' => ['nullable', 'numeric', 'min:0'],
+        'entries.*.penalty_amount' => ['nullable', 'numeric', 'min:0'],
+        'entries.*.amount' => ['required', 'numeric', 'min:0'],
     ]);
 
-    $validated['certificate_number'] = str_pad((\App\Models\OrRptTransaction::max('id') ?? 0) + 1, 7, '0', STR_PAD_LEFT);
+    // Rule 1 & 2: exactly one scheme per row. 'full' must NOT carry a quarter;
+    // 'installment' MUST carry a quarter (1–4).
+    $validator = \Illuminate\Support\Facades\Validator::make([], []);
+    foreach ($validated['entries'] as $i => $entry) {
+        $scheme = $entry['payment_scheme'];
+        $quarter = $entry['installment_quarter'] ?? null;
 
-    $orRptTransaction = $formStock->orRptTransactions()->create($validated);
+        if ($scheme === 'full' && $quarter !== null) {
+            $validator->errors()->add("entries.{$i}.installment_quarter", 'A full payment cannot also have an installment quarter.');
+        }
+        if ($scheme === 'installment' && $quarter === null) {
+            $validator->errors()->add("entries.{$i}.installment_quarter", 'An installment payment requires a quarter (1–4).');
+        }
+    }
 
-    $formStock->update([
-        'qty' => max(0, $formStock->qty - 1),
-    ]);
+    // Receipt tie-out: header amount must equal the sum of entry totals.
+    $entryTotal = collect($validated['entries'])->sum(fn ($e) => (float) $e['amount']);
+    if (round($entryTotal, 2) !== round((float) $validated['amount_paid'], 2)) {
+        $validator->errors()->add('amount_paid', 'Amount paid must equal the sum of all entry totals.');
+    }
 
-    \App\Models\TransactionLog::create([
-        'serial_number'    => $validated['certificate_number'],
-        'payee'            => $validated['client_name'],
-        'transacted_at'    => now(),
-        'form_type'        => $formStock->form_code,
-        'status'           => 'Completed',
-        'transaction_id'   => $orRptTransaction->id,
-        'transaction_type' => \App\Models\OrRptTransaction::class,
-    ]);
+    if ($validator->errors()->isNotEmpty()) {
+        throw new \Illuminate\Validation\ValidationException($validator);
+    }
 
-    \App\Models\ActivityLog::record('Collection Management - Add Entry - ' . \App\Models\TransactionLog::formName($formStock->form_code) . ' - ' . $validated['certificate_number']);
+    $payload = \Illuminate\Support\Facades\DB::transaction(function () use ($validated, $formStock) {
+        $certificateNumber = str_pad((\App\Models\OrRptTransaction::max('id') ?? 0) + 1, 7, '0', STR_PAD_LEFT);
+
+        $orRptTransaction = $formStock->orRptTransactions()->create([
+            'certificate_number' => $certificateNumber,
+            'previous_receipt_number' => $validated['previous_receipt_number'] ?? null,
+            'previous_receipt_date' => $validated['previous_receipt_date'] ?? null,
+            'previous_receipt_year' => $validated['previous_receipt_year'] ?? null,
+            'municipality_province' => $validated['municipality_province'] ?? null,
+            'city' => $validated['city'] ?? null,
+            'transaction_date' => $validated['transaction_date'] ?? null,
+            'client_name' => $validated['client_name'],
+            'payment_in_words' => $validated['payment_in_words'] ?? null,
+            'amount_paid' => $validated['amount_paid'],
+            'treasurer_deputy' => $validated['treasurer_deputy'] ?? null,
+            'basic_tax' => $validated['basic_tax'] ?? false,
+            'special_education_fund' => $validated['special_education_fund'] ?? false,
+        ]);
+
+        foreach ($validated['entries'] as $entry) {
+            $property = \App\Models\RptProperty::updateOrCreate(
+                ['tax_declaration_number' => $entry['tax_declaration_number']],
+                [
+                    'declared_owner' => $entry['declared_owner'],
+                    'location' => $entry['location'],
+                    'lot_block_number' => $entry['lot_block_number'] ?? null,
+                    'municipality_province' => $validated['municipality_province'] ?? null,
+                    'city' => $validated['city'] ?? null,
+                    'assessed_value_land' => $entry['assessed_value_land'] ?? 0,
+                    'assessed_value_improvement' => $entry['assessed_value_improvement'] ?? 0,
+                    'assessed_value_total' => $entry['assessed_value_total'],
+                    'annual_tax_due' => $entry['tax_due'],
+                ]
+            );
+
+            $orRptTransaction->entries()->create([
+                'rpt_property_id' => $property->id,
+                'payment_scheme' => $entry['payment_scheme'],
+                'installment_quarter' => $entry['installment_quarter'] ?? null,
+                'tax_due' => $entry['tax_due'],
+                'discount' => $entry['discount'] ?? 0,
+                'penalty_percent' => $entry['penalty_percent'] ?? 0,
+                'penalty_amount' => $entry['penalty_amount'] ?? 0,
+                'amount' => $entry['amount'],
+            ]);
+        }
+
+        $formStock->update(['qty' => max(0, $formStock->qty - 1)]);
+
+        \App\Models\TransactionLog::create([
+            'serial_number'    => $certificateNumber,
+            'payee'            => $validated['client_name'],
+            'transacted_at'    => now(),
+            'form_type'        => $formStock->form_code,
+            'status'           => 'Completed',
+            'transaction_id'   => $orRptTransaction->id,
+            'transaction_type' => \App\Models\OrRptTransaction::class,
+        ]);
+
+        \App\Models\ActivityLog::record('Collection Management - Add Entry - ' . \App\Models\TransactionLog::formName($formStock->form_code) . ' - ' . $certificateNumber);
+
+        return ['qty' => $formStock->qty];
+    });
 
     return response()->json([
         'message' => 'Transaction saved successfully.',
-        'qty' => $formStock->qty,
+        'qty' => $payload['qty'],
         'redirect' => route('collections', [], false),
     ]);
 })->name('transaction-entry.or-rpt.store');
