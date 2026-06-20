@@ -376,11 +376,15 @@ Route::post('/collections/transaction-entry/{formStock}/corporation-cedula', fun
 
 Route::get('/collections/transaction-entry/{formStock}/or-rpt', function (\App\Models\FormStock $formStock) {
     $batch = $formStock->nextAvailableBatch();
+    $nextSerial = $batch?->nextAvailableSerialNumber();
 
     return view('collection-management.transaction-entry.or-rpt', [
         'form' => $formStock,
-        'certificateNumber' => $batch?->nextAvailableSerialNumber()
-            ?? str_pad((\App\Models\OrRptTransaction::max('id') ?? 0) + 1, 7, '0', STR_PAD_LEFT),
+        // Full serial = batch prefix (e.g. "ORRPT") + next available number
+        // (e.g. "001"); nextAvailableSerialNumber() returns digits only.
+        'certificateNumber' => $nextSerial !== null
+            ? $batch->expectedCertificatePrefix() . $nextSerial
+            : str_pad((\App\Models\OrRptTransaction::max('id') ?? 0) + 1, 7, '0', STR_PAD_LEFT),
         'rptRates' => config('rpt'),
     ]);
 })->name('transaction-entry.or-rpt');
@@ -445,11 +449,17 @@ Route::post('/collections/transaction-entry/{formStock}/or-rpt', function (\Illu
 
     $payload = \Illuminate\Support\Facades\DB::transaction(function () use ($validated, $formStock) {
         // Record the serial the clerk confirmed on the form (defaulted from the
-        // booklet's next available serial); fall back to the batch serial, then
-        // to a synthetic running number only if no batch is on record.
-        $certificateNumber = ($validated['serial_number'] ?? null)
-            ?: ($formStock->nextAvailableBatch()?->nextAvailableSerialNumber()
-                ?? str_pad((\App\Models\OrRptTransaction::max('id') ?? 0) + 1, 7, '0', STR_PAD_LEFT));
+        // booklet's next available serial); fall back to the batch serial
+        // (prefix + number), then to a synthetic running number only if no
+        // batch is on record.
+        $certificateNumber = $validated['serial_number'] ?? null;
+        if (! $certificateNumber) {
+            $batch = $formStock->nextAvailableBatch();
+            $nextSerial = $batch?->nextAvailableSerialNumber();
+            $certificateNumber = $nextSerial !== null
+                ? $batch->expectedCertificatePrefix() . $nextSerial
+                : str_pad((\App\Models\OrRptTransaction::max('id') ?? 0) + 1, 7, '0', STR_PAD_LEFT);
+        }
 
         $orRptTransaction = $formStock->orRptTransactions()->create([
             'certificate_number' => $certificateNumber,

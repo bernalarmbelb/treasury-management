@@ -98,19 +98,35 @@ it('saves the submitted serial number as the certificate number', function () {
 });
 
 it('defaults the serial number field to the next available batch serial', function () {
-    // Start at 0000007 so the batch serial differs from the old id-counter
-    // default (max(id)+1 = 0000001 on an empty table), making this test
-    // actually distinguish the two behaviours.
+    // Prefixed serial (ORRPT007) so the test verifies BOTH that the batch
+    // serial is used (not max(id)+1) AND that the alpha prefix is preserved.
     $this->formStock->batches()->create([
         'registration_date' => now(),
         'purchase_date' => now(),
-        'starting_serial_number' => '0000007',
-        'ending_serial_number' => '0000016',
+        'starting_serial_number' => 'ORRPT007',
+        'ending_serial_number' => 'ORRPT016',
         'added_by' => 'Tester',
     ]);
 
     $this->actingAs($this->user)
         ->get("/collections/transaction-entry/{$this->formStock->id}/or-rpt")
         ->assertOk()
-        ->assertViewHas('certificateNumber', '0000007');
+        ->assertViewHas('certificateNumber', 'ORRPT007');
+});
+
+it('falls back to the batch serial (with prefix) when no serial is submitted', function () {
+    $this->formStock->batches()->create([
+        'registration_date' => now(),
+        'purchase_date' => now(),
+        'starting_serial_number' => 'ORRPT007',
+        'ending_serial_number' => 'ORRPT016',
+        'added_by' => 'Tester',
+    ]);
+
+    // validOrRptPayload() carries no serial_number, so the store must derive it.
+    $this->actingAs($this->user)
+        ->postJson("/collections/transaction-entry/{$this->formStock->id}/or-rpt", validOrRptPayload())
+        ->assertOk();
+
+    expect(OrRptTransaction::first()->certificate_number)->toBe('ORRPT007');
 });
