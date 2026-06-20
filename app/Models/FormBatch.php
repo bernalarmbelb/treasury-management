@@ -175,7 +175,9 @@ class FormBatch extends Model
         return match ($formStock->form_code) {
             'BIR0016' => $this->matchingCertificateNumbers($formStock->ctcIndividualTransactions),
             'BIR0017' => $this->matchingCertificateNumbers($formStock->ctcCorporationTransactions),
-            'Form 56' => $formStock->orRptTransactions->map(fn ($t) => $this->trailingNumber($t->certificate_number)),
+            'Form 56' => $formStock->orRptTransactions
+                ->filter(fn ($t) => $this->certificatePrefix($t->certificate_number) === $this->expectedCertificatePrefix())
+                ->map(fn ($t) => $this->trailingNumber($t->certificate_number)),
             'Form 5IC' => $formStock->orTransactions->map(fn ($t) => $this->trailingNumber($t->certificate_number)),
             'Form 10' => $formStock->marriageCertificateTransactions->map(fn ($t) => $this->trailingNumber($t->certificate_number)),
             default => collect(),
@@ -229,5 +231,18 @@ class FormBatch extends Model
         preg_match('/(\d+)$/', $serial, $matches);
 
         return $matches[1] ?? '';
+    }
+
+    /**
+     * The leading (non-trailing-digit) portion of a certificate number, e.g.
+     * "ORRPT" for "ORRPT001" or "" for "0000001". Used to exclude OR/RPT
+     * certificates recorded under a different prefix (e.g. legacy synthetic
+     * serials) when counting a batch's used serials.
+     */
+    private function certificatePrefix(string $serial): string
+    {
+        $digits = $this->trailingDigits($serial);
+
+        return $digits === '' ? $serial : substr($serial, 0, -strlen($digits));
     }
 }
