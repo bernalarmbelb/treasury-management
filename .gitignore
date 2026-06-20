@@ -14,7 +14,8 @@
 /.zed
 /auth.json
 /node_modules
-/public/build
+# /public/build is intentionally NOT ignored — Hostinger can't run `npm`,
+# so the compiled Vite assets must be committed and deployed via git.
 /public/fonts-manifest.dev.json
 /public/hot
 /public/storage
@@ -25,3 +26,18 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# AI assistant / internal dev artifacts — keep out of the client deliverable.
+# (Matches names/paths, NOT file contents.)
+/.claude/
+/.codex/
+CLAUDE.md
+AGENTS.md
+GEMINI.md
+.mcp.json
+.cursorrules
+/build.zip
+/public/build.zip
+
+# Internal developer documentation — not part of the client deliverable
+/docs/

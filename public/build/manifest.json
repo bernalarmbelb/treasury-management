@@ -1,0 +1,59 @@
+{
+  "resources/assets/login/avatar.png": {
+    "file": "assets/avatar-B_lyQqD9.png",
+    "src": "resources/assets/login/avatar.png"
+  },
+  "resources/assets/login/cabinet.svg": {
+    "file": "assets/cabinet-BFSiXsjW.svg",
+    "src": "resources/assets/login/cabinet.svg"
+  },
+  "resources/assets/login/character.svg": {
+    "file": "assets/character-BbkJpwxf.svg",
+    "src": "resources/assets/login/character.svg"
+  },
+  "resources/assets/login/plant.svg": {
+    "file": "assets/plant-CQhoxOYt.svg",
+    "src": "resources/assets/login/plant.svg"
+  },
+  "resources/assets/login/seal.png": {
+    "file": "assets/seal-D-Ml9Yrz.png",
+    "src": "resources/assets/login/seal.png"
+  },
+  "resources/assets/login/shadow.svg": {
+    "file": "assets/shadow-B_2_Pbnz.svg",
+    "src": "resources/assets/login/shadow.svg"
+  },
+  "resources/assets/login/speech-bubble.svg": {
+    "file": "assets/speech-bubble-Be61sQCr.svg",
+    "src": "resources/assets/login/speech-bubble.svg"
+  },
+  "resources/assets/login/streetlight.svg": {
+    "file": "assets/streetlight-BEh68qX8.svg",
+    "src": "resources/assets/login/streetlight.svg"
+  },
+  "resources/css/app.css": {
+    "file": "assets/app-BPOeHXM1.css",
+    "name": "app",
+    "names": [
+      "app.css"
+    ],
+    "src": "resources/css/app.css",
+    "isEntry": true,
+    "assets": [
+      "assets/seal-D-Ml9Yrz.png",
+      "assets/cabinet-BFSiXsjW.svg",
+      "assets/shadow-B_2_Pbnz.svg",
+      "assets/streetlight-BEh68qX8.svg",
+      "assets/speech-bubble-Be61sQCr.svg",
+      "assets/character-BbkJpwxf.svg",
+      "assets/plant-CQhoxOYt.svg",
+      "assets/avatar-B_lyQqD9.png"
+    ]
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-Bl0lTTNI.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true
+  }
+}
