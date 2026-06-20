@@ -1,0 +1,35 @@
+- generic [ref=e2]:
+  - generic:
+    - img
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - heading "Municipality of Prieto Diaz" [level=1] [ref=e6]
+      - paragraph [ref=e7]: Treasury Management System
+    - generic [ref=e9]:
+      - generic [ref=e10]:
+        - generic [ref=e11]: Username
+        - generic [ref=e12]:
+          - img [ref=e13]
+          - textbox "Username" [active] [ref=e16]:
+            - /placeholder: Enter username
+      - generic [ref=e17]:
+        - generic [ref=e18]: Password
+        - generic [ref=e19]:
+          - img [ref=e20]
+          - textbox "Password" [ref=e23]:
+            - /placeholder: Enter password
+          - button "Show password" [ref=e24] [cursor=pointer]:
+            - img [ref=e25]
+      - generic [ref=e28]:
+        - generic [ref=e29] [cursor=pointer]:
+          - checkbox "Remember me" [ref=e30]
+          - text: Remember me
+        - link "Forgot password?" [ref=e31] [cursor=pointer]:
+          - /url: "#"
+      - button "Sign in" [ref=e32] [cursor=pointer]
+      - generic [ref=e33]:
+        - link "Create account" [ref=e34] [cursor=pointer]:
+          - /url: "#"
+        - generic [ref=e35]: ·
+        - link "Need help?" [ref=e36] [cursor=pointer]:
+          - /url: "#"

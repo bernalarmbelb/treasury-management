@@ -11,22 +11,30 @@ There are two moving parts:
 
 ---
 
+> **What runs where (Hostinger reality):**
+> Even with SSH, Hostinger shared/premium/business does **not** provide
+> `npm`/`node` — so the frontend build MUST happen on your machine. But `php`,
+> `composer`, and `php artisan` **do** work over SSH. So: build assets locally,
+> then either upload `vendor/` or run `composer install` on the server.
+
 ## 1. Build the frontend assets locally
 
-Hostinger shared hosting can't run `npm`, so compile assets on your machine and
-upload the result.
+`npm`/`node` are not available on the server (not even over SSH), so compile
+assets on your machine and upload the result. The live site only reads the
+compiled files in `public/build/` — no Node needed at runtime.
 
 ```bash
 npm install
-npm run build        # outputs to public/build/
+npm run build        # outputs to public/build/  (manifest.json + assets/)
 ```
 
-Commit/keep the generated `public/build/` folder — it must be uploaded.
+Keep the generated `public/build/` folder — it must be uploaded.
 
 ## 2. Install PHP dependencies (production)
 
-If you have **SSH** (Business plan, or Premium with SSH enabled), skip this and
-run it on the server in step 5. Otherwise run locally and upload `vendor/`:
+`composer` IS available over SSH. If you have **SSH** (Business, or Premium with
+SSH enabled), skip this and run it on the server in step 5. Otherwise run
+locally and upload the resulting `vendor/` folder:
 
 ```bash
 composer install --no-dev --optimize-autoloader
