@@ -378,6 +378,7 @@ Route::get('/collections/transaction-entry/{formStock}/or-rpt', function (\App\M
     return view('collection-management.transaction-entry.or-rpt', [
         'form' => $formStock,
         'certificateNumber' => str_pad((\App\Models\OrRptTransaction::max('id') ?? 0) + 1, 7, '0', STR_PAD_LEFT),
+        'rptRates' => config('rpt'),
     ]);
 })->name('transaction-entry.or-rpt');
 

@@ -118,6 +118,14 @@
             const form = document.getElementById('ctcForm');
             if (!form) return;
 
+            const RPT_RATES = @json($rptRates);
+
+            // Source of truth for the property line items, mirroring the
+            // server's `entries.*` payload shape. Index aligns with table rows.
+            const entries = [];
+
+            const num = (v) => parseFloat(String(v ?? '').replace(/[^0-9.]/g, '')) || 0;
+
             const preview = form.querySelector('.ctcp-page--or-rpt');
 
             // Table row currently being edited via the "Edit" action (null when adding a new entry).
@@ -316,6 +324,80 @@
             entryLandInput.addEventListener('input', updateAssessedTotal);
             entryImprovementInput.addEventListener('input', updateAssessedTotal);
 
+            const entryTaxDueInput = addEntryModal.querySelector('[name="entry_tax_due"]');
+            const entryInstallmentNoInput = addEntryModal.querySelector('[name="entry_installment_no"]');
+            const entryInstallmentPaymentInput = addEntryModal.querySelector('[name="entry_installment_payment"]');
+            const entryFullPaymentInput = addEntryModal.querySelector('[name="entry_full_payment"]');
+            const entryPenaltyInput = addEntryModal.querySelector('[name="entry_penalty_per_cent"]');
+            const entryTotalInput = addEntryModal.querySelector('[name="entry_total"]');
+
+            const recomputeRowTotal = () => {
+                const taxDue = num(entryTaxDueInput.value);
+                const penalty = num(entryPenaltyInput.value);
+                if (entryFullPaymentInput.value) {
+                    entryInstallmentNoInput.value = '';
+                    entryInstallmentPaymentInput.value = '';
+                    const total = taxDue + penalty;
+                    if (total) entryTotalInput.value = formatAmount(total);
+                } else if (entryInstallmentNoInput.value || entryInstallmentPaymentInput.value) {
+                    entryFullPaymentInput.value = '';
+                    const quarterly = num(entryInstallmentPaymentInput.value) || (taxDue / 4);
+                    if (!entryInstallmentPaymentInput.value && quarterly) entryInstallmentPaymentInput.value = formatAmount(quarterly);
+                    const total = quarterly + penalty;
+                    if (total) entryTotalInput.value = formatAmount(total);
+                }
+            };
+
+            const computeTaxDue = () => {
+                const total = num(entryAssessedTotalInput.value);
+                const due = total * (RPT_RATES.basic_tax_rate + RPT_RATES.sef_rate);
+                if (due) entryTaxDueInput.value = formatAmount(due);
+                recomputeRowTotal();
+            };
+
+            entryLandInput.addEventListener('input', computeTaxDue);
+            entryImprovementInput.addEventListener('input', computeTaxDue);
+            entryTaxDueInput.addEventListener('input', recomputeRowTotal);
+            entryPenaltyInput.addEventListener('input', recomputeRowTotal);
+            entryInstallmentNoInput.addEventListener('input', () => { if (entryInstallmentNoInput.value) entryFullPaymentInput.value = ''; recomputeRowTotal(); });
+            entryInstallmentPaymentInput.addEventListener('input', () => { if (entryInstallmentPaymentInput.value) entryFullPaymentInput.value = ''; recomputeRowTotal(); });
+            entryFullPaymentInput.addEventListener('input', () => { if (entryFullPaymentInput.value) { entryInstallmentNoInput.value = ''; entryInstallmentPaymentInput.value = ''; } recomputeRowTotal(); });
+
+            const entryTdInput = addEntryModal.querySelector('[name="entry_tax_declaration_number"]');
+            const entryOwnerInput = addEntryModal.querySelector('[name="entry_declared_owner"]');
+            const entryLocationInput = addEntryModal.querySelector('[name="entry_location"]');
+            const entryLotBlockInput = addEntryModal.querySelector('[name="entry_lot_block_number"]');
+
+            entryTdInput.addEventListener('blur', () => {
+                const td = entryTdInput.value.trim();
+                if (!td) return;
+
+                fetch(`/rpt-properties/${encodeURIComponent(td)}`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                    .then((r) => r.ok ? r.json() : Promise.reject())
+                    .then((data) => {
+                        if (!data.found) return; // new property — leave fields blank
+                        const p = data.property;
+                        entryOwnerInput.value = p.declared_owner || '';
+                        entryLocationInput.value = p.location || '';
+                        entryLotBlockInput.value = p.lot_block_number || '';
+                        entryLandInput.value = p.assessed_value_land ? formatAmount(p.assessed_value_land) : '';
+                        entryImprovementInput.value = p.assessed_value_improvement ? formatAmount(p.assessed_value_improvement) : '';
+                        updateAssessedTotal();
+                        computeTaxDue();
+
+                        const paid = (data.paid_quarters || []);
+                        const nextQuarter = [1, 2, 3, 4].find((q) => !paid.includes(q));
+                        if (nextQuarter && !entryFullPaymentInput.value) {
+                            entryInstallmentNoInput.value = nextQuarter;
+                            recomputeRowTotal();
+                        }
+                        if (typeof showToast === 'function') {
+                            showToast('Property found', paid.length ? `Paid quarters: ${paid.join(', ')}` : 'No installments paid yet', 'success');
+                        }
+                    })
+                    .catch(() => {});
+            });
+
             // Save / Add Another Entry: write the entry's values into the next empty table row.
             const formatTableAmount = (value) => {
                 const num = parseFloat(unformatNumber(value));
@@ -356,6 +438,27 @@
                 });
 
                 targetRow.querySelector('.ctcp-rpt-action').classList.add('has-entry');
+
+                const scheme = getValue('entry_full_payment') !== '' ? 'full' : 'installment';
+                const entryData = {
+                    tax_declaration_number: getValue('entry_tax_declaration_number'),
+                    declared_owner: getValue('entry_declared_owner'),
+                    location: getValue('entry_location'),
+                    lot_block_number: getValue('entry_lot_block_number'),
+                    assessed_value_land: num(getValue('entry_assessed_value_land')),
+                    assessed_value_improvement: num(getValue('entry_assessed_value_improvement')),
+                    assessed_value_total: land + improvement,
+                    tax_due: num(getValue('entry_tax_due')),
+                    payment_scheme: scheme,
+                    installment_quarter: scheme === 'installment' ? (num(getValue('entry_installment_no')) || null) : null,
+                    discount: 0,
+                    penalty_percent: num(getValue('entry_penalty_per_cent')),
+                    penalty_amount: 0,
+                    amount: num(getValue('entry_total')),
+                };
+
+                const rowIndex = [...rows].indexOf(targetRow);
+                if (rowIndex > -1) entries[rowIndex] = entryData;
 
                 editingRow = null;
 
@@ -419,6 +522,8 @@
                     row.querySelector('.ctcp-rpt-action').classList.remove('has-entry');
                     updateProceedButtonVisibility();
                     [...row.children].slice(0, -1).forEach((cell) => { cell.textContent = ' '; });
+                    const removedIndex = [...preview.querySelectorAll('.ctcp-rpt-table tbody tr')].indexOf(row);
+                    if (removedIndex > -1) delete entries[removedIndex];
                     if (editingRow === row) editingRow = null;
                 }
             });
@@ -448,6 +553,15 @@
             rptPreviewPrintBtn.addEventListener('click', function () {
                 const formData = new FormData(form);
                 if (amountInput) formData.set('amount_paid', unformatNumber(amountInput.value));
+
+                entries.forEach((entry, i) => {
+                    if (!entry) return;
+                    Object.entries(entry).forEach(([key, value]) => {
+                        if (value !== null && value !== undefined && value !== '') {
+                            formData.append(`entries[${i}][${key}]`, value);
+                        }
+                    });
+                });
 
                 fetch(form.action, {
                     method: 'POST',
