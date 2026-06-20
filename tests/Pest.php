@@ -48,3 +48,14 @@ function something()
 {
     // ..
 }
+
+function makeOrRptFormStock(): \App\Models\FormStock
+{
+    return \App\Models\FormStock::create([
+        'qty' => 10,
+        'form_name' => 'Real Property Tax Receipt',
+        'form_code' => 'OR-RPT',
+        'added_date' => now()->toDateString(),
+        'added_by' => 'Tester',
+    ]);
+}

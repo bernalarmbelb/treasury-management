@@ -424,6 +424,25 @@ Route::post('/collections/transaction-entry/{formStock}/or-rpt', function (\Illu
     ]);
 })->name('transaction-entry.or-rpt.store');
 
+Route::get('/rpt-properties/{taxDeclarationNumber}', function (string $taxDeclarationNumber) {
+    $property = \App\Models\RptProperty::where('tax_declaration_number', $taxDeclarationNumber)->first();
+
+    if (! $property) {
+        return response()->json(['found' => false]);
+    }
+
+    return response()->json([
+        'found' => true,
+        'property' => $property->only([
+            'declared_owner', 'location', 'lot_block_number',
+            'municipality_province', 'city',
+            'assessed_value_land', 'assessed_value_improvement',
+            'assessed_value_total', 'annual_tax_due',
+        ]),
+        'paid_quarters' => $property->paidQuarters(),
+    ]);
+})->where('taxDeclarationNumber', '.*')->name('rpt-properties.lookup');
+
 Route::get('/collections/transaction-entry/{formStock}/official-receipt', function (\App\Models\FormStock $formStock) {
     return view('collection-management.transaction-entry.official-receipt', [
         'form' => $formStock,
