@@ -88,9 +88,69 @@
 		{{ $slot }}
 	</main>
 
+	@if (($quickEntryForms ?? collect())->isNotEmpty())
+		<div class="quick-entry-bar" id="quickEntryBar">
+			<button type="button" class="quick-entry-toggle" id="quickEntryToggle" aria-label="Toggle quick entry links" aria-expanded="true">
+				<span class="qe-icon" aria-hidden="true">
+					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 3 14h7v8l10-12h-7z"/></svg>
+				</span>
+				Quick Entry
+				<span class="quick-entry-count">{{ $quickEntryForms->count() }}</span>
+				<span class="quick-entry-chevron" aria-hidden="true">&#9662;</span>
+			</button>
+			<div class="quick-entry-links" id="quickEntryLinks">
+				@foreach ($quickEntryForms as $qf)
+					<a href="{{ $qf['url'] }}" class="quick-entry-link">
+						{{ $qf['label'] }}
+						<span class="quick-entry-badge {{ $qf['qty'] <= 5 ? 'low' : '' }}">{{ $qf['qty'] }} left</span>
+					</a>
+				@endforeach
+			</div>
+		</div>
+	@endif
+
+	<div class="app-toast" id="appToast" role="status" aria-live="polite">
+		<span class="app-toast-icon" id="appToastIcon" aria-hidden="true"></span>
+		<div class="app-toast-text">
+			<p class="app-toast-title" id="appToastTitle"></p>
+			<p class="app-toast-subtitle" id="appToastSubtitle"></p>
+		</div>
+	</div>
+
 	@stack('scripts')
 
 	<script>
+	// ── Global toast (success / error feedback) ───────────────────────────
+	(function () {
+		const ICONS = {
+			success: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>',
+			error: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>',
+		};
+
+		let toastTimer;
+
+		window.showToast = function (title, subtitle = '', type = 'success') {
+			const toast = document.getElementById('appToast');
+			if (!toast) return;
+
+			const titleEl = document.getElementById('appToastTitle');
+			const subtitleEl = document.getElementById('appToastSubtitle');
+			const iconEl = document.getElementById('appToastIcon');
+			const variant = type === 'error' ? 'error' : 'success';
+
+			titleEl.textContent = title;
+			subtitleEl.textContent = subtitle || '';
+			subtitleEl.style.display = subtitle ? '' : 'none';
+			iconEl.innerHTML = ICONS[variant];
+
+			toast.classList.remove('app-toast--success', 'app-toast--error');
+			toast.classList.add('app-toast--' + variant, 'show');
+
+			clearTimeout(toastTimer);
+			toastTimer = setTimeout(() => toast.classList.remove('show'), 3500);
+		};
+	})();
+
 	// ── Live clock ────────────────────────────────────────────────────────
 	(function () {
 		const dateEl = document.getElementById('live-date');
@@ -245,6 +305,38 @@
 
 		fetchCount();
 		setInterval(fetchCount, 30000);
+	})();
+
+	// ── Quick entry footer bar ───────────────────────────────────────────
+	(function () {
+		const bar = document.getElementById('quickEntryBar');
+		if (!bar) return;
+
+		const toggle = document.getElementById('quickEntryToggle');
+		const STORAGE_KEY = 'quickEntryCollapsed';
+
+		// Reserve space at the bottom of the page so the fixed bar never
+		// covers page content (tables, pagination, action buttons).
+		function applyPadding() {
+			document.body.style.paddingBottom = bar.offsetHeight + 'px';
+		}
+
+		function setCollapsed(collapsed) {
+			bar.classList.toggle('collapsed', collapsed);
+			toggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+			applyPadding();
+		}
+
+		setCollapsed(localStorage.getItem(STORAGE_KEY) === '1');
+
+		toggle.addEventListener('click', function () {
+			const collapsed = !bar.classList.contains('collapsed');
+			localStorage.setItem(STORAGE_KEY, collapsed ? '1' : '0');
+			setCollapsed(collapsed);
+		});
+
+		window.addEventListener('resize', applyPadding);
+		window.addEventListener('load', applyPadding);
 	})();
 	</script>
 </body>

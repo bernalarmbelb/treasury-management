@@ -66,12 +66,6 @@
                     </div>
 
                     <button type="submit" class="login-submit">Sign in</button>
-
-                    <div class="login-foot">
-                        <a href="#">Create account</a>
-                        <span>&middot;</span>
-                        <a href="#">Need help?</a>
-                    </div>
                 </form>
             </div>
         </div>

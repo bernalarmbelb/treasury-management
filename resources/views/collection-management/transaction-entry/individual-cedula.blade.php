@@ -239,12 +239,12 @@
                 <p class="ctc-sidebar-label">Total Amount Paid</p>
                 <div class="ctc-sidebar-amount-value">
                     <span>&#8369;</span>
-                    <input type="text" class="ctc-sidebar-input ctc-sidebar-amount-input" id="ctc-amount-paid" name="amount_paid" value="500.00">
+                    <input type="text" class="ctc-sidebar-input ctc-sidebar-amount-input" id="ctc-amount-paid" name="amount_paid" value="0.00" readonly>
                 </div>
             </div>
             <div class="ctc-field ctc-sidebar-words" style="left:960px; top:124px; width:412px; height:84px;">
                 <p class="ctc-sidebar-label">Amount in Words</p>
-                <input type="text" class="ctc-sidebar-input ctc-sidebar-words-input" id="ctc-amount-in-words" name="amount_in_words" value="Five hundred pesos only">
+                <input type="text" class="ctc-sidebar-input ctc-sidebar-words-input" id="ctc-amount-in-words" name="amount_in_words" value="Zero pesos only" readonly>
             </div>
 
             <button type="submit" class="ctc-proceed-btn">Proceed</button>
@@ -311,6 +311,51 @@
             const totalInput = document.getElementById('ctc-total');
             const interestInput = document.getElementById('ctc-interest');
 
+            // Total Amount Paid = Total + Interest; Amount in Words is derived from it.
+            const amountPaidInput = document.getElementById('ctc-amount-paid');
+            const amountInWordsInput = document.getElementById('ctc-amount-in-words');
+
+            const NUM_ONES = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
+            const NUM_TENS = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+            const NUM_SCALES = ['', 'thousand', 'million', 'billion'];
+
+            const threeToWords = (n) => {
+                let w = '';
+                if (n >= 100) { w += NUM_ONES[Math.floor(n / 100)] + ' hundred'; n %= 100; if (n) w += ' '; }
+                if (n >= 20) { w += NUM_TENS[Math.floor(n / 10)]; if (n % 10) w += '-' + NUM_ONES[n % 10]; }
+                else if (n > 0) { w += NUM_ONES[n]; }
+                return w;
+            };
+
+            const intToWords = (num) => {
+                if (num === 0) return 'zero';
+                const groups = [];
+                while (num > 0) { groups.push(num % 1000); num = Math.floor(num / 1000); }
+                let w = '';
+                for (let i = groups.length - 1; i >= 0; i--) {
+                    if (!groups[i]) continue;
+                    w += threeToWords(groups[i]) + (NUM_SCALES[i] ? ' ' + NUM_SCALES[i] : '') + ' ';
+                }
+                return w.trim();
+            };
+
+            const amountToWords = (amount) => {
+                const pesos = Math.floor(amount);
+                const centavos = Math.round((amount - pesos) * 100);
+                let w = intToWords(pesos) + ' peso' + (pesos === 1 ? '' : 's');
+                if (centavos > 0) w += ' and ' + intToWords(centavos) + ' centavo' + (centavos === 1 ? '' : 's');
+                w += ' only';
+                return w.charAt(0).toUpperCase() + w.slice(1);
+            };
+
+            const recalcAmountPaid = () => {
+                const amount = (parseFloat(totalInput.value) || 0) + (parseFloat(interestInput.value) || 0);
+                amountPaidInput.value = amount.toFixed(2);
+                amountInWordsInput.value = amountToWords(amount);
+                toggleEmpty(amountPaidInput);
+                toggleEmpty(amountInWordsInput);
+            };
+
             const sumOf = (ids) => ids.reduce((sum, id) => {
                 const el = document.getElementById(id);
                 return sum + (parseFloat(el?.value) || 0);
@@ -318,10 +363,12 @@
 
             const recalcTotal = () => {
                 totalInput.value = sumOf(['ctc-a-ctd', 'ctc-1-ctd', 'ctc-2-ctd', 'ctc-3-ctd']).toFixed(2);
+                recalcAmountPaid();
             };
 
             const recalcInterest = () => {
                 interestInput.value = sumOf(['ctc-1-taxable', 'ctc-2-taxable', 'ctc-3-taxable']).toFixed(2);
+                recalcAmountPaid();
             };
 
             ['ctc-a-ctd', 'ctc-1-ctd', 'ctc-2-ctd', 'ctc-3-ctd'].forEach((id) => {
@@ -331,6 +378,10 @@
             ['ctc-1-taxable', 'ctc-2-taxable', 'ctc-3-taxable'].forEach((id) => {
                 document.getElementById(id).addEventListener('input', recalcInterest);
             });
+
+            // Recompute the amount when Total/Interest are edited directly, and once on load.
+            [totalInput, interestInput].forEach((el) => el.addEventListener('input', recalcAmountPaid));
+            recalcAmountPaid();
 
             // Proceed: validate required fields, save via AJAX, then redirect to Collection Management.
             const requiredIds = ['ctc-surname', 'ctc-first-name', 'ctc-amount-paid'];
@@ -412,7 +463,7 @@
                     .then((response) => response.json().then((data) => ({ ok: response.ok, data })))
                     .then(({ ok, data }) => {
                         if (!ok) {
-                            alert(data.message || 'Something went wrong while saving. Please try again.');
+                            showToast('Action could not be completed', data.message || 'Something went wrong while saving. Please try again.', 'error');
                             return;
                         }
 
@@ -421,7 +472,7 @@
                         window.location.href = data.redirect;
                     })
                     .catch(() => {
-                        alert('Something went wrong while saving. Please try again.');
+                        showToast('Action could not be completed', 'Something went wrong while saving. Please try again.', 'error');
                     });
             });
         })();

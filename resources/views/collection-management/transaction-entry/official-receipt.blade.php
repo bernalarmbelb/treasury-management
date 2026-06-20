@@ -88,7 +88,7 @@
                     <div class="ctc-or2-group">
                         <div class="ctc-or2-bar"><p>Amount In Words</p></div>
                         <div class="ctc-or2-cell">
-                            <input type="text" id="or-amount-in-words" name="amount_in_words" placeholder="Amount in Words">
+                            <input type="text" id="or-amount-in-words" name="amount_in_words" placeholder="Amount in Words" readonly>
                         </div>
                     </div>
                 </div>
@@ -187,6 +187,41 @@
             const amountInputs = form.querySelectorAll('.ctc-or-amount-input');
             const totalInput = document.getElementById('or-total-input');
             const totalValueEl = document.getElementById('orTotalValue');
+            const amountInWordsInput = document.getElementById('or-amount-in-words');
+
+            // Amount in Words is derived from the running Total.
+            const NUM_ONES = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
+            const NUM_TENS = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+            const NUM_SCALES = ['', 'thousand', 'million', 'billion'];
+
+            const threeToWords = (n) => {
+                let w = '';
+                if (n >= 100) { w += NUM_ONES[Math.floor(n / 100)] + ' hundred'; n %= 100; if (n) w += ' '; }
+                if (n >= 20) { w += NUM_TENS[Math.floor(n / 10)]; if (n % 10) w += '-' + NUM_ONES[n % 10]; }
+                else if (n > 0) { w += NUM_ONES[n]; }
+                return w;
+            };
+
+            const intToWords = (num) => {
+                if (num === 0) return 'zero';
+                const groups = [];
+                while (num > 0) { groups.push(num % 1000); num = Math.floor(num / 1000); }
+                let w = '';
+                for (let i = groups.length - 1; i >= 0; i--) {
+                    if (!groups[i]) continue;
+                    w += threeToWords(groups[i]) + (NUM_SCALES[i] ? ' ' + NUM_SCALES[i] : '') + ' ';
+                }
+                return w.trim();
+            };
+
+            const amountToWords = (amount) => {
+                const pesos = Math.floor(amount);
+                const centavos = Math.round((amount - pesos) * 100);
+                let w = intToWords(pesos) + ' peso' + (pesos === 1 ? '' : 's');
+                if (centavos > 0) w += ' and ' + intToWords(centavos) + ' centavo' + (centavos === 1 ? '' : 's');
+                w += ' only';
+                return w.charAt(0).toUpperCase() + w.slice(1);
+            };
 
             const recalculateTotal = () => {
                 let total = 0;
@@ -196,6 +231,8 @@
 
                 totalValueEl.textContent = total > 0 ? formatAmount(total) : '--';
                 totalInput.value = total.toFixed(2);
+                amountInWordsInput.value = total > 0 ? amountToWords(total) : '';
+                amountInWordsInput.closest('.ctc-or2-cell')?.classList.toggle('filled', amountInWordsInput.value !== '');
             };
 
             amountInputs.forEach((input) => {
@@ -315,7 +352,7 @@
                         window.location.href = data.redirect;
                     })
                     .catch(() => {
-                        alert('Something went wrong while saving. Please try again.');
+                        showToast('Action could not be completed', 'Something went wrong while saving. Please try again.', 'error');
                     });
             });
         })();

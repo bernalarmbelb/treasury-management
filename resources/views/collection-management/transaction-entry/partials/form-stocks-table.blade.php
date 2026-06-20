@@ -49,7 +49,7 @@
                     <td class="col-actions">
                         <div class="table-actions-entry">
                             @if ($availableQty == 0)
-                                <button type="button" class="action-link js-add-receipt" aria-label="Add new receipt" data-form-stock-id="{{ $form->id }}" data-form-code="{{ $form->form_code }}">
+                                <button type="button" class="action-btn action-batch js-add-receipt" aria-label="Add new receipt" data-form-stock-id="{{ $form->id }}" data-form-code="{{ $form->form_code }}">
                                     Add new receipt
                                 </button>
                             @endif
@@ -64,7 +64,7 @@
                                     default => '#',
                                 };
                             @endphp
-                            <a href="{{ $addTransactionRoute }}" class="action-link" aria-label="Add Transaction">
+                            <a href="{{ $addTransactionRoute }}" class="action-btn action-view" aria-label="Add Transaction">
                                 Add Transaction
                             </a>
                         @endif

@@ -303,8 +303,8 @@
 
             postJson('/collections/bulk-cancel', { ids })
             .then(r => r.json())
-            .then(data => { alert(data.message); window.location.reload(); })
-            .catch(() => alert('Something went wrong. Please try again.'))
+            .then(data => { showToast(data.message); window.location.reload(); })
+            .catch(() => showToast('Action could not be completed', 'Something went wrong. Please try again.', 'error'))
             .finally(() => { bulkCancelBtn.disabled = false; bulkCancelBtn.textContent = 'Cancel Selected'; });
         });
     }
@@ -321,8 +321,8 @@
 
             postJson('/collections/bulk-cancel-request', { ids })
             .then(r => r.json())
-            .then(data => { alert(data.message); window.location.reload(); })
-            .catch(() => alert('Something went wrong. Please try again.'))
+            .then(data => { showToast(data.message); window.location.reload(); })
+            .catch(() => showToast('Action could not be completed', 'Something went wrong. Please try again.', 'error'))
             .finally(() => { bulkRequestBtn.disabled = false; bulkRequestBtn.textContent = 'Request Cancel'; });
         });
     }
@@ -339,8 +339,8 @@
 
             postJson('/collections/bulk-archive', { ids })
             .then(r => r.json())
-            .then(data => { alert(data.message); window.location.reload(); })
-            .catch(() => alert('Something went wrong. Please try again.'))
+            .then(data => { showToast(data.message); window.location.reload(); })
+            .catch(() => showToast('Action could not be completed', 'Something went wrong. Please try again.', 'error'))
             .finally(() => { bulkArchiveBtn.disabled = false; bulkArchiveBtn.textContent = 'Archive Selected'; });
         });
     }
@@ -371,8 +371,8 @@
 
         postJson(`/collections/${reqLogId}/cancel-request`, { reason })
         .then(r => r.json())
-        .then(data => { closeReqModal(); alert(data.message); })
-        .catch(() => alert('Something went wrong. Please try again.'))
+        .then(data => { closeReqModal(); showToast(data.message); })
+        .catch(() => showToast('Action could not be completed', 'Something went wrong. Please try again.', 'error'))
         .finally(() => { reqSubmitBtn.disabled = false; reqSubmitBtn.textContent = 'Submit Request'; });
     });
 
@@ -401,8 +401,8 @@
 
         postJson(`/collections/${targetId}/cancel`)
         .then(r => r.json())
-        .then(data => { closeAdminModal(); alert(data.message); window.location.reload(); })
-        .catch(() => alert('Something went wrong. Please try again.'))
+        .then(data => { closeAdminModal(); showToast(data.message); window.location.reload(); })
+        .catch(() => showToast('Action could not be completed', 'Something went wrong. Please try again.', 'error'))
         .finally(() => { adminConfirmBtn.disabled = false; adminConfirmBtn.textContent = 'Confirm Cancel'; });
     });
 
@@ -423,8 +423,8 @@
 
         postJson(`/collections/${btn.dataset.id}/archive`)
         .then(r => r.json())
-        .then(data => { alert(data.message); btn.closest('tr')?.remove(); })
-        .catch(() => alert('Something went wrong. Please try again.'));
+        .then(data => { showToast(data.message); btn.closest('tr')?.remove(); })
+        .catch(() => showToast('Action could not be completed', 'Something went wrong. Please try again.', 'error'));
     });
 })();
 </script>

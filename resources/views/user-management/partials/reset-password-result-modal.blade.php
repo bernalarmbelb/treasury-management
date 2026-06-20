@@ -17,9 +17,9 @@
 
         <div class="um-reset-result-row">
             <div class="um-reset-result-col">
-                <div class="um-reset-result-header">Random Generated Password</div>
+                <div class="um-reset-result-header">New Password</div>
                 <div class="um-reset-result-value">
-                    <input type="text" id="resetResultPassword" value="" readonly>
+                    <input type="text" id="resetResultPassword" value="" placeholder="Enter new password" autocomplete="new-password">
                 </div>
             </div>
         </div>

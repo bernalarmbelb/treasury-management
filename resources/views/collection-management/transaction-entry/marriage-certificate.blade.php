@@ -263,7 +263,7 @@
                         window.location.href = data.redirect;
                     })
                     .catch(() => {
-                        alert('Something went wrong while saving. Please try again.');
+                        showToast('Action could not be completed', 'Something went wrong while saving. Please try again.', 'error');
                     });
             };
         })();

@@ -156,7 +156,7 @@
                         .then((response) => {
                             if (!response.ok) {
                                 return response.json().then((data) => {
-                                    alert(data.message || 'Something went wrong. Please try again.');
+                                    showToast('Action could not be completed', data.message || 'Something went wrong. Please try again.', 'error');
                                     throw new Error(data.message);
                                 });
                             }

@@ -223,7 +223,10 @@
                             'X-Requested-With': 'XMLHttpRequest',
                             'X-CSRF-TOKEN': token,
                         },
-                    }))).then(reloadTable);
+                    }))).then(() => {
+                        reloadTable();
+                        showToast('User status updated successfully');
+                    });
                 });
 
                 /* ===== Account Type: checkbox group that behaves like a single-select ===== */
@@ -285,7 +288,7 @@
                         .then((response) => {
                             if (!response.ok) {
                                 return response.json().then((data) => {
-                                    alert(formatErrors(data));
+                                    showToast('Action could not be completed', formatErrors(data), 'error');
                                     throw new Error(data.message);
                                 });
                             }
@@ -295,6 +298,7 @@
                         .then((html) => {
                             container.innerHTML = html;
                             closeAddUserModal();
+                            showToast('User added successfully');
                         })
                         .catch(() => {});
                 });
@@ -367,7 +371,7 @@
                         .then((response) => {
                             if (!response.ok) {
                                 return response.json().then((data) => {
-                                    alert(formatErrors(data));
+                                    showToast('Action could not be completed', formatErrors(data), 'error');
                                     throw new Error(data.message);
                                 });
                             }
@@ -377,6 +381,7 @@
                         .then((html) => {
                             container.innerHTML = html;
                             closeEditUserModal();
+                            showToast('User updated successfully');
                         })
                         .catch(() => {});
                 });
@@ -397,11 +402,13 @@
                 let resetTargetUserId = null;
                 let resetTargetName = '';
                 let resetTargetRole = '';
+                let resetTargetEmail = '';
 
                 function openResetVerifyModal(trigger) {
                     resetTargetUserId = trigger.dataset.id;
                     resetTargetName = trigger.dataset.name;
                     resetTargetRole = trigger.dataset.roleName || '';
+                    resetTargetEmail = trigger.dataset.email || '';
 
                     resetVerifySubjectName.textContent = resetTargetName;
                     resetVerifySubjectRole.textContent = resetTargetRole;
@@ -451,25 +458,20 @@
                         .then((response) => {
                             if (!response.ok) {
                                 return response.json().then((data) => {
-                                    alert(formatErrors(data));
+                                    showToast('Action could not be completed', formatErrors(data), 'error');
                                     throw new Error(data.message);
                                 });
                             }
 
-                            return fetch(`/user-management/users/${resetTargetUserId}/reset-password`, {
-                                method: 'POST',
-                                headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                                body: formData,
-                            });
+                            return response.json();
                         })
-                        .then((response) => response.json())
-                        .then((data) => {
+                        .then(() => {
                             closeResetVerifyModal();
 
                             resetResultSubjectName.textContent = resetTargetName;
                             resetResultSubjectRole.textContent = resetTargetRole;
-                            resetResultPassword.value = data.password;
-                            resetResultEmail.value = data.email;
+                            resetResultPassword.value = '';
+                            resetResultEmail.value = resetTargetEmail;
                             resetResultMobile.value = '';
 
                             resetResultModalOverlay.classList.add('open');
@@ -478,7 +480,41 @@
                 });
 
                 document.getElementById('resetPasswordResultCloseBtn').addEventListener('click', closeResetResultModal);
-                document.getElementById('resetResultSaveBtn').addEventListener('click', closeResetResultModal);
+                document.getElementById('resetResultSaveBtn').addEventListener('click', function () {
+                    const newPassword = resetResultPassword.value.trim();
+
+                    if (newPassword.length < 8) {
+                        showToast('Invalid password', 'Password must be at least 8 characters.', 'error');
+                        return;
+                    }
+
+                    const formData = new FormData();
+                    formData.append('password', newPassword);
+
+                    fetch(`/user-management/users/${resetTargetUserId}/reset-password`, {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+                        },
+                        body: formData,
+                    })
+                        .then((response) => {
+                            if (!response.ok) {
+                                return response.json().then((data) => {
+                                    showToast('Action could not be completed', formatErrors(data), 'error');
+                                    throw new Error(data.message);
+                                });
+                            }
+
+                            return response.json();
+                        })
+                        .then(() => {
+                            closeResetResultModal();
+                            showToast('Password successfully changed', resetTargetName);
+                        })
+                        .catch(() => {});
+                });
 
                 resetResultModalOverlay.addEventListener('click', function (event) {
                     if (event.target === resetResultModalOverlay) {
@@ -549,6 +585,7 @@
                         .then((html) => {
                             container.innerHTML = html;
                             closeConfirmModal();
+                            showToast('User status updated successfully');
                         })
                         .catch(() => {});
                 });

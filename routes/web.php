@@ -2093,14 +2093,15 @@ Route::post('/user-management/users/{user}/verify-password', function (\Illumina
 })->name('user-management.users.verify-password');
 
 Route::post('/user-management/users/{user}/reset-password', function (\Illuminate\Http\Request $request, \App\Models\User $user) {
-    $password = \Illuminate\Support\Str::password(16);
+    $validated = $request->validate([
+        'password' => ['required', 'string', 'min:8'],
+    ]);
 
-    $user->update(['password' => $password]);
+    $user->update(['password' => $validated['password']]);
 
     \App\Models\ActivityLog::record('User Management - Reset Password - ' . $user->name);
 
     return response()->json([
-        'password' => $password,
         'email' => $user->email,
     ]);
 })->name('user-management.users.reset-password');

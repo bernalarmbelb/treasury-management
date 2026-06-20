@@ -98,6 +98,7 @@
                                 <button type="button" class="um-actions-item um-actions-item--export js-reset-password"
                                     data-id="{{ $user->id }}"
                                     data-name="{{ $user->name }}"
+                                    data-email="{{ $user->email }}"
                                     data-role-name="{{ $role?->name }}"
                                 >Reset Password</button>
                                 @if ($user->isActivated())

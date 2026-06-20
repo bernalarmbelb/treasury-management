@@ -180,7 +180,7 @@
                         .then((response) => {
                             if (!response.ok) {
                                 return response.json().then((data) => {
-                                    alert(data.message);
+                                    showToast('Action could not be completed', data.message, 'error');
                                     throw new Error(data.message);
                                 });
                             }
@@ -277,7 +277,7 @@
                             closeExportModal();
                             document.getElementById('reportPreviewOverlay').classList.add('open');
                         })
-                        .catch(() => alert('Failed to load preview. Please try again.'))
+                        .catch(() => showToast('Action could not be completed', 'Failed to load preview. Please try again.', 'error'))
                         .finally(() => {
                             submitBtn.disabled  = false;
                             submitBtn.innerHTML = originalHTML;

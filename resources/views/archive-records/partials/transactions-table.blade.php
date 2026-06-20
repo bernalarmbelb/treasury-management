@@ -192,8 +192,8 @@
                     headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrf() },
                 }).then(r => r.json())
             ))
-            .then(() => { alert(`${ids.length} transaction(s) unarchived.`); window.location.reload(); })
-            .catch(() => alert('Something went wrong. Please try again.'))
+            .then(() => { showToast(`${ids.length} transaction(s) unarchived.`); window.location.reload(); })
+            .catch(() => showToast('Action could not be completed', 'Something went wrong. Please try again.', 'error'))
             .finally(() => { bulkUnarchive.disabled = false; bulkUnarchive.textContent = 'Unarchive Selected'; });
         });
     }
@@ -212,8 +212,8 @@
             headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrf() },
         })
         .then(r => r.json())
-        .then(data => { alert(data.message); btn.closest('tr')?.remove(); })
-        .catch(() => alert('Something went wrong. Please try again.'))
+        .then(data => { showToast(data.message); btn.closest('tr')?.remove(); })
+        .catch(() => showToast('Action could not be completed', 'Something went wrong. Please try again.', 'error'))
         .finally(() => { btn.disabled = false; btn.textContent = 'Unarchive'; });
     });
 })();

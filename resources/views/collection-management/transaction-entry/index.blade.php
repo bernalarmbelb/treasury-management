@@ -169,7 +169,7 @@
                         .then((response) => {
                             if (!response.ok) {
                                 return response.json().then((data) => {
-                                    alert(data.message);
+                                    showToast('Action could not be completed', data.message, 'error');
                                     throw new Error(data.message);
                                 });
                             }

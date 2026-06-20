@@ -1878,6 +1878,70 @@ select.form-batch-input {
     color: rgba(31, 77, 54, 0.75);
 }
 
+/* =============================================
+   Global toast (app-wide success / error feedback)
+   ============================================= */
+.app-toast {
+    display: none;
+    position: fixed;
+    bottom: 76px;
+    right: 24px;
+    z-index: 1200;
+    align-items: center;
+    gap: 10px;
+    max-width: 360px;
+    padding: 14px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    font-family: 'Archivo', var(--font-family-secondary, sans-serif);
+}
+
+.app-toast.show {
+    display: flex;
+}
+
+.app-toast-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.app-toast-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.app-toast-title {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.app-toast-subtitle {
+    margin: 0;
+    font-size: 10px;
+}
+
+.app-toast--success {
+    background-color: var(--sbtn-success, #D2F9E5);
+}
+
+.app-toast--success .app-toast-icon { color: #2DAE6C; }
+.app-toast--success .app-toast-title { color: #1f4d36; }
+.app-toast--success .app-toast-subtitle { color: rgba(31, 77, 54, 0.75); }
+
+.app-toast--error {
+    background-color: #FDE2E2;
+}
+
+.app-toast--error .app-toast-icon { color: #D64545; }
+.app-toast--error .app-toast-title { color: #7a1f1f; }
+.app-toast--error .app-toast-subtitle { color: rgba(122, 31, 31, 0.75); }
+
 /* Individual Cedula - Community Tax Certificate entry page (Figma node 116:2258) */
 .ctc-tabs-row {
     display: flex;
@@ -3755,20 +3819,22 @@ select.form-batch-input {
 .ctc-or2-bar {
     display: flex;
     align-items: center;
-    height: 24px;
-    padding: 0 10px;
-    background-color: var(--primary, #427AB5);
+    height: 26px;
+    padding: 0 12px;
+    background-color: rgba(66, 122, 181, 0.08);
+    border: 1px solid rgba(66, 122, 181, 0.3);
     box-sizing: border-box;
     width: 100%;
 }
 
 .ctc-or2-bar p {
     margin: 0;
-    font-family: 'Aptos', var(--font-family-secondary, sans-serif);
+    font-family: var(--font-family-secondary, 'Manrope', sans-serif);
     font-weight: 700;
-    font-size: 10px;
-    text-transform: capitalize;
-    color: #fff;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--primary, #427AB5);
 }
 
 .ctc-or2-cell {
@@ -3776,7 +3842,7 @@ select.form-batch-input {
     min-height: 42px;
     width: 100%;
     border: 1px solid #333;
-    background-color: #F5F1F1;
+    background-color: #fff;
     box-sizing: border-box;
     font-family: var(--font-family-primary, 'Obviously', sans-serif);
     font-weight: 400;
@@ -6138,29 +6204,6 @@ select.form-batch-input {
     transform: translateY(1px);
 }
 
-.login-foot {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 14px;
-    margin-top: 18px;
-    font-size: 13px;
-}
-
-.login-foot a {
-    color: #CFE0FA;
-    text-decoration: none;
-}
-
-.login-foot a:hover {
-    color: #fff;
-    text-decoration: underline;
-}
-
-.login-foot span {
-    color: rgba(255, 255, 255, 0.45);
-}
-
 @media (max-width: 480px) {
     .login-title {
         font-size: 22px;
@@ -6211,6 +6254,118 @@ select.form-batch-input {
 
 .action-link-success {
     color: var(--btn-primary, #0fa958);
+}
+
+/* =============================================
+   Quick entry footer bar
+   ============================================= */
+.quick-entry-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 900;
+    display: flex;
+    align-items: center;
+    gap: 10px 16px;
+    flex-wrap: wrap;
+    padding: 10px 16px;
+    background: var(--fonts-white, #fff);
+    border-top: 1px solid var(--table-border, #D9D9D9);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.06);
+    font-family: var(--font-family-secondary, 'Manrope', sans-serif);
+}
+
+.quick-entry-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.3px;
+    color: var(--fonts-black, #333);
+}
+
+.quick-entry-toggle .qe-icon {
+    display: inline-flex;
+    color: var(--primary, #427AB5);
+}
+
+.quick-entry-count {
+    background: var(--primary, #427AB5);
+    color: var(--fonts-white, #fff);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+    padding: 3px 7px;
+    border-radius: 999px;
+}
+
+.quick-entry-chevron {
+    font-size: 12px;
+    color: var(--fonts-black-60, rgba(51, 51, 51, 0.6));
+    transition: transform 0.2s ease;
+}
+
+.quick-entry-bar.collapsed .quick-entry-chevron {
+    transform: rotate(180deg);
+}
+
+.quick-entry-bar.collapsed .quick-entry-links {
+    display: none;
+}
+
+.quick-entry-links {
+    display: flex;
+    align-items: center;
+    gap: 8px 10px;
+    flex-wrap: wrap;
+}
+
+.quick-entry-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    text-decoration: none;
+    padding: 7px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--primary, #427AB5);
+    background: rgba(66, 122, 181, 0.08);
+    color: var(--primary, #427AB5);
+    font-weight: 500;
+    font-size: 12.5px;
+    letter-spacing: 0.3px;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.quick-entry-link:hover {
+    background: var(--btn-primary, #1877f2);
+    border-color: var(--btn-primary, #1877f2);
+    color: var(--fonts-white, #fff);
+}
+
+.quick-entry-badge {
+    font-size: 10.5px;
+    font-weight: 600;
+    line-height: 1;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: rgba(15, 169, 88, 0.15);
+    color: var(--success, #0fa958);
+}
+
+.quick-entry-badge.low {
+    background: rgba(232, 78, 70, 0.15);
+    color: var(--warning, #e84e46);
+}
+
+.quick-entry-link:hover .quick-entry-badge {
+    background: rgba(255, 255, 255, 0.25);
+    color: var(--fonts-white, #fff);
 }
 
 /* =============================================

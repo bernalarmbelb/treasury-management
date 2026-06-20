@@ -901,10 +901,10 @@
                 })
                 .then(r => r.json())
                 .then(data => {
-                    alert(data.message);
+                    showToast(data.message);
                     window.location.href = '{{ route('archives', ['tab' => 'collection-management']) }}';
                 })
-                .catch(() => { alert('Something went wrong.'); btn.disabled = false; btn.textContent = 'Unarchive'; });
+                .catch(() => { showToast('Action could not be completed', 'Something went wrong.', 'error'); btn.disabled = false; btn.textContent = 'Unarchive'; });
             });
         })();
         </script>
@@ -950,7 +950,7 @@
                     .then((r) => r.json())
                     .then((data) => {
                         close();
-                        alert(data.message);
+                        showToast(data.message);
                         if (isAdmin) {
                             if (openBtn) {
                                 openBtn.disabled = true;
@@ -976,7 +976,7 @@
                             }
                         }
                     })
-                    .catch(() => alert('Something went wrong. Please try again.'))
+                    .catch(() => showToast('Action could not be completed', 'Something went wrong. Please try again.', 'error'))
                     .finally(() => {
                         submitBtn.disabled = false;
                         submitBtn.textContent = isAdmin ? 'Confirm Cancel' : 'Submit Request';
@@ -999,14 +999,14 @@
                         })
                         .then(r => r.json())
                         .then(data => {
-                            alert(data.message);
+                            showToast(data.message);
                             // Remove pending indicators and update buttons
                             rejectBtn.remove();
                             const pendingBadge = document.querySelector('.ctc-view-pending-badge');
                             if (pendingBadge) pendingBadge.remove();
                             if (openBtn) openBtn.textContent = 'Cancel Transaction';
                         })
-                        .catch(() => alert('Something went wrong. Please try again.'))
+                        .catch(() => showToast('Action could not be completed', 'Something went wrong. Please try again.', 'error'))
                         .finally(() => {
                             if (rejectBtn.isConnected) {
                                 rejectBtn.disabled = false;
