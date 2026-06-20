@@ -1128,6 +1128,11 @@ Route::get('/cheque-management', function () { return view('cheque-management.in
  * Collection and Deposit) have no underlying data model yet, so their rows
  * show "Coming Soon" instead of a Generate Report button.
  */
+// These helpers live in the route file. Route files are re-included on every
+// app boot, so without this guard PHPUnit's multi-boot test process throws
+// "Cannot redeclare ...". The guard declares them once per process.
+if (! function_exists('ram_report_slugs')) {
+
 function ram_report_slugs(): array
 {
     return ['treasurers-monthly', 'craaf', 'summary-ctc', 'raaf', 'abstract-ctc'];
@@ -1991,6 +1996,8 @@ function um_user_list_data(\Illuminate\Http\Request $request): array
         'direction' => $direction,
     ];
 }
+
+} // end function_exists guard for RAM/UM route-file helpers
 
 Route::get('/user-management', function (\Illuminate\Http\Request $request) {
     $data = um_user_list_data($request);
