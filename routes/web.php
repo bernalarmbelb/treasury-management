@@ -375,15 +375,19 @@ Route::post('/collections/transaction-entry/{formStock}/corporation-cedula', fun
 })->name('transaction-entry.corporation-cedula.store');
 
 Route::get('/collections/transaction-entry/{formStock}/or-rpt', function (\App\Models\FormStock $formStock) {
+    $batch = $formStock->nextAvailableBatch();
+
     return view('collection-management.transaction-entry.or-rpt', [
         'form' => $formStock,
-        'certificateNumber' => str_pad((\App\Models\OrRptTransaction::max('id') ?? 0) + 1, 7, '0', STR_PAD_LEFT),
+        'certificateNumber' => $batch?->nextAvailableSerialNumber()
+            ?? str_pad((\App\Models\OrRptTransaction::max('id') ?? 0) + 1, 7, '0', STR_PAD_LEFT),
         'rptRates' => config('rpt'),
     ]);
 })->name('transaction-entry.or-rpt');
 
 Route::post('/collections/transaction-entry/{formStock}/or-rpt', function (\Illuminate\Http\Request $request, \App\Models\FormStock $formStock) {
     $validated = $request->validate([
+        'serial_number' => ['nullable', 'string'],
         'previous_receipt_number' => ['nullable', 'string'],
         'previous_receipt_date' => ['nullable', 'string'],
         'previous_receipt_year' => ['nullable', 'string'],
@@ -440,7 +444,12 @@ Route::post('/collections/transaction-entry/{formStock}/or-rpt', function (\Illu
     }
 
     $payload = \Illuminate\Support\Facades\DB::transaction(function () use ($validated, $formStock) {
-        $certificateNumber = str_pad((\App\Models\OrRptTransaction::max('id') ?? 0) + 1, 7, '0', STR_PAD_LEFT);
+        // Record the serial the clerk confirmed on the form (defaulted from the
+        // booklet's next available serial); fall back to the batch serial, then
+        // to a synthetic running number only if no batch is on record.
+        $certificateNumber = ($validated['serial_number'] ?? null)
+            ?: ($formStock->nextAvailableBatch()?->nextAvailableSerialNumber()
+                ?? str_pad((\App\Models\OrRptTransaction::max('id') ?? 0) + 1, 7, '0', STR_PAD_LEFT));
 
         $orRptTransaction = $formStock->orRptTransactions()->create([
             'certificate_number' => $certificateNumber,

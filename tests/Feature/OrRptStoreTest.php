@@ -87,3 +87,30 @@ it('reuses an existing property and records a second installment', function () {
     expect(RptProperty::where('tax_declaration_number', 'TD-001')->count())->toBe(1);
     expect($property->fresh()->entries()->count())->toBe(1);
 });
+
+it('saves the submitted serial number as the certificate number', function () {
+    $this->actingAs($this->user)
+        ->postJson("/collections/transaction-entry/{$this->formStock->id}/or-rpt", validOrRptPayload(['serial_number' => 'SN-2026-0042']))
+        ->assertOk();
+
+    expect(OrRptTransaction::first()->certificate_number)->toBe('SN-2026-0042');
+    expect(\App\Models\TransactionLog::first()->serial_number)->toBe('SN-2026-0042');
+});
+
+it('defaults the serial number field to the next available batch serial', function () {
+    // Start at 0000007 so the batch serial differs from the old id-counter
+    // default (max(id)+1 = 0000001 on an empty table), making this test
+    // actually distinguish the two behaviours.
+    $this->formStock->batches()->create([
+        'registration_date' => now(),
+        'purchase_date' => now(),
+        'starting_serial_number' => '0000007',
+        'ending_serial_number' => '0000016',
+        'added_by' => 'Tester',
+    ]);
+
+    $this->actingAs($this->user)
+        ->get("/collections/transaction-entry/{$this->formStock->id}/or-rpt")
+        ->assertOk()
+        ->assertViewHas('certificateNumber', '0000007');
+});
