@@ -15,15 +15,6 @@
     };
 @endphp
 
-{{-- ── Bulk action bar ──────────────────────────────────────────────────── --}}
-<div class="bulk-action-bar" id="bulkActionBar" style="display:none;">
-    <span class="bulk-action-count" id="bulkActionCount">0 selected</span>
-    <div class="bulk-action-btns">
-        <button type="button" class="bulk-btn bulk-btn--archive" id="bulkUnarchiveBtn">Unarchive Selected</button>
-        <button type="button" class="bulk-btn bulk-btn--clear"   id="bulkClearBtn">Clear Selection</button>
-    </div>
-</div>
-
 <div class="table-scroll-area">
 <div class="table-wrapper">
     <table class="data-table">
@@ -134,87 +125,3 @@
         @endif
     </div>
 </div>
-
-<script>
-(function () {
-    const container      = document.getElementById('archive-table-container');
-    if (!container) return;
-    const csrf           = () => document.querySelector('meta[name="csrf-token"]')?.content ?? '';
-    const bulkBar        = document.getElementById('bulkActionBar');
-    const bulkCount      = document.getElementById('bulkActionCount');
-    const bulkUnarchive  = document.getElementById('bulkUnarchiveBtn');
-    const bulkClear      = document.getElementById('bulkClearBtn');
-    const selectAll      = document.getElementById('selectAllCheckbox');
-
-    const rowCheckboxes  = () => [...container.querySelectorAll('.row-checkbox')];
-    const checkedBoxes   = () => rowCheckboxes().filter(cb => cb.checked);
-
-    function updateBulkBar() {
-        const n = checkedBoxes().length;
-        if (bulkBar)   bulkBar.style.display = n > 0 ? 'flex' : 'none';
-        if (bulkCount) bulkCount.textContent  = n === 1 ? '1 item selected' : `${n} items selected`;
-        const all = rowCheckboxes();
-        if (selectAll) {
-            selectAll.indeterminate = n > 0 && n < all.length;
-            selectAll.checked = all.length > 0 && n === all.length;
-        }
-    }
-
-    container.addEventListener('change', e => { if (e.target.classList.contains('row-checkbox')) updateBulkBar(); });
-
-    if (selectAll) {
-        selectAll.addEventListener('change', () => {
-            rowCheckboxes().forEach(cb => { cb.checked = selectAll.checked; });
-            updateBulkBar();
-        });
-    }
-
-    if (bulkClear) {
-        bulkClear.addEventListener('click', () => {
-            rowCheckboxes().forEach(cb => { cb.checked = false; });
-            if (selectAll) { selectAll.checked = false; selectAll.indeterminate = false; }
-            if (bulkBar) bulkBar.style.display = 'none';
-        });
-    }
-
-    if (bulkUnarchive) {
-        bulkUnarchive.addEventListener('click', function () {
-            const ids = checkedBoxes().map(cb => parseInt(cb.dataset.id));
-            if (!ids.length) return;
-            if (!confirm(`Unarchive ${ids.length} transaction(s)? They will reappear in Collection Management.`)) return;
-
-            bulkUnarchive.disabled = true;
-            bulkUnarchive.textContent = 'Unarchiving…';
-
-            Promise.all(ids.map(id =>
-                fetch(`/archive-records/transactions/${id}/unarchive`, {
-                    method: 'POST',
-                    headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrf() },
-                }).then(r => r.json())
-            ))
-            .then(() => { showToast(`${ids.length} transaction(s) unarchived.`); window.location.reload(); })
-            .catch(() => showToast('Action could not be completed', 'Something went wrong. Please try again.', 'error'))
-            .finally(() => { bulkUnarchive.disabled = false; bulkUnarchive.textContent = 'Unarchive Selected'; });
-        });
-    }
-
-    // Row-level unarchive
-    container.addEventListener('click', function (e) {
-        const btn = e.target.closest('.action-unarchive');
-        if (!btn) return;
-        if (!confirm('Unarchive this transaction? It will reappear in Collection Management.')) return;
-
-        btn.disabled = true;
-        btn.textContent = 'Unarchiving…';
-
-        fetch(`/archive-records/transactions/${btn.dataset.id}/unarchive`, {
-            method: 'POST',
-            headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrf() },
-        })
-        .then(r => r.json())
-        .then(data => { showToast(data.message); btn.closest('tr')?.remove(); })
-        .catch(() => showToast('Action could not be completed', 'Something went wrong. Please try again.', 'error'))
-        .finally(() => { btn.disabled = false; btn.textContent = 'Unarchive'; });
-    });
-})();
-</script>

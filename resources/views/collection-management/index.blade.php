@@ -114,8 +114,79 @@
             </div>
         </div>
 
+        {{-- ── Bulk action bar (persists across AJAX table reloads) ─────────── --}}
+        <div class="bulk-action-bar" id="bulkActionBar" style="display:none;">
+            <span class="bulk-action-count" id="bulkActionCount">0 selected</span>
+            <div class="bulk-action-btns">
+                @if($isAdmin ?? false)
+                    <button type="button" class="bulk-btn bulk-btn--cancel" id="bulkCancelBtn" style="display:none;">Cancel Selected</button>
+                @else
+                    <button type="button" class="bulk-btn bulk-btn--cancel" id="bulkRequestBtn" style="display:none;">Request Cancel</button>
+                @endif
+                <button type="button" class="bulk-btn bulk-btn--archive" id="bulkArchiveBtn" style="display:none;">Archive Selected</button>
+                <button type="button" class="bulk-btn bulk-btn--clear" id="bulkClearBtn">Clear Selection</button>
+            </div>
+        </div>
+
         <div id="transactions-table-container">
             @include('collection-management.partials.transactions-table')
+        </div>
+
+        {{-- ── Cancel Request Modal (non-admin) — persists across reloads ───── --}}
+        <div class="ctc-modal-overlay" id="tableCancelRequestOverlay">
+            <div class="ctc-modal">
+                <div class="ctc-modal-header">
+                    <p class="ctc-modal-title">Request to Cancel Transaction</p>
+                    <button type="button" class="ctc-modal-close-btn" id="tableCancelCloseBtn" aria-label="Close">
+                        <x-bx-x class="icon" />
+                    </button>
+                </div>
+                <div class="ctc-modal-body">
+                    <div class="ctc-modal-info-row">
+                        <span class="ctc-modal-info-label">Serial No.</span>
+                        <span class="ctc-modal-info-value" id="tableCancelSerial"></span>
+                    </div>
+                    <div class="ctc-modal-info-row">
+                        <span class="ctc-modal-info-label">Payee</span>
+                        <span class="ctc-modal-info-value" id="tableCancelPayee"></span>
+                    </div>
+                    <div class="ctc-modal-field">
+                        <label class="ctc-modal-field-label" for="tableCancelReason">Reason <span style="color:#999;">(optional)</span></label>
+                        <textarea id="tableCancelReason" class="ctc-modal-textarea" rows="3" placeholder="Enter reason for cancellation..."></textarea>
+                    </div>
+                </div>
+                <div class="ctc-modal-footer">
+                    <button type="button" class="ctc-modal-btn ctc-modal-btn--secondary" id="tableCancelCancelBtn">Cancel</button>
+                    <button type="button" class="ctc-modal-btn ctc-modal-btn--primary" id="tableCancelSubmitBtn">Submit Request</button>
+                </div>
+            </div>
+        </div>
+
+        {{-- ── Admin Cancel Confirmation Modal — persists across reloads ────── --}}
+        <div class="ctc-modal-overlay" id="tableAdminCancelOverlay">
+            <div class="ctc-modal">
+                <div class="ctc-modal-header">
+                    <p class="ctc-modal-title">Cancel Transaction</p>
+                    <button type="button" class="ctc-modal-close-btn" id="tableAdminCancelCloseBtn" aria-label="Close">
+                        <x-bx-x class="icon" />
+                    </button>
+                </div>
+                <div class="ctc-modal-body">
+                    <div class="ctc-modal-info-row">
+                        <span class="ctc-modal-info-label">Serial No.</span>
+                        <span class="ctc-modal-info-value" id="tableAdminCancelSerial"></span>
+                    </div>
+                    <div class="ctc-modal-info-row">
+                        <span class="ctc-modal-info-label">Payee</span>
+                        <span class="ctc-modal-info-value" id="tableAdminCancelPayee"></span>
+                    </div>
+                    <p class="ctc-modal-confirm-text">Are you sure you want to cancel this transaction? This action cannot be undone.</p>
+                </div>
+                <div class="ctc-modal-footer">
+                    <button type="button" class="ctc-modal-btn ctc-modal-btn--secondary" id="tableAdminCancelCloseBtn2">Close</button>
+                    <button type="button" class="ctc-modal-btn ctc-modal-btn--primary" id="tableAdminCancelConfirmBtn">Confirm Cancel</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -139,6 +210,7 @@
                         .then((html) => {
                             container.innerHTML = html;
                             window.history.replaceState({}, '', url);
+                            resetBulkSelection();
                         });
                 }
 
@@ -363,6 +435,186 @@
                 });
 
                 updateBreadcrumbs();
+
+                // ── Bulk selection + row actions ─────────────────────────────────
+                // The bulk bar and modals live in the parent (persist across AJAX
+                // table reloads); row/select-all events are delegated on the
+                // persistent container so freshly-loaded rows keep working.
+                const csrfToken = () => document.querySelector('meta[name="csrf-token"]')?.content ?? '';
+                const postJson  = (url, body = null) => fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': csrfToken(),
+                    },
+                    body: body ? JSON.stringify(body) : null,
+                });
+
+                const bulkBar        = document.getElementById('bulkActionBar');
+                const bulkCount      = document.getElementById('bulkActionCount');
+                const bulkClearBtn   = document.getElementById('bulkClearBtn');
+                const bulkCancelBtn  = document.getElementById('bulkCancelBtn');
+                const bulkRequestBtn = document.getElementById('bulkRequestBtn');
+                const bulkArchiveBtn = document.getElementById('bulkArchiveBtn');
+
+                // Queried fresh each call — these live inside the reloaded container.
+                const rowCheckboxes = () => [...container.querySelectorAll('.row-checkbox')];
+                const checkedBoxes  = () => rowCheckboxes().filter(cb => cb.checked);
+                const archivableIds = () => checkedBoxes()
+                    .filter(cb => cb.dataset.status === 'Cancelled' && cb.dataset.archived === '0')
+                    .map(cb => parseInt(cb.dataset.id));
+                const completedIds  = () => checkedBoxes()
+                    .filter(cb => cb.dataset.status === 'Completed')
+                    .map(cb => parseInt(cb.dataset.id));
+
+                function updateBulkBar() {
+                    const checked = checkedBoxes();
+                    const n = checked.length;
+                    bulkBar.style.display = n > 0 ? 'flex' : 'none';
+                    bulkCount.textContent = n === 1 ? '1 item selected' : `${n} items selected`;
+
+                    const hasCompleted  = checked.some(cb => cb.dataset.status === 'Completed');
+                    const hasArchivable = checked.some(cb => cb.dataset.status === 'Cancelled' && cb.dataset.archived === '0');
+
+                    if (bulkCancelBtn)  bulkCancelBtn.style.display  = hasCompleted ? '' : 'none';
+                    if (bulkRequestBtn) bulkRequestBtn.style.display = hasCompleted ? '' : 'none';
+                    if (bulkArchiveBtn) bulkArchiveBtn.style.display = hasArchivable ? '' : 'none';
+
+                    const selectAll = container.querySelector('#selectAllCheckbox');
+                    const all = rowCheckboxes();
+                    if (selectAll) {
+                        selectAll.indeterminate = n > 0 && n < all.length;
+                        selectAll.checked = all.length > 0 && n === all.length;
+                    }
+                }
+
+                function resetBulkSelection() {
+                    // New rows from a reload are unchecked; just refresh the bar state.
+                    updateBulkBar();
+                }
+
+                // Delegated: row checkbox + select-all changes on the persistent container.
+                container.addEventListener('change', (e) => {
+                    if (e.target.id === 'selectAllCheckbox') {
+                        rowCheckboxes().forEach(cb => { cb.checked = e.target.checked; });
+                        updateBulkBar();
+                    } else if (e.target.classList.contains('row-checkbox')) {
+                        updateBulkBar();
+                    }
+                });
+
+                if (bulkClearBtn) {
+                    bulkClearBtn.addEventListener('click', () => {
+                        rowCheckboxes().forEach(cb => { cb.checked = false; });
+                        updateBulkBar();
+                    });
+                }
+
+                if (bulkCancelBtn) {
+                    bulkCancelBtn.addEventListener('click', function () {
+                        const ids = completedIds();
+                        if (!ids.length) return;
+                        if (!confirm(`Cancel ${ids.length} selected transaction(s)? This cannot be undone.`)) return;
+                        bulkCancelBtn.disabled = true;
+                        bulkCancelBtn.textContent = 'Cancelling…';
+                        postJson('/collections/bulk-cancel', { ids })
+                            .then(r => r.json())
+                            .then(data => { showToast(data.message); window.location.reload(); })
+                            .catch(() => showToast('Action could not be completed', 'Something went wrong. Please try again.', 'error'))
+                            .finally(() => { bulkCancelBtn.disabled = false; bulkCancelBtn.textContent = 'Cancel Selected'; });
+                    });
+                }
+
+                if (bulkRequestBtn) {
+                    bulkRequestBtn.addEventListener('click', function () {
+                        const ids = completedIds();
+                        if (!ids.length) return;
+                        if (!confirm(`Submit cancel requests for ${ids.length} selected transaction(s)?`)) return;
+                        bulkRequestBtn.disabled = true;
+                        bulkRequestBtn.textContent = 'Submitting…';
+                        postJson('/collections/bulk-cancel-request', { ids })
+                            .then(r => r.json())
+                            .then(data => { showToast(data.message); window.location.reload(); })
+                            .catch(() => showToast('Action could not be completed', 'Something went wrong. Please try again.', 'error'))
+                            .finally(() => { bulkRequestBtn.disabled = false; bulkRequestBtn.textContent = 'Request Cancel'; });
+                    });
+                }
+
+                if (bulkArchiveBtn) {
+                    bulkArchiveBtn.addEventListener('click', function () {
+                        const ids = archivableIds();
+                        if (!ids.length) return;
+                        if (!confirm(`Archive ${ids.length} selected transaction(s)? This cannot be undone.`)) return;
+                        bulkArchiveBtn.disabled = true;
+                        bulkArchiveBtn.textContent = 'Archiving…';
+                        postJson('/collections/bulk-archive', { ids })
+                            .then(r => r.json())
+                            .then(data => { showToast(data.message); window.location.reload(); })
+                            .catch(() => showToast('Action could not be completed', 'Something went wrong. Please try again.', 'error'))
+                            .finally(() => { bulkArchiveBtn.disabled = false; bulkArchiveBtn.textContent = 'Archive Selected'; });
+                    });
+                }
+
+                // ── Per-row Cancel / Archive (delegated on persistent container) ──
+                const reqOverlay   = document.getElementById('tableCancelRequestOverlay');
+                const reqSerial    = document.getElementById('tableCancelSerial');
+                const reqPayee     = document.getElementById('tableCancelPayee');
+                const reqReason    = document.getElementById('tableCancelReason');
+                let reqLogId = null;
+                const openReqModal  = (id, serial, payee) => { reqLogId = id; reqSerial.textContent = serial; reqPayee.textContent = payee; reqReason.value = ''; reqOverlay.classList.add('open'); };
+                const closeReqModal = () => { reqOverlay.classList.remove('open'); reqLogId = null; };
+                document.getElementById('tableCancelCloseBtn').addEventListener('click', closeReqModal);
+                document.getElementById('tableCancelCancelBtn').addEventListener('click', closeReqModal);
+                reqOverlay.addEventListener('click', (e) => { if (e.target === reqOverlay) closeReqModal(); });
+                document.getElementById('tableCancelSubmitBtn').addEventListener('click', function () {
+                    if (!reqLogId) return;
+                    const btn = this;
+                    btn.disabled = true; btn.textContent = 'Submitting…';
+                    postJson(`/collections/${reqLogId}/cancel-request`, { reason: reqReason.value.trim() })
+                        .then(r => r.json())
+                        .then(data => { closeReqModal(); showToast(data.message); })
+                        .catch(() => showToast('Action could not be completed', 'Something went wrong. Please try again.', 'error'))
+                        .finally(() => { btn.disabled = false; btn.textContent = 'Submit Request'; });
+                });
+
+                const adminOverlay = document.getElementById('tableAdminCancelOverlay');
+                const adminSerial  = document.getElementById('tableAdminCancelSerial');
+                const adminPayee   = document.getElementById('tableAdminCancelPayee');
+                let adminLogId = null;
+                const openAdminModal  = (id, serial, payee) => { adminLogId = id; adminSerial.textContent = serial; adminPayee.textContent = payee; adminOverlay.classList.add('open'); };
+                const closeAdminModal = () => { adminOverlay.classList.remove('open'); adminLogId = null; };
+                document.getElementById('tableAdminCancelCloseBtn').addEventListener('click', closeAdminModal);
+                document.getElementById('tableAdminCancelCloseBtn2').addEventListener('click', closeAdminModal);
+                adminOverlay.addEventListener('click', (e) => { if (e.target === adminOverlay) closeAdminModal(); });
+                document.getElementById('tableAdminCancelConfirmBtn').addEventListener('click', function () {
+                    if (!adminLogId) return;
+                    const btn = this, targetId = adminLogId;
+                    btn.disabled = true; btn.textContent = 'Cancelling…';
+                    postJson(`/collections/${targetId}/cancel`)
+                        .then(r => r.json())
+                        .then(data => { closeAdminModal(); showToast(data.message); window.location.reload(); })
+                        .catch(() => showToast('Action could not be completed', 'Something went wrong. Please try again.', 'error'))
+                        .finally(() => { btn.disabled = false; btn.textContent = 'Confirm Cancel'; });
+                });
+
+                container.addEventListener('click', (e) => {
+                    const cancelBtn = e.target.closest('.action-cancel');
+                    if (cancelBtn) {
+                        cancelBtn.dataset.cancelType === 'direct'
+                            ? openAdminModal(cancelBtn.dataset.id, cancelBtn.dataset.serial, cancelBtn.dataset.payee)
+                            : openReqModal(cancelBtn.dataset.id, cancelBtn.dataset.serial, cancelBtn.dataset.payee);
+                        return;
+                    }
+                    const archiveBtn = e.target.closest('.action-archive');
+                    if (archiveBtn) {
+                        if (!confirm('Archive this transaction? This cannot be undone.')) return;
+                        postJson(`/collections/${archiveBtn.dataset.id}/archive`)
+                            .then(r => r.json())
+                            .then(data => { showToast(data.message); archiveBtn.closest('tr')?.remove(); updateBulkBar(); })
+                            .catch(() => showToast('Action could not be completed', 'Something went wrong. Please try again.', 'error'));
+                    }
+                });
             })();
         </script>
     @endpush

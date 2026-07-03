@@ -132,6 +132,8 @@
                 </div>
             </div>
 
+            @include('archive-records.partials.bulk-action-bar')
+
             <div id="archive-table-container">
                 @include('archive-records.partials.transactions-table')
             </div>
@@ -147,6 +149,8 @@
                            value="{{ request('search') }}" autocomplete="off">
                 </form>
             </div>
+
+            @include('archive-records.partials.bulk-action-bar')
 
             <div id="archive-table-container">
                 @include('archive-records.partials.users-table')
@@ -176,6 +180,7 @@
                 .then(html => {
                     container.innerHTML = html;
                     window.history.replaceState({}, '', url);
+                    updateBulkBar();
                 });
         }
 
@@ -208,6 +213,87 @@
             if (searchInput.value) params.set('search', searchInput.value);
             else params.delete('search');
             fetchAndRender(params);
+        });
+
+        // ── Bulk selection + row unarchive (persists across AJAX reloads) ────
+        // Bulk bar lives outside the reloaded container; row/select-all events
+        // are delegated on the persistent container. Endpoint + wording switch
+        // by tab (collection transactions vs users).
+        const unarchiveBase = '{{ $tab === 'user-management' ? '/archive-records/users' : '/archive-records/transactions' }}';
+        const bulkNoun      = '{{ $tab === 'user-management' ? 'user' : 'transaction' }}';
+        const bulkMsg       = '{{ $tab === 'user-management' ? 'Their accounts will be reactivated.' : 'They will reappear in Collection Management.' }}';
+        const rowMsg        = '{{ $tab === 'user-management' ? 'Their account will be reactivated.' : 'It will reappear in Collection Management.' }}';
+        const csrf          = () => document.querySelector('meta[name="csrf-token"]')?.content ?? '';
+        const bulkBar       = document.getElementById('bulkActionBar');
+        const bulkCount     = document.getElementById('bulkActionCount');
+        const bulkUnarchive = document.getElementById('bulkUnarchiveBtn');
+        const bulkClear     = document.getElementById('bulkClearBtn');
+
+        const rowCheckboxes = () => [...container.querySelectorAll('.row-checkbox')];
+        const checkedBoxes  = () => rowCheckboxes().filter(cb => cb.checked);
+
+        function updateBulkBar() {
+            const n = checkedBoxes().length;
+            if (bulkBar)   bulkBar.style.display = n > 0 ? 'flex' : 'none';
+            if (bulkCount) bulkCount.textContent = n === 1 ? '1 item selected' : `${n} items selected`;
+            const selectAll = container.querySelector('#selectAllCheckbox');
+            const all = rowCheckboxes();
+            if (selectAll) {
+                selectAll.indeterminate = n > 0 && n < all.length;
+                selectAll.checked = all.length > 0 && n === all.length;
+            }
+        }
+
+        container.addEventListener('change', function (e) {
+            if (e.target.id === 'selectAllCheckbox') {
+                rowCheckboxes().forEach(cb => { cb.checked = e.target.checked; });
+                updateBulkBar();
+            } else if (e.target.classList.contains('row-checkbox')) {
+                updateBulkBar();
+            }
+        });
+
+        if (bulkClear) {
+            bulkClear.addEventListener('click', () => {
+                rowCheckboxes().forEach(cb => { cb.checked = false; });
+                updateBulkBar();
+            });
+        }
+
+        if (bulkUnarchive) {
+            bulkUnarchive.addEventListener('click', function () {
+                const ids = checkedBoxes().map(cb => parseInt(cb.dataset.id));
+                if (!ids.length) return;
+                if (!confirm(`Unarchive ${ids.length} ${bulkNoun}(s)? ${bulkMsg}`)) return;
+                bulkUnarchive.disabled = true;
+                bulkUnarchive.textContent = 'Unarchiving…';
+                Promise.all(ids.map(id =>
+                    fetch(`${unarchiveBase}/${id}/unarchive`, {
+                        method: 'POST',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrf() },
+                    }).then(r => r.json())
+                ))
+                .then(() => { showToast(`${ids.length} ${bulkNoun}(s) unarchived.`); window.location.reload(); })
+                .catch(() => showToast('Action could not be completed', 'Something went wrong. Please try again.', 'error'))
+                .finally(() => { bulkUnarchive.disabled = false; bulkUnarchive.textContent = 'Unarchive Selected'; });
+            });
+        }
+
+        // Row-level unarchive (delegated on persistent container).
+        container.addEventListener('click', function (e) {
+            const btn = e.target.closest('.action-unarchive');
+            if (!btn) return;
+            if (!confirm(`Unarchive this ${bulkNoun}? ${rowMsg}`)) return;
+            btn.disabled = true;
+            btn.textContent = 'Unarchiving…';
+            fetch(`${unarchiveBase}/${btn.dataset.id}/unarchive`, {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrf() },
+            })
+            .then(r => r.json())
+            .then(data => { showToast(data.message); btn.closest('tr')?.remove(); updateBulkBar(); })
+            .catch(() => showToast('Action could not be completed', 'Something went wrong. Please try again.', 'error'))
+            .finally(() => { btn.disabled = false; btn.textContent = 'Unarchive'; });
         });
 
         @if ($tab === 'collection-management')
