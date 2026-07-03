@@ -1721,14 +1721,26 @@ function export_treasurers_monthly_xlsx(array $built, string $periodLabel, ?stri
     $left = \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT;
     $thin = ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN];
 
-    foreach (['A' => 20.0, 'B' => 9.0, 'C' => 20.0, 'D' => 9.0, 'E' => 20.0, 'F' => 9.0, 'G' => 20.0, 'H' => 9.0, 'I' => 20.0, 'J' => 22.0] as $col => $width) {
+    // OOXML stored widths taken verbatim from the reference file so Excel's
+    // Column-Width dialog shows exactly A=17.3, quantity=5.8, serial/remarks=19.2
+    // (Excel displays ~0.7-1.4 less than the stored value due to cell padding).
+    foreach (['A' => 18.0, 'B' => 6.5, 'C' => 19.8984375, 'D' => 6.5, 'E' => 19.8984375, 'F' => 6.5, 'G' => 19.8984375, 'H' => 6.5, 'I' => 19.8984375, 'J' => 19.8984375] as $col => $width) {
         $sheet->getColumnDimension($col)->setWidth($width);
     }
     $spreadsheet->getDefaultStyle()->getFont()->setName('Roboto');
 
+    // Print at actual size with NO fit-to-page scaling, mirroring the
+    // reference file: the column widths above already span the
+    // folio-landscape printable width, so no scaling is needed. Fit-to-page
+    // is explicitly disabled so Excel does not shrink the sheet, and the
+    // sheet is centered horizontally on the page.
     $sheet->getPageSetup()
         ->setOrientation(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_LANDSCAPE)
-        ->setPaperSize(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::PAPERSIZE_FOLIO);
+        ->setPaperSize(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::PAPERSIZE_FOLIO)
+        ->setFitToHeight(0)
+        ->setFitToWidth(0)
+        ->setFitToPage(false)
+        ->setHorizontalCentered(true);
     $sheet->getPageMargins()->setTop(0.5)->setBottom(0.2)->setLeft(0.2)->setRight(0.2);
 
     $vCenter = \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER;
@@ -1736,7 +1748,7 @@ function export_treasurers_monthly_xlsx(array $built, string $periodLabel, ?stri
 
     $sheet->setCellValue('A1', strtoupper($built['title']));
     $sheet->mergeCells('A1:J1');
-    $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(12);
+    $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(11);
     $sheet->getStyle('A1')->getAlignment()->setHorizontal($center);
 
     $sheet->setCellValue('A2', $periodLabel);
@@ -1746,8 +1758,8 @@ function export_treasurers_monthly_xlsx(array $built, string $periodLabel, ?stri
 
     // Officer / Designation / Province row (values on row 4, italic labels on row 5).
     $officerCols = [
-        ['A4:C4', 'A5:C5', strtoupper($officerName ?: ''), 'Name of Officer'],
-        ['D4:F4', 'D5:F5', strtoupper($designation ?: ''), 'Official Designation'],
+        ['A4:B4', 'A5:B5', $officerName ?: '', 'Name of Officer'],
+        ['D4:F4', 'D5:F5', $designation ?: '', 'Official Designation'],
         ['H4:J4', 'H5:J5', 'PRIETO DIAZ, SORSOGON', 'Province or City'],
     ];
     foreach ($officerCols as [$valueRange, $labelRange, $value, $label]) {
@@ -1761,11 +1773,11 @@ function export_treasurers_monthly_xlsx(array $built, string $periodLabel, ?stri
 
         $sheet->mergeCells($labelRange);
         $sheet->setCellValue(explode(':', $labelRange)[0], $label);
-        $sheet->getStyle($labelRange)->getFont()->setSize(9)->setItalic(true);
+        $sheet->getStyle($labelRange)->getFont()->setSize(8)->setItalic(true);
         $sheet->getStyle($labelRange)->getAlignment()->setHorizontal($center);
     }
-    $sheet->setCellValue('G4', 'OF');
-    $sheet->getStyle('G4')->getFont()->setBold(true)->setSize(11);
+    $sheet->setCellValue('G4', 'of');
+    $sheet->getStyle('G4')->getFont()->setSize(11);
     $sheet->getStyle('G4')->getAlignment()->setHorizontal($center)->setVertical($vCenter);
 
     // Two-row grouped column header (row 7 group labels over row 8 sub-headers),
@@ -1786,11 +1798,10 @@ function export_treasurers_monthly_xlsx(array $built, string $periodLabel, ?stri
     $sheet->setCellValue('J7', 'REMARKS');
 
     $sheet->getStyle('A7:J8')->applyFromArray([
-        'font' => ['bold' => true, 'size' => 10],
+        'font' => ['bold' => true, 'size' => 9],
         'alignment' => ['horizontal' => $center, 'vertical' => $vCenter, 'wrapText' => true],
         'borders' => ['allBorders' => $thin],
     ]);
-    $sheet->getStyle('B8:I8')->getFont()->setSize(9);
 
     $quantityCols = [1, 3, 5, 7];
 
@@ -1808,7 +1819,7 @@ function export_treasurers_monthly_xlsx(array $built, string $periodLabel, ?stri
             ]);
         }
         $sheet->getStyle("A{$row}:J{$row}")->applyFromArray([
-            'font' => ['name' => 'Roboto', 'size' => 9],
+            'font' => ['name' => 'Roboto', 'size' => 8],
             'borders' => ['allBorders' => $thin],
         ]);
         // Form-group label cell (column A) is bold in the reference.
@@ -1825,7 +1836,7 @@ function export_treasurers_monthly_xlsx(array $built, string $periodLabel, ?stri
         }
         $sheet->getStyle("A{$row}")->getAlignment()->setHorizontal($right);
         $sheet->getStyle("A{$row}:J{$row}")->applyFromArray([
-            'font' => ['name' => 'Roboto', 'size' => 9, 'bold' => true],
+            'font' => ['name' => 'Roboto', 'size' => 8, 'bold' => true],
             'borders' => ['allBorders' => $thin],
         ]);
     }

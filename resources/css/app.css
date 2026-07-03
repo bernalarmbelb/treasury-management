@@ -4691,6 +4691,7 @@ select.form-batch-input {
 
 .ram-preview-export-btn {
     margin-top: 0;
+    border-radius: var(--button, 8px);
 }
 
 /* Paper document */

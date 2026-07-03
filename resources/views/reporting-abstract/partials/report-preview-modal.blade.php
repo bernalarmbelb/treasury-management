@@ -8,7 +8,8 @@
                 Close
             </button>
             <div class="ram-preview-topbar-actions">
-                <button type="button" class="ram-preview-print-btn" id="ramPreviewPrintBtn">
+                {{-- Print temporarily hidden per request; element + JS handler kept intact. --}}
+                <button type="button" class="ram-preview-print-btn" id="ramPreviewPrintBtn" style="display: none;">
                     Print
                 </button>
                 <button type="button" class="ctc-add-entry-btn ram-preview-export-btn" id="ramPreviewExportBtn">
