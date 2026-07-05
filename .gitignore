@@ -36,6 +36,8 @@ AGENTS.md
 GEMINI.md
 .mcp.json
 .cursorrules
+/.playwright-mcp/
+/boost.json
 /build.zip
 /public/build.zip
 
