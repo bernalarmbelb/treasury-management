@@ -929,6 +929,28 @@ body {
     font-size: 14px;
 }
 
+.report-log-add-batch-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    height: 42px;
+    padding: 0 20px;
+    border: none;
+    border-radius: 8px;
+    background-color: var(--primary, #427AB5);
+    font-family: var(--font-family-secondary, 'Manrope', sans-serif);
+    font-weight: 600;
+    font-size: 14px;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.report-log-add-batch-btn:hover {
+    background-color: #355f8f;
+}
+
 .module-filter-select {
     box-sizing: border-box;
     height: 42px;

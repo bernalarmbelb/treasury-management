@@ -20,11 +20,15 @@
             <form class="search-group" role="search" method="GET" id="report-log-search-form">
                 <input type="search" name="search" class="search-input" id="report-log-search-input" placeholder="Search Batch Number" value="{{ request('search') }}" autocomplete="off">
             </form>
+
+            <button type="button" class="report-log-add-batch-btn" id="reportLogAddBatchBtn">Add New Batch</button>
         </div>
 
         <div id="report-logs-table-container">
             @include('official-receipt-accountable-forms.partials.report-logs-table')
         </div>
+
+        @include('collection-management.transaction-entry.partials.add-batch-modal')
     </div>
 
     @push('scripts')
@@ -236,6 +240,68 @@
 
                     event.preventDefault();
                     input.blur();
+                });
+
+                // ── Add batch modal ──────────────────────────────────────────────
+                const modalOverlay = document.getElementById('formBatchModalOverlay');
+                const modalTitle = document.getElementById('formBatchModalTitle');
+                const modalForm = document.getElementById('formBatchForm');
+                const successAlert = document.getElementById('formBatchSuccessAlert');
+                const successAlertSubtitle = document.getElementById('formBatchSuccessAlertSubtitle');
+                let successAlertTimer;
+
+                const formStockId = {{ $formStock->id }};
+                const formCode = @json($formStock->form_code);
+
+                function showSuccessAlert() {
+                    successAlertSubtitle.textContent = formCode;
+                    successAlert.classList.add('show');
+
+                    clearTimeout(successAlertTimer);
+                    successAlertTimer = setTimeout(() => {
+                        successAlert.classList.remove('show');
+                    }, 3000);
+                }
+
+                function openBatchModal() {
+                    modalTitle.textContent = `Add new batch of ${formCode}`;
+                    modalForm.action = `/official-receipts-accountable-forms/${formStockId}/batches`;
+                    modalOverlay.classList.add('open');
+                }
+
+                function closeBatchModal() {
+                    modalOverlay.classList.remove('open');
+                    modalForm.reset();
+                }
+
+                document.getElementById('reportLogAddBatchBtn').addEventListener('click', function (event) {
+                    event.preventDefault();
+                    openBatchModal();
+                });
+
+                document.getElementById('formBatchCloseBtn').addEventListener('click', closeBatchModal);
+
+                modalForm.addEventListener('submit', function (event) {
+                    event.preventDefault();
+
+                    fetch(modalForm.action, {
+                        method: 'POST',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                        body: new FormData(modalForm),
+                    })
+                        .then((response) => {
+                            if (!response.ok) {
+                                return response.json().then((data) => {
+                                    showToast('Action could not be completed', data.message, 'error');
+                                    throw new Error(data.message);
+                                });
+                            }
+
+                            closeBatchModal();
+                            showSuccessAlert();
+                            reloadTable();
+                        })
+                        .catch(() => {});
                 });
             })();
         </script>
