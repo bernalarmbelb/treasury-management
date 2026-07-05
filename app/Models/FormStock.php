@@ -39,11 +39,7 @@ class FormStock extends Model
             $validated['purchase_day'],
         );
 
-        $startingNumber = (int) substr($validated['starting_serial_number'], -3);
-        $endingNumber = (int) substr($validated['ending_serial_number'], -3);
-        $qty = max(0, $endingNumber - $startingNumber + 1);
-
-        $this->batches()->create([
+        $batch = $this->batches()->create([
             'registration_date' => $registrationDate,
             'purchase_date' => $purchaseDate,
             'starting_serial_number' => $validated['starting_serial_number'],
@@ -51,8 +47,11 @@ class FormStock extends Model
             'added_by' => $addedBy ?? 'System',
         ]);
 
+        // Quantity is derived from the full trailing digits of the serial range
+        // (same logic Report Logs uses), so it stays correct for ranges that
+        // cross a hundreds/thousands boundary (e.g. …998 → …1005 = 8).
         $this->update([
-            'qty' => $this->qty + $qty,
+            'qty' => $this->qty + $batch->startingQty(),
             'added_date' => $purchaseDate,
             'added_time' => now()->format('H:i:s'),
         ]);
@@ -61,6 +60,21 @@ class FormStock extends Model
     public function batches(): HasMany
     {
         return $this->hasMany(FormBatch::class);
+    }
+
+    /**
+     * The default Starting Serial Number for a new batch: the serial right
+     * after this form's highest existing batch ending serial (e.g. last batch
+     * ends "2026-00005" => "2026-00006"). Null when the form has no batches
+     * yet, so the first batch is entered manually.
+     */
+    public function nextBatchStartingSerial(): ?string
+    {
+        $last = $this->batches
+            ->sortByDesc(fn (FormBatch $batch) => $batch->serialRange()[1])
+            ->first();
+
+        return $last?->nextSerialNumber();
     }
 
     /**
@@ -104,24 +118,65 @@ class FormStock extends Model
     }
 
     /**
-     * If the given (not yet saved) batch serial range overlaps a certificate
-     * already recorded in a CM Transaction Entry for this form, returns the
-     * conflicting certificate (e.g. "CCI2026-00007"); otherwise null. Only
-     * forms with a certificate prefix (BIR0016/BIR0017) are checked.
+     * Validates a proposed new batch serial range against everything already
+     * on record for this form and returns a user-facing "Error in adding
+     * batch" message (listing the offending serials) when it must be blocked,
+     * or null when the range is free to add. Applies to ALL forms.
+     *
+     * A serial is considered unavailable when it either:
+     *   1. falls inside an existing batch's serial range (same prefix), or
+     *   2. has already been issued in a CM Transaction Entry.
      */
-    public function conflictingCertificate(string $startingSerialNumber, string $endingSerialNumber): ?string
+    public function batchConflictMessage(string $startingSerialNumber, string $endingSerialNumber): ?string
     {
-        if (! in_array($this->form_code, ['BIR0016', 'BIR0017'])) {
-            return null;
-        }
-
-        $batch = new FormBatch([
+        $probe = new FormBatch([
             'starting_serial_number' => $startingSerialNumber,
             'ending_serial_number' => $endingSerialNumber,
         ]);
-        $batch->setRelation('formStock', $this);
+        $probe->setRelation('formStock', $this);
 
-        return $batch->conflictingCertificate();
+        [$start, $end] = $probe->serialRange();
+        $prefix = $probe->serialPrefix();
+        preg_match('/(\d+)$/', $startingSerialNumber, $matches);
+        $length = strlen($matches[1] ?? '');
+
+        $conflicts = collect();
+
+        // 1) Overlap with an existing batch's serial range (same prefix only,
+        //    so a "2026-" batch never collides with a "2025-" batch).
+        foreach ($this->batches as $batch) {
+            if ($batch->serialPrefix() !== $prefix) {
+                continue;
+            }
+
+            [$batchStart, $batchEnd] = $batch->serialRange();
+            for ($number = max($start, $batchStart); $number <= min($end, $batchEnd); $number++) {
+                $conflicts->push($number);
+            }
+        }
+
+        // 2) Overlap with a serial already issued in a CM Transaction Entry.
+        $probe->transactionSerialNumbers()
+            ->filter(fn (int $number) => $number >= $start && $number <= $end)
+            ->each(fn (int $number) => $conflicts->push($number));
+
+        $conflicts = $conflicts->unique()->sort()->values();
+
+        if ($conflicts->isEmpty()) {
+            return null;
+        }
+
+        // List the offending serials (cap the enumeration so the alert stays
+        // readable for very large overlaps).
+        $shown = $conflicts->take(25)
+            ->map(fn (int $number) => $prefix . str_pad((string) $number, $length, '0', STR_PAD_LEFT))
+            ->implode(', ');
+
+        if ($conflicts->count() > 25) {
+            $shown .= ' and ' . ($conflicts->count() - 25) . ' more';
+        }
+
+        return "Error in adding batch: serial number {$shown} is already used.";
     }
 
     public function ctcIndividualTransactions(): HasMany

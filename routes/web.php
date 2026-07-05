@@ -137,9 +137,9 @@ Route::post('/collections/transaction-entry/{formStock}/batches', function (\Ill
         'ending_serial_number' => ['required', 'string'],
     ]);
 
-    if ($conflict = $formStock->conflictingCertificate($validated['starting_serial_number'], $validated['ending_serial_number'])) {
+    if ($message = $formStock->batchConflictMessage($validated['starting_serial_number'], $validated['ending_serial_number'])) {
         return response()->json([
-            'message' => "ALERT: {$conflict} is already in used, change batch receipt.",
+            'message' => $message,
         ], 422);
     }
 
@@ -944,9 +944,9 @@ Route::post('/official-receipts-accountable-forms/{formStock}/batches', function
         'ending_serial_number' => ['required', 'string'],
     ]);
 
-    if ($conflict = $formStock->conflictingCertificate($validated['starting_serial_number'], $validated['ending_serial_number'])) {
+    if ($message = $formStock->batchConflictMessage($validated['starting_serial_number'], $validated['ending_serial_number'])) {
         return response()->json([
-            'message' => "ALERT: {$conflict} is already in used, change batch receipt.",
+            'message' => $message,
         ], 422);
     }
 

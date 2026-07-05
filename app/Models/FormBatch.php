@@ -65,6 +65,20 @@ class FormBatch extends Model
     }
 
     /**
+     * The serial number immediately after this batch's ending serial,
+     * formatted to match the starting serial's prefix/padding — e.g. a batch
+     * ending "2026-00005" yields "2026-00006", or "05" yields "06". Used to
+     * pre-fill the Starting Serial Number when adding the next batch.
+     */
+    public function nextSerialNumber(): string
+    {
+        [$start, $end] = $this->serialRange();
+        $length = strlen($this->trailingDigits($this->starting_serial_number));
+
+        return $this->serialPrefix() . str_pad((string) ($end + 1), $length, '0', STR_PAD_LEFT);
+    }
+
+    /**
      * The oldest unused serial number within this batch's range, formatted
      * to match the starting serial number's prefix/padding, or null if every
      * serial number in this batch has already been used.
@@ -164,7 +178,7 @@ class FormBatch extends Model
      * this batch's form stock that belong to this batch (matching prefix for
      * BIR0016/BIR0017), used to compute the used count.
      */
-    private function transactionSerialNumbers(): \Illuminate\Support\Collection
+    public function transactionSerialNumbers(): \Illuminate\Support\Collection
     {
         $formStock = $this->formStock;
 

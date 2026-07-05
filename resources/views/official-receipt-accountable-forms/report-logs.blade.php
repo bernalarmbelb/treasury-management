@@ -266,6 +266,15 @@
                 function openBatchModal() {
                     modalTitle.textContent = `Add new batch of ${formCode}`;
                     modalForm.action = `/official-receipts-accountable-forms/${formStockId}/batches`;
+
+                    // Pre-fill Starting Serial with the next serial after the
+                    // form's latest batch (blank when there are no batches yet).
+                    const nextEl = document.getElementById('reportLogNextSerial');
+                    const ssnInput = modalForm.querySelector('[name="starting_serial_number"]');
+                    if (ssnInput) {
+                        ssnInput.value = (nextEl && nextEl.dataset.nextSerial) ? nextEl.dataset.nextSerial : '';
+                    }
+
                     modalOverlay.classList.add('open');
                 }
 

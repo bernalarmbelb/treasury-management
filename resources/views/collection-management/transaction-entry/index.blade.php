@@ -125,10 +125,18 @@
                     }, 3000);
                 }
 
-                function openBatchModal(formStockId, formCode) {
+                function openBatchModal(formStockId, formCode, nextSerial) {
                     currentFormCode = formCode;
                     modalTitle.textContent = `Add new batch of ${formCode}`;
                     modalForm.action = `/collections/transaction-entry/${formStockId}/batches`;
+
+                    // Pre-fill Starting Serial with the next serial after the
+                    // form's latest batch (blank when there are no batches yet).
+                    const ssnInput = modalForm.querySelector('[name="starting_serial_number"]');
+                    if (ssnInput) {
+                        ssnInput.value = nextSerial || '';
+                    }
+
                     modalOverlay.classList.add('open');
                 }
 
@@ -145,16 +153,13 @@
                     }
 
                     event.preventDefault();
-                    openBatchModal(trigger.dataset.formStockId, trigger.dataset.formCode);
+                    openBatchModal(trigger.dataset.formStockId, trigger.dataset.formCode, trigger.dataset.nextSerial);
                 });
 
                 document.getElementById('formBatchCloseBtn').addEventListener('click', closeBatchModal);
 
-                modalOverlay.addEventListener('click', function (event) {
-                    if (event.target === modalOverlay) {
-                        closeBatchModal();
-                    }
-                });
+                // Intentionally no backdrop/outside-click close — the Add Batch
+                // modal only closes via the close (X) button or a successful save.
 
                 modalForm.addEventListener('submit', function (event) {
                     event.preventDefault();

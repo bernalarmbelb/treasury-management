@@ -14,6 +14,9 @@
     };
 @endphp
 
+{{-- Server-computed default Starting Serial for the next batch (re-rendered on each AJAX reload so it stays current). --}}
+<span id="reportLogNextSerial" data-next-serial="{{ $formStock->nextBatchStartingSerial() }}" hidden></span>
+
 <div class="table-scroll-area">
 <div class="table-wrapper">
     <table class="data-table">
