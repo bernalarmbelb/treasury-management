@@ -152,27 +152,10 @@
 	})();
 
 	// ── Live clock ────────────────────────────────────────────────────────
-	(function () {
-		const dateEl = document.getElementById('live-date');
-		const timeEl = document.getElementById('live-time');
-		const days  = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-		const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-
-		function pad(n) { return n < 10 ? '0' + n : n; }
-
-		function tick() {
-			const now = new Date();
-			const d = now.getDay(), mo = now.getMonth(), dy = now.getDate(), yr = now.getFullYear();
-			let h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
-			const ampm = h >= 12 ? 'PM' : 'AM';
-			h = h % 12 || 12;
-			if (dateEl) dateEl.textContent = days[d] + ' - ' + months[mo] + ' ' + dy + ', ' + yr;
-			if (timeEl) timeEl.textContent = pad(h) + ':' + pad(m) + ':' + pad(s) + ' ' + ampm;
-		}
-
-		tick();
-		setInterval(tick, 1000);
-	})();
+	// The header clock is driven solely by updateDateTime() in resources/js/app.js
+	// (the Vite-bundled script). A second inline clock used to run here too; both
+	// wrote #live-date every second with different day formats ("July 04" vs
+	// "July 4"), so they alternated and made the date jitter. Removed the duplicate.
 
 	// ── Notification bell ────────────────────────────────────────────────
 	(function () {

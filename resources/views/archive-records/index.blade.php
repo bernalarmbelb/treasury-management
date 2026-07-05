@@ -93,8 +93,13 @@
             <div class="filter-modal-overlay" id="filterModalOverlay">
                 <div class="filter-panel" id="filterPanel">
                     <div class="filter-panel-header">
-                        <p class="filter-panel-title">Filter By</p>
-                        <p class="filter-panel-subtitle">Pto. Diaz Treasury Management System</p>
+                        <div class="filter-panel-heading">
+                            <p class="filter-panel-title">Filter By</p>
+                            <p class="filter-panel-subtitle">Pto. Diaz Treasury Management System</p>
+                        </div>
+                        <button type="button" class="filter-panel-close-btn" id="filterCloseBtn" aria-label="Close">
+                            <x-bx-x class="icon" />
+                        </button>
                     </div>
                     <div class="filter-options">
                         <label class="filter-option">
@@ -317,6 +322,7 @@
         filterToggleBtn.addEventListener('click', () =>
             filterModalOverlay.classList.contains('open') ? closeFilterModal() : openFilterModal());
         filterModalOverlay.addEventListener('click', e => { if (e.target === filterModalOverlay) closeFilterModal(); });
+        document.getElementById('filterCloseBtn')?.addEventListener('click', closeFilterModal);
 
         filterFormType.addEventListener('change', () =>
             filterSelectForm.classList.toggle('open', filterFormType.checked));
