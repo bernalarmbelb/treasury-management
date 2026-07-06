@@ -8,7 +8,7 @@
             </div>
             <p class="ctc-preview-caption">BIR Form 0016 (December, 2014)</p>
 
-            <div class="ctcp-page">
+            <div class="ctcp-page ctcp-page--individual">
                 <div class="ctc-field ctc-field--title" style="left:0; top:0; width:438px; height:42px;">
                     <p>Community Tax Certificate</p>
                 </div>
@@ -241,9 +241,10 @@
                 </div>
             </div>
 
-            <p class="ctc-preview-caption">DOP: 05.14.2021</p>
+            <div class="ctc-preview-footer">
+                <p class="ctc-preview-caption">DOP: 05.14.2021</p>
+                <button type="button" class="ctc-preview-print-btn" id="ctcPreviewPrintBtn">Print</button>
+            </div>
         </div>
-
-        <button type="button" class="ctc-preview-print-btn" id="ctcPreviewPrintBtn">Print</button>
     </div>
 </div>

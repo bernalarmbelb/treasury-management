@@ -61,6 +61,7 @@
                                     'Form 56' => route('transaction-entry.or-rpt', $form->id),
                                     'Form 5IC' => route('transaction-entry.official-receipt', $form->id),
                                     'Form 10' => route('transaction-entry.marriage-certificate', $form->id),
+                                    'Form 58' => route('transaction-entry.burial', $form->id),
                                     default => '#',
                                 };
                             @endphp

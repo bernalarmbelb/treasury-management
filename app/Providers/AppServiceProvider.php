@@ -19,6 +19,7 @@ class AppServiceProvider extends ServiceProvider
         'BIR0017' => ['label' => 'Corporation Cedula', 'route' => 'transaction-entry.corporation-cedula'],
         'Form 56' => ['label' => 'OR / RPT', 'route' => 'transaction-entry.or-rpt'],
         'Form 10' => ['label' => 'Marriage Certificate', 'route' => 'transaction-entry.marriage-certificate'],
+        'Form 58' => ['label' => 'Burial', 'route' => 'transaction-entry.burial'],
     ];
 
     /**

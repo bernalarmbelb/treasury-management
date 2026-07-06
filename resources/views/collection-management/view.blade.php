@@ -11,6 +11,7 @@
             'Form 10'            => '675px',
             'Form 56'            => '812px',
             'Form 5IC'           => '451px',
+            'Form 58'            => '540px',
             'BIR0016', 'BIR0017' => '882px',
             default              => '900px',
         };
@@ -109,7 +110,7 @@
                     @case('BIR0016')
                         <div class="ctc-view-doc-wrap">
                             <p class="ctc-preview-caption">BIR Form 0016 (December, 2014)</p>
-                            <div class="ctcp-page ctcp-page--view">
+                            <div class="ctcp-page ctcp-page--individual ctcp-page--view">
                                 <div class="ctc-field ctc-field--title" style="left:0;top:0;width:438px;height:42px;">
                                     <p>Community Tax Certificate</p>
                                 </div>
@@ -705,6 +706,59 @@
                                     <p class="mc-doc-body mc-doc-body--sm">
                                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If males above 20 but under 25 years of age, or females above 18 but under 23 years of age, did not obtain advice of their parents or guardian, or if it be unfavorable, a note above the signature of the Local Civil Registrar should be indicated in the following manner: "Note: The advice upon the intended marriage of <span class="mc-doc-fill">{{ $t->husband_name }}</span> with <span class="mc-doc-fill">{{ $t->wife_name }}</span> not having been obtained or having been refused, the marriage shall not take place till after three months following completion of the publication, on <span class="mc-doc-fill mc-doc-fill--sm">{{ $t->instructions_day }}</span> <span class="mc-doc-fill">{{ $t->instructions_month }}</span>, 20<span class="mc-doc-fill mc-doc-fill--sm">{{ $t->instructions_year }}</span> of the application for the marriage license."
                                     </p>
+                                </div>
+                            </div>
+                        </div>
+                        @break
+
+                    {{-- ── Form 58 — Burial Permit ──────────────────────── --}}
+                    @case('Form 58')
+                        <div class="ctc-view-doc-wrap">
+                            <div class="burial-doc burial-doc--view">
+                                <div class="burial-doc-meta">
+                                    <span>Accountable Form No. 51 · Revised 1993</span><span>ORIGINAL</span>
+                                </div>
+                                <div class="burial-doc-masthead">
+                                    <p class="burial-doc-or-title">OFFICIAL RECEIPT</p>
+                                    <p class="burial-doc-or-sub">of the Republic of the Philippines</p>
+                                    <p class="burial-doc-no">No. {{ $t->certificate_number }} {{ $t->series_letter }}</p>
+                                </div>
+                                <div class="burial-doc-title-bar">City / Municipal Burial Permit and Fee Receipt</div>
+
+                                <p class="burial-doc-line">Mr. <b>{{ $t->applicant_name }}</b></p>
+                                <p class="burial-doc-line">To the City / Municipality of <b>{{ $t->city_municipality }}</b></p>
+                                <p class="burial-doc-line">Province of <b>{{ $t->province }}</b></p>
+
+                                <p class="burial-doc-line">Permission is hereby granted to <b>{{ $t->permission_type }}</b> the remains of —</p>
+
+                                <ol class="burial-doc-list">
+                                    <li>Name <b>{{ $t->deceased_name }}</b></li>
+                                    <li>Nationality <b>{{ $t->nationality }}</b></li>
+                                    <li>Age <b>{{ $t->age }}</b> years. Sex <b>{{ $t->sex }}</b></li>
+                                    <li>Date of death <b>{{ $fmtDate($t->date_of_death) }}</b></li>
+                                    <li>Cause of death <b>{{ $t->cause_of_death }}</b></li>
+                                    <li>Name of cemetery <b>{{ $t->cemetery_name }}</b></li>
+                                </ol>
+                                <p class="burial-doc-note">* In case of disinterment—</p>
+                                <ol class="burial-doc-list" start="7">
+                                    <li>Infectious or non-infectious <b>{{ $t->infectious }}</b></li>
+                                    <li>Body embalmed or not embalmed <b>{{ $t->embalmed }}</b></li>
+                                    <li>Disposition of remains <b>{{ $t->disposition }}</b></li>
+                                    <li>Amount of the fee per city/municipal ordinance <b>₱ {{ $fmt($t->fee_amount) }}</b></li>
+                                </ol>
+
+                                <div class="burial-doc-fee-row">
+                                    <span>No. <b>{{ $t->certificate_number }}</b></span>
+                                    <span>Dated: <b>{{ $fmtDate($t->date_issued) }}</b></span>
+                                </div>
+
+                                <p class="burial-doc-cert">
+                                    I hereby certify that I have this day issued this burial permit and have received the fee above stated in the amount of
+                                    <b>₱ {{ $fmt($t->fee_amount) }}</b>.
+                                </p>
+                                <div class="burial-doc-sig">
+                                    <b>{{ $t->municipal_secretary }}</b>
+                                    <span>City / Municipal Secretary / Treasurer</span>
                                 </div>
                             </div>
                         </div>

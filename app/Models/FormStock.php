@@ -203,4 +203,9 @@ class FormStock extends Model
     {
         return $this->hasMany(MarriageCertificateTransaction::class);
     }
+
+    public function burialPermitTransactions(): HasMany
+    {
+        return $this->hasMany(BurialPermitTransaction::class);
+    }
 }

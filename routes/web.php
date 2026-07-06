@@ -661,6 +661,72 @@ Route::post('/collections/transaction-entry/{formStock}/marriage-certificate', f
     ]);
 })->name('transaction-entry.marriage-certificate.store');
 
+Route::get('/collections/transaction-entry/{formStock}/burial', function (\App\Models\FormStock $formStock) {
+    $batch = $formStock->nextAvailableBatch();
+
+    return view('collection-management.transaction-entry.burial', [
+        'form' => $formStock,
+        'certificateNumber' => $batch?->nextAvailableSerialNumber()
+            ?? str_pad((\App\Models\BurialPermitTransaction::max('id') ?? 0) + 1, 7, '0', STR_PAD_LEFT),
+    ]);
+})->name('transaction-entry.burial');
+
+Route::post('/collections/transaction-entry/{formStock}/burial', function (\Illuminate\Http\Request $request, \App\Models\FormStock $formStock) {
+    $validated = $request->validate([
+        'certificate_number' => ['required', 'string'],
+        'series_letter' => ['nullable', 'string', 'max:5'],
+        'applicant_name' => ['nullable', 'string'],
+        'city_municipality' => ['nullable', 'string'],
+        'province' => ['nullable', 'string'],
+        'permission_type' => ['nullable', 'in:Inter,Disinter,Remove'],
+        'deceased_name' => ['required', 'string'],
+        'nationality' => ['nullable', 'string'],
+        'age' => ['nullable', 'integer', 'min:0', 'max:200'],
+        'sex' => ['nullable', 'string'],
+        'date_of_death' => ['nullable', 'date'],
+        'cause_of_death' => ['nullable', 'string'],
+        'cemetery_name' => ['nullable', 'string'],
+        'infectious' => ['nullable', 'string'],
+        'embalmed' => ['nullable', 'string'],
+        'disposition' => ['nullable', 'string'],
+        'fee_amount' => ['nullable', 'numeric', 'min:0'],
+        'date_issued' => ['nullable', 'date'],
+        'municipal_secretary' => ['nullable', 'string'],
+    ]);
+
+    // Fields 7–9 only apply to a disinterment; drop any stray values otherwise.
+    if (($validated['permission_type'] ?? null) !== 'Disinter') {
+        $validated['infectious'] = null;
+        $validated['embalmed'] = null;
+        $validated['disposition'] = null;
+    }
+
+    $burialTransaction = $formStock->burialPermitTransactions()->create($validated);
+
+    $formStock->update([
+        'qty' => max(0, $formStock->qty - 1),
+    ]);
+
+    $serial = 'No. ' . $validated['certificate_number'] . ($validated['series_letter'] ? ' ' . $validated['series_letter'] : '');
+
+    \App\Models\TransactionLog::create([
+        'serial_number'    => $serial,
+        'payee'            => $validated['applicant_name'] ?: $validated['deceased_name'],
+        'transacted_at'    => now(),
+        'form_type'        => $formStock->form_code,
+        'status'           => 'Completed',
+        'transaction_id'   => $burialTransaction->id,
+        'transaction_type' => \App\Models\BurialPermitTransaction::class,
+    ]);
+
+    \App\Models\ActivityLog::record('Collection Management - Add Entry - ' . \App\Models\TransactionLog::formName($formStock->form_code) . ' - ' . $serial);
+
+    return response()->json([
+        'message' => 'Transaction saved successfully.',
+        'redirect' => route('collections', [], false),
+    ]);
+})->name('transaction-entry.burial.store');
+
 Route::get('/collections/{log}', function (\Illuminate\Http\Request $request, \App\Models\TransactionLog $log) {
     $log->load('transaction');
 
@@ -1235,6 +1301,10 @@ Route::get('/reporting-abstract/{report}/export', function (\Illuminate\Http\Req
         );
     }
 
+    if ($report === 'abstract-ctc') {
+        return export_abstract_ctc_xlsx($built, $periodLabel, $filename);
+    }
+
     return export_ram_report_xlsx(
         $built,
         $periodLabel,
@@ -1344,10 +1414,10 @@ function ram_form_stock_breakdown(\App\Models\FormStock $formStock, \Illuminate\
 
 /**
  * Abstract of Community Tax Certificate — per-transaction listing for the
- * period (Individual + Corporation Cedula). The reference template has
- * separate "OR No." and "CTC No." columns; this system only records a
- * single certificate number per CTC, so both collapse into one "CTC No."
- * column.
+ * period (Individual + Corporation Cedula). "Tax" is split into CTC A (Basic
+ * Community Tax) and CTC B (Additional Community Tax), matching the reference
+ * template's columns: Date, Name of Taxpayer, CTC No., CTC A, CTC B, Penalty,
+ * Total.
  */
 function ram_build_abstract_ctc(\Illuminate\Support\Carbon $from, \Illuminate\Support\Carbon $to): array
 {
@@ -1359,13 +1429,15 @@ function ram_build_abstract_ctc(\Illuminate\Support\Carbon $from, \Illuminate\Su
         ->filter(fn ($log) => $log->transaction !== null);
 
     $rows = [];
-    $totalTax = 0;
+    $totalCtcA = 0;
+    $totalCtcB = 0;
     $totalInterest = 0;
     $totalAmount = 0;
 
     foreach ($logs as $log) {
         $t = $log->transaction;
-        $tax = (float) $t->total_community_tax_due;
+        $ctcA = (float) $t->a_community_tax_due;                          // Basic Community Tax
+        $ctcB = max(0, (float) $t->total_community_tax_due - $ctcA);      // Additional Community Tax
         $interest = (float) $t->interest;
         $amount = (float) $t->amount_paid;
 
@@ -1373,12 +1445,14 @@ function ram_build_abstract_ctc(\Illuminate\Support\Carbon $from, \Illuminate\Su
             $log->transacted_at->format('M d, Y'),
             $log->payee,
             $log->serial_number,
-            number_format($tax, 2),
+            number_format($ctcA, 2),
+            number_format($ctcB, 2),
             number_format($interest, 2),
             number_format($amount, 2),
         ];
 
-        $totalTax += $tax;
+        $totalCtcA += $ctcA;
+        $totalCtcB += $ctcB;
         $totalInterest += $interest;
         $totalAmount += $amount;
     }
@@ -1391,12 +1465,13 @@ function ram_build_abstract_ctc(\Illuminate\Support\Carbon $from, \Illuminate\Su
                 ['label' => 'Date', 'align' => 'left'],
                 ['label' => 'Name of Taxpayer', 'align' => 'left'],
                 ['label' => 'CTC No.', 'align' => 'left'],
-                ['label' => 'Tax', 'align' => 'right'],
-                ['label' => 'Interest/Penalty', 'align' => 'right'],
+                ['label' => 'CTC A', 'align' => 'right'],
+                ['label' => 'CTC B', 'align' => 'right'],
+                ['label' => 'Penalty', 'align' => 'right'],
                 ['label' => 'Total', 'align' => 'right'],
             ],
             'rows' => $rows,
-            'totals' => ['', '', 'Total', number_format($totalTax, 2), number_format($totalInterest, 2), number_format($totalAmount, 2)],
+            'totals' => ['', '', 'Total', number_format($totalCtcA, 2), number_format($totalCtcB, 2), number_format($totalInterest, 2), number_format($totalAmount, 2)],
         ]],
     ];
 }
@@ -2029,6 +2104,133 @@ function export_ram_report_xlsx(array $built, string $periodLabel, ?string $offi
     foreach (range('A', $lastColLetter) as $col) {
         $sheet->getColumnDimension($col)->setAutoSize(true);
     }
+
+    $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+
+    return response()->streamDownload(function () use ($writer) {
+        $writer->save('php://output');
+    }, $filename, [
+        'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    ]);
+}
+
+/**
+ * Dedicated .xlsx export for the Abstract of Community Tax Certificate,
+ * matching the municipality's reference template: centered letterhead block,
+ * a bordered 7-column table (Date, Name, CTC No., CTC A, CTC B, Penalty,
+ * Total), and a Sub Total / Add / GRAND TOTAL footer. Portrait, horizontally
+ * centered, 0.7" margins, with the reference column widths.
+ */
+function export_abstract_ctc_xlsx(array $built, string $periodLabel, string $filename): \Symfony\Component\HttpFoundation\StreamedResponse
+{
+    $A = \PhpOffice\PhpSpreadsheet\Style\Alignment::class;
+    $B = \PhpOffice\PhpSpreadsheet\Style\Border::class;
+    $C = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::class;
+    $NUM = \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC;
+
+    $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+    $sheet = $spreadsheet->getActiveSheet();
+    // Keep the Normal-style font at the default (Calibri 11) so column widths
+    // render at the reference's physical inches (Excel sizes columns by the
+    // default font's digit width). Roboto is applied per-cell below.
+
+    $section = $built['sections'][0];
+    $columns = $section['columns'];
+    $lastCol = $C::stringFromColumnIndex(count($columns));   // "G"
+
+    // ── Letterhead block (merged A:lastCol, centered) ──
+    $lines = [
+        ['Republic of the Philippines', false, false],
+        ['Province of Sorsogon', false, false],
+        ['MUNICIPALITY OF PRIETO DIAZ', false, false],
+        ['', false, false],
+        ['Office of the Municipal Treasurer', false, true],
+        ['ABSTRACT OF COMMUNITY TAX CERTIFICATE', true, false],
+        ['For the month of ' . $periodLabel, false, true],
+    ];
+    $row = 1;
+    foreach ($lines as [$text, $bold, $italic]) {
+        $sheet->setCellValue("A{$row}", $text);
+        $sheet->mergeCells("A{$row}:{$lastCol}{$row}");
+        $sheet->getStyle("A{$row}")->getFont()->setName('Roboto')->setSize(10)->setBold($bold)->setItalic($italic);
+        $sheet->getStyle("A{$row}")->getAlignment()->setHorizontal($A::HORIZONTAL_CENTER);
+        $row++;
+    }
+    $row++; // blank spacer
+
+    // ── Table header ──
+    foreach ($columns as $i => $col) {
+        $sheet->setCellValue($C::stringFromColumnIndex($i + 1) . $row, $col['label']);
+    }
+    $sheet->getStyle("A{$row}:{$lastCol}{$row}")->applyFromArray([
+        'font' => ['bold' => true, 'size' => 9, 'name' => 'Roboto'],
+        'alignment' => ['horizontal' => $A::HORIZONTAL_LEFT, 'vertical' => $A::VERTICAL_CENTER],
+        'borders' => ['allBorders' => ['borderStyle' => $B::BORDER_THIN]],
+    ]);
+    $sheet->getRowDimension($row)->setRowHeight(15);
+    $row++;
+
+    // ── Data rows (numeric columns written as real numbers) ──
+    foreach ($section['rows'] as $dataRow) {
+        foreach ($dataRow as $i => $value) {
+            $letter = $C::stringFromColumnIndex($i + 1);
+            if (($columns[$i]['align'] ?? 'left') === 'right') {
+                $sheet->setCellValueExplicit("{$letter}{$row}", (float) str_replace(',', '', $value), $NUM);
+                $sheet->getStyle("{$letter}{$row}")->getAlignment()->setHorizontal($A::HORIZONTAL_RIGHT);
+            } else {
+                $sheet->setCellValue("{$letter}{$row}", $value);
+                $sheet->getStyle("{$letter}{$row}")->getAlignment()->setHorizontal($A::HORIZONTAL_LEFT);
+            }
+        }
+        $sheet->getStyle("A{$row}:{$lastCol}{$row}")->applyFromArray([
+            'font' => ['size' => 8, 'name' => 'Roboto'],
+            'alignment' => ['vertical' => $A::VERTICAL_CENTER],
+            'borders' => ['allBorders' => ['borderStyle' => $B::BORDER_THIN]],
+        ]);
+        $sheet->getRowDimension($row)->setRowHeight(15);
+        $row++;
+    }
+
+    // ── Footer: Sub Total / Add / GRAND TOTAL ──
+    $totals = $section['totals'];   // ['', '', 'Total', ctcA, ctcB, penalty, total]
+    $footer = function (string $label) use ($sheet, &$row, $lastCol, $A, $B) {
+        $sheet->setCellValue("A{$row}", $label);
+        $sheet->mergeCells("A{$row}:B{$row}");
+        $sheet->getStyle("A{$row}:{$lastCol}{$row}")->applyFromArray([
+            'font' => ['bold' => true, 'size' => 8, 'name' => 'Roboto'],
+            'alignment' => ['vertical' => $A::VERTICAL_CENTER],
+            'borders' => ['allBorders' => ['borderStyle' => $B::BORDER_THIN]],
+        ]);
+        $sheet->getStyle("A{$row}")->getAlignment()->setHorizontal($A::HORIZONTAL_CENTER);
+    };
+
+    $subTotalRow = $row;
+    $footer('Sub Total:');
+    foreach ([3, 4, 5, 6] as $i) {   // D, E, F, G
+        $sheet->setCellValueExplicit($C::stringFromColumnIndex($i + 1) . $row, (float) str_replace(',', '', $totals[$i]), $NUM);
+    }
+    $row++;
+
+    $addRow = $row;
+    $footer('Add:');
+    $sheet->setCellValueExplicit("{$lastCol}{$row}", 0, $NUM);
+    $row++;
+
+    $footer('GRAND TOTAL:');
+    $sheet->setCellValue("{$lastCol}{$row}", "=SUM({$lastCol}{$subTotalRow}:{$lastCol}{$addRow})");
+
+    // ── Column widths (reference template) ──
+    $sheet->getColumnDimension('A')->setWidth(15.33203125);
+    $sheet->getColumnDimension('B')->setWidth(33.109375);
+    $sheet->getColumnDimension('C')->setWidth(11.77734375);
+    foreach (['D', 'E', 'F', 'G'] as $col) {
+        $sheet->getColumnDimension($col)->setWidth(7.44140625);
+    }
+
+    // ── Page setup: portrait, horizontally centered, 0.7" margins ──
+    $sheet->getPageSetup()->setOrientation(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_PORTRAIT);
+    $sheet->getPageSetup()->setHorizontalCentered(true);
+    $sheet->getPageMargins()->setLeft(0.7)->setRight(0.7)->setTop(0.7)->setBottom(0.7)->setHeader(0.3)->setFooter(0.3);
 
     $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
 

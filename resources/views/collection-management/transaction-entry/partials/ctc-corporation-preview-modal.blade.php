@@ -180,9 +180,10 @@
                 </div>
             </div>
 
-            <p class="ctc-preview-caption">DOP: 05.14.2021</p>
+            <div class="ctc-preview-footer">
+                <p class="ctc-preview-caption">DOP: 05.14.2021</p>
+                <button type="button" class="ctc-preview-print-btn" id="ctcPreviewPrintBtn">Print</button>
+            </div>
         </div>
-
-        <button type="button" class="ctc-preview-print-btn" id="ctcPreviewPrintBtn">Print</button>
     </div>
 </div>

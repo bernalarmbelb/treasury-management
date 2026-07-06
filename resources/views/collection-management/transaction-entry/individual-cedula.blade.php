@@ -18,7 +18,7 @@
     </div>
 
     <div class="collection-content">
-        <form class="ctc-page" id="ctcForm" method="POST" action="{{ route('transaction-entry.individual-cedula.store', $form->id, false) }}">
+        <form class="ctc-page ctc-page--individual" id="ctcForm" method="POST" action="{{ route('transaction-entry.individual-cedula.store', $form->id, false) }}">
             @csrf
             <div class="ctc-field ctc-field--title" style="left:40px; top:40px; width:438px; height:42px;">
                 <p>Community Tax Certificate</p>

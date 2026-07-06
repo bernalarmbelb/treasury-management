@@ -2758,6 +2758,118 @@ select.form-batch-input {
     color: var(--fonts-black, #333);
 }
 
+/* ===== Cedula (Corporation + Individual) — modern retheme =====
+   Scoped to the Cedula entry pages (.ctc-page--corporation/--individual) and
+   preview documents (.ctcp-page--corporation/--individual) so the shared
+   .ctc-* base — also used by OR/RPT — is not affected. Modal chrome is scoped
+   to #ctcPreviewOverlay (Cedula only; OR/RPT uses #ctcRptPreviewOverlay). */
+
+/* Soften the heavy #333 grid borders */
+.ctc-page--corporation .ctc-field,
+.ctc-page--individual .ctc-field,
+.ctcp-page--corporation .ctc-field,
+.ctcp-page--individual .ctc-field {
+    border-color: #c7d0dd;
+}
+
+/* Badge bar: solid dark -> light blue tint + blue text */
+.ctc-page--corporation .ctc-badge,
+.ctc-page--individual .ctc-badge,
+.ctcp-page--corporation .ctc-badge,
+.ctcp-page--individual .ctc-badge {
+    background-color: rgba(66, 122, 181, 0.08);
+}
+.ctc-page--corporation .ctc-badge p,
+.ctc-page--individual .ctc-badge p,
+.ctcp-page--corporation .ctc-badge p,
+.ctcp-page--individual .ctc-badge p {
+    color: #2f5f92;
+}
+
+/* Column headers + Total/Interest labels: light blue tint + blue text */
+.ctc-page--corporation .ctc-col-header,
+.ctc-page--individual .ctc-col-header,
+.ctcp-page--corporation .ctc-col-header,
+.ctcp-page--individual .ctc-col-header,
+.ctc-page--corporation .ctc-cell-label,
+.ctc-page--individual .ctc-cell-label,
+.ctcp-page--corporation .ctc-cell-label,
+.ctcp-page--individual .ctc-cell-label {
+    background-color: rgba(66, 122, 181, 0.08);
+}
+.ctc-page--corporation .ctc-col-header div,
+.ctc-page--individual .ctc-col-header div,
+.ctcp-page--corporation .ctc-col-header div,
+.ctcp-page--individual .ctc-col-header div,
+.ctc-page--corporation .ctc-cell-label,
+.ctc-page--individual .ctc-cell-label,
+.ctcp-page--corporation .ctc-cell-label,
+.ctcp-page--individual .ctc-cell-label {
+    color: #2f5f92;
+}
+
+/* "N/A" shaded cells: heavy dark grey -> light neutral */
+.ctc-page--corporation .ctc-cell-grey,
+.ctc-page--individual .ctc-cell-grey,
+.ctcp-page--corporation .ctc-cell-grey,
+.ctcp-page--individual .ctc-cell-grey {
+    background-color: #e9edf2;
+    border-color: #c7d0dd;
+}
+
+/* Date of Registration / Incorporation: the value/input now sits BELOW the
+   two-line caption instead of overlapping it. Targets only the multiline-
+   caption date field (the single-line "Date Issued" is unaffected). */
+.ctc-input-wrap.ctc-date:has(.ctc-caption-multiline) .ctcp-value,
+.ctc-input-wrap.ctc-date:has(.ctc-caption-multiline) .ctc-input {
+    padding-top: 40px;
+}
+
+/* Preview modal chrome (Cedula only) */
+#ctcPreviewOverlay .ctc-preview-modal {
+    background-color: #fff;
+    border-radius: 14px;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.18);
+}
+#ctcPreviewOverlay .ctc-preview-close-btn {
+    border: 1px solid #d7dee8;
+    background-color: #f1f4f8;
+    color: #5a6675;
+}
+#ctcPreviewOverlay .ctc-preview-close-btn:hover {
+    background-color: #e6ebf2;
+}
+/* Footer row inside the card: DOP caption (left) + Print button (right) */
+#ctcPreviewOverlay .ctc-preview-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-top: 4px;
+}
+#ctcPreviewOverlay .ctc-preview-print-btn {
+    position: static;
+    border: 1px solid #427AB5;
+    background-color: #eaf1fa;
+    color: #2f5f92;
+    font-family: var(--font-family-secondary, 'Manrope', sans-serif);
+    font-weight: 600;
+}
+#ctcPreviewOverlay .ctc-preview-print-btn:hover {
+    background-color: #d9e6f5;
+}
+
+/* View page: left-align the Cedula document captions ("BIR Form 0017…" and
+   "DOP:…") to the document's left edge instead of centering them. Constrained
+   to the document width so, with the wrap's align-items:center, the caption
+   block lines up with the 882px document below it. Cedula only (OR/RPT, OR,
+   and MC wraps carry their own modifier classes). */
+.ctc-view-doc-wrap:not(.ctc-view-doc-wrap--rpt):not(.ctc-view-doc-wrap--or):not(.ctc-view-doc-wrap--mc) .ctc-preview-caption {
+    width: 882px;
+    max-width: 100%;
+    text-align: left;
+}
+
 .ctcp-radio {
     display: inline-block;
     width: 18px;
@@ -4074,6 +4186,329 @@ select.form-batch-input {
 .ctc-or2-cell.has-error {
     border-color: #d92d20;
 }
+
+/* ===== Burial Permit (Form 58) entry — receipt-style paper replica ===== */
+.burial-page {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto 32px;
+    padding: 18px 18px 20px;
+    background-color: #fff;
+    border: 1px solid #c7d0dd;
+    border-radius: 10px;
+    box-sizing: border-box;
+}
+
+/* Modern soft borders + tint, scoped to this form only */
+.burial-page .ctc-or2-cell {
+    border-color: #c7d0dd;
+    font-family: var(--font-family-secondary, 'Manrope', sans-serif);
+}
+.burial-page .ctc-or2-cell.filled {
+    background-color: #f6f9fc;
+}
+.burial-page .ctc-or2-cell input:focus {
+    outline: 1px solid var(--primary, #427AB5);
+}
+
+.burial-meta {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-family-secondary, 'Manrope', sans-serif);
+    font-size: 9px;
+    letter-spacing: 0.03em;
+    color: #8590a0;
+}
+
+.burial-masthead {
+    text-align: center;
+}
+.burial-or-title {
+    margin: 0;
+    font-family: var(--font-family-secondary, 'Manrope', sans-serif);
+    font-weight: 800;
+    font-size: 20px;
+    letter-spacing: 0.02em;
+    color: #2b3543;
+}
+.burial-or-sub {
+    margin: 0 0 6px;
+    font-family: var(--font-family-secondary, 'Manrope', sans-serif);
+    font-size: 10px;
+    color: #5a6675;
+}
+.burial-no-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+.burial-seal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border: 1px solid #c7d0dd;
+    border-radius: 50%;
+    color: #9aa4b2;
+}
+.burial-seal .icon { width: 18px; height: 18px; }
+.burial-no-label {
+    font-family: var(--font-family-secondary, 'Manrope', sans-serif);
+    font-size: 13px;
+    color: #2b3543;
+}
+.burial-no-box {
+    border: 1px solid var(--primary, #427AB5);
+    border-radius: 6px;
+    background-color: rgba(66, 122, 181, 0.06);
+    overflow: hidden;
+}
+.burial-no-box input {
+    width: 140px;
+    border: none;
+    background: transparent;
+    padding: 4px 10px;
+    font-family: var(--font-family-secondary, 'Manrope', sans-serif);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: #2f5f92;
+}
+.burial-no-box input:focus { outline: none; }
+.burial-series {
+    width: 42px;
+    border: 1px solid #c7d0dd;
+    border-radius: 6px;
+    padding: 4px 6px;
+    text-align: center;
+    font-family: var(--font-family-secondary, 'Manrope', sans-serif);
+    font-weight: 700;
+    color: #2b3543;
+}
+.burial-serial-hint {
+    margin: 3px 0 0;
+    font-family: var(--font-family-secondary, 'Manrope', sans-serif);
+    font-size: 8px;
+    color: #9aa4b2;
+}
+
+.burial-title-bar {
+    margin: 4px 0 2px;
+    padding: 6px;
+    text-align: center;
+    background-color: rgba(66, 122, 181, 0.08);
+    border: 1px solid rgba(66, 122, 181, 0.3);
+    border-radius: 4px;
+    font-family: var(--font-family-secondary, 'Manrope', sans-serif);
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--primary, #427AB5);
+}
+
+.burial-permission {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 9px 11px;
+    border: 1px dashed #b9c3d0;
+    border-radius: 7px;
+    background-color: #fbfcfe;
+}
+.burial-permission-label,
+.burial-permission-tail {
+    font-family: var(--font-family-secondary, 'Manrope', sans-serif);
+    font-size: 10px;
+    letter-spacing: 0.03em;
+    color: #6b7686;
+    text-transform: uppercase;
+}
+.burial-permission-opts {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+.burial-radio {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-family-secondary, 'Manrope', sans-serif);
+    font-size: 12px;
+    color: #2b3543;
+    cursor: pointer;
+}
+.burial-radio input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+.burial-radio-dot {
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    border: 2px solid #b9c3d0;
+    box-sizing: border-box;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.burial-radio input:checked + .burial-radio-dot {
+    border-color: var(--primary, #427AB5);
+    box-shadow: inset 0 0 0 3px var(--primary, #427AB5);
+}
+.burial-radio input:focus-visible + .burial-radio-dot {
+    outline: 2px solid rgba(66, 122, 181, 0.5);
+    outline-offset: 2px;
+}
+
+.burial-disinter-note {
+    margin: 2px 0 0;
+    font-family: var(--font-family-secondary, 'Manrope', sans-serif);
+    font-style: italic;
+    font-size: 9px;
+    color: #8590a0;
+}
+.burial-disinter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: opacity 0.15s ease;
+}
+.burial-disinter-group.is-disabled {
+    opacity: 0.5;
+}
+
+.burial-cert {
+    margin-top: 4px;
+    padding: 10px 12px;
+    border: 1px solid #e3e9f1;
+    border-radius: 8px;
+    background-color: #fbfcfe;
+}
+.burial-cert-text {
+    margin: 0 0 10px;
+    font-family: var(--font-family-secondary, 'Manrope', sans-serif);
+    font-size: 10px;
+    line-height: 1.55;
+    color: #5a6675;
+}
+.burial-cert-amount {
+    font-weight: 700;
+    color: #2b3543;
+}
+.burial-sig-input {
+    max-width: 260px;
+    margin-left: auto;
+}
+
+.burial-cancel-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 110px;
+    height: 42px;
+    margin-right: 10px;
+    padding: 0 20px;
+    border: 1px solid #c7d0dd;
+    border-radius: 8px;
+    background-color: #fff;
+    font-family: var(--font-family-secondary, 'Manrope', sans-serif);
+    font-weight: 600;
+    font-size: 14px;
+    color: #5a6675;
+    text-decoration: none;
+    cursor: pointer;
+}
+.burial-cancel-btn:hover { background-color: #f1f4f8; }
+
+/* ── Burial preview modal (read-only receipt) ── */
+.burial-preview-modal {
+    width: 540px;
+    background-color: #fff;
+    border-radius: 14px;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.18);
+}
+.burial-doc {
+    width: 100%;
+    font-family: var(--font-family-secondary, 'Manrope', sans-serif);
+    color: #2b3543;
+    font-size: 12px;
+    line-height: 1.5;
+}
+.burial-doc-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 9px;
+    color: #8590a0;
+}
+.burial-doc-masthead { text-align: center; margin: 6px 0; }
+.burial-doc-or-title { margin: 0; font-weight: 800; font-size: 18px; color: #2b3543; }
+.burial-doc-or-sub { margin: 0; font-size: 10px; color: #5a6675; }
+.burial-doc-no { margin: 6px 0 0; font-weight: 700; font-size: 15px; }
+.burial-doc-title-bar {
+    margin: 6px 0 10px;
+    padding: 6px;
+    text-align: center;
+    background-color: rgba(66, 122, 181, 0.08);
+    border: 1px solid rgba(66, 122, 181, 0.3);
+    border-radius: 4px;
+    font-weight: 700;
+    font-size: 12px;
+    text-transform: uppercase;
+    color: var(--primary, #427AB5);
+}
+.burial-doc-line { margin: 4px 0; }
+.burial-doc-line b, .burial-doc-list b, .burial-doc-cert b, .burial-doc-sig b {
+    font-weight: 700;
+    border-bottom: 1px solid #c7d0dd;
+    padding: 0 4px;
+    min-width: 40px;
+    display: inline-block;
+}
+.burial-doc-list { margin: 6px 0; padding-left: 22px; }
+.burial-doc-list li { margin: 3px 0; }
+.burial-doc-note { margin: 6px 0 2px; font-style: italic; font-size: 10px; color: #6b7686; }
+.burial-doc-fee-row { display: flex; gap: 24px; margin: 8px 0; }
+.burial-doc-cert { margin: 10px 0; font-size: 11px; line-height: 1.55; }
+.burial-doc-sig { text-align: center; margin-top: 18px; }
+.burial-doc-sig b { border-bottom: none; }
+.burial-doc-sig span { display: block; border-top: 1px solid #c7d0dd; margin-top: 2px; padding-top: 3px; font-size: 9px; color: #8590a0; }
+
+/* Standalone burial document on the transaction View page (no modal card). */
+.burial-doc--view {
+    width: 540px;
+    max-width: 100%;
+    padding: 20px 22px 24px;
+    background-color: #fff;
+    border: 1px solid #c7d0dd;
+    border-radius: 10px;
+    box-sizing: border-box;
+}
+
+.burial-preview-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    margin-top: 6px;
+}
+.burial-preview-actions .ctc-preview-print-btn {
+    position: static;
+    min-width: 120px;
+    border: 1px solid var(--primary, #427AB5);
+    background-color: #eaf1fa;
+    color: #2f5f92;
+    font-family: var(--font-family-secondary, 'Manrope', sans-serif);
+    font-weight: 600;
+}
+.burial-preview-actions .ctc-preview-print-btn:hover { background-color: #d9e6f5; }
 
 .ctcp-page--or-rpt .pagination-bar {
     width: 100%;
