@@ -1336,7 +1336,122 @@ Route::get('/reporting-abstract/{report}/export', function (\Illuminate\Http\Req
         $filename
     );
 })->name('reporting-abstract.export');
-Route::get('/bank-deposit-reconciliation', function () { return view('bank-deposit-reconciliation.index'); })->name('bank-deposit-reconciliation');
+// ── Bank Deposit & Reconciliation (Phase 2a: read-only logs) ──────────────
+Route::get('/bank-deposit-reconciliation', function (\Illuminate\Http\Request $request) {
+    // Combined reconciliation ledger: Incoming (Collections) + Outgoing (Cheques).
+    $perPageOptions = [10, 25, 50, 100];
+    $perPage = in_array((int) $request->input('per_page'), $perPageOptions) ? (int) $request->input('per_page') : 10;
+
+    $incoming = \App\Models\TransactionLog::whereNull('archived_at')->get()->map(fn ($l) => (object) [
+        'date'      => $l->transacted_at,
+        'type'      => 'Incoming',
+        'reference' => $l->serial_number,
+        'party'     => $l->payee,
+        'amount'    => (float) ($l->amount ?? 0),
+        'status'    => $l->status === 'Cancelled' ? 'Void' : ucfirst($l->recon_status ?: 'pending'),
+        'view_url'  => route('collections.view', $l->id, false),
+    ]);
+
+    $outgoing = \App\Models\Cheque::whereNull('archived_at')->get()->map(fn ($c) => (object) [
+        'date'      => $c->created_at,
+        'type'      => 'Outgoing',
+        'reference' => 'Cheque ' . $c->check_number,
+        'party'     => $c->pay_to_order_of ?: '—',
+        'amount'    => (float) $c->amount,
+        'status'    => $c->status === 'Cancelled' ? 'Void' : 'Pending',
+        'view_url'  => route('cheque-management.view', $c->id, false),
+    ]);
+
+    $rows = $incoming->concat($outgoing);
+
+    if ($search = $request->input('search')) {
+        $rows = $rows->filter(fn ($r) => str_contains(strtolower($r->party . ' ' . $r->reference), strtolower($search)));
+    }
+    if ($types = array_intersect((array) $request->input('type', []), ['Incoming', 'Outgoing'])) {
+        $rows = $rows->filter(fn ($r) => in_array($r->type, $types));
+    }
+    if ($statuses = array_intersect((array) $request->input('status', []), ['Pending', 'Completed', 'Failed', 'Void'])) {
+        $rows = $rows->filter(fn ($r) => in_array($r->status, $statuses));
+    }
+    if ($ds = $request->input('date_start')) {
+        $rows = $rows->filter(fn ($r) => $r->date && $r->date->toDateString() >= $ds);
+    }
+    if ($de = $request->input('date_end')) {
+        $rows = $rows->filter(fn ($r) => $r->date && $r->date->toDateString() <= $de);
+    }
+
+    $rows = $rows->sortByDesc('date')->values();
+
+    $page = (int) ($request->input('page') ?: 1);
+    $ledger = new \Illuminate\Pagination\LengthAwarePaginator(
+        $rows->forPage($page, $perPage)->values(),
+        $rows->count(),
+        $perPage,
+        $page,
+        ['path' => $request->url(), 'query' => $request->query()]
+    );
+
+    $data = ['ledger' => $ledger, 'perPageOptions' => $perPageOptions, 'perPage' => $perPage];
+
+    if ($request->ajax()) {
+        return view('bank-deposit-reconciliation.partials.combined-table', $data);
+    }
+
+    return view('bank-deposit-reconciliation.index', $data);
+})->name('bank-deposit-reconciliation');
+
+Route::get('/bank-deposit-reconciliation/incoming', function (\Illuminate\Http\Request $request) {
+    $perPageOptions = [10, 25, 50, 100];
+    $perPage = in_array((int) $request->input('per_page'), $perPageOptions) ? (int) $request->input('per_page') : 10;
+
+    $sortable = ['transacted_at', 'payee', 'form_type', 'payment_method', 'amount'];
+    $sort = in_array($request->input('sort'), $sortable) ? $request->input('sort') : 'transacted_at';
+    $direction = $request->input('direction') === 'asc' ? 'asc' : 'desc';
+
+    $logs = \App\Models\TransactionLog::query()
+        ->whereNull('archived_at')
+        ->when($request->input('search'), fn ($q, $s) => $q->where(fn ($q) => $q->where('payee', 'like', "%{$s}%")->orWhere('serial_number', 'like', "%{$s}%")))
+        ->when($request->input('date_start'), fn ($q, $d) => $q->whereDate('transacted_at', '>=', $d))
+        ->when($request->input('date_end'), fn ($q, $d) => $q->whereDate('transacted_at', '<=', $d))
+        ->orderBy($sort, $direction)
+        ->paginate($perPage)
+        ->withQueryString();
+
+    $data = ['logs' => $logs, 'perPageOptions' => $perPageOptions, 'perPage' => $perPage, 'sort' => $sort, 'direction' => $direction];
+
+    if ($request->ajax()) {
+        return view('bank-deposit-reconciliation.partials.incoming-table', $data);
+    }
+
+    return view('bank-deposit-reconciliation.incoming', $data);
+})->name('bank-deposit-reconciliation.incoming');
+
+Route::get('/bank-deposit-reconciliation/outgoing', function (\Illuminate\Http\Request $request) {
+    $perPageOptions = [10, 25, 50, 100];
+    $perPage = in_array((int) $request->input('per_page'), $perPageOptions) ? (int) $request->input('per_page') : 10;
+
+    $sortable = ['created_at', 'check_number', 'pay_to_order_of', 'amount', 'status'];
+    $sort = in_array($request->input('sort'), $sortable) ? $request->input('sort') : 'created_at';
+    $direction = $request->input('direction') === 'asc' ? 'asc' : 'desc';
+
+    $cheques = \App\Models\Cheque::query()
+        ->with('bankAccount')
+        ->whereNull('archived_at')
+        ->when($request->input('search'), fn ($q, $s) => $q->where(fn ($q) => $q->where('pay_to_order_of', 'like', "%{$s}%")->orWhere('check_number', 'like', "%{$s}%")))
+        ->when($request->input('date_start'), fn ($q, $d) => $q->whereDate('created_at', '>=', $d))
+        ->when($request->input('date_end'), fn ($q, $d) => $q->whereDate('created_at', '<=', $d))
+        ->orderBy($sort, $direction)
+        ->paginate($perPage)
+        ->withQueryString();
+
+    $data = ['cheques' => $cheques, 'perPageOptions' => $perPageOptions, 'perPage' => $perPage, 'sort' => $sort, 'direction' => $direction];
+
+    if ($request->ajax()) {
+        return view('bank-deposit-reconciliation.partials.outgoing-table', $data);
+    }
+
+    return view('bank-deposit-reconciliation.outgoing', $data);
+})->name('bank-deposit-reconciliation.outgoing');
 // ── Cheque Management (disbursement) ──────────────────────────────────────
 Route::get('/cheque-management', function (\Illuminate\Http\Request $request) {
     $perPageOptions = [10, 25, 50, 100];
