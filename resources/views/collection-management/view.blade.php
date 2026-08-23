@@ -17,6 +17,46 @@
         };
     @endphp
 
+    <style>
+        /* Clean read-only screen view (print keeps the receipt replica below). */
+        @media screen { .cm-print { display: none; } }
+        @media print {
+            .cm-screen { display: none !important; }
+            .ctc-view-meta, .cqm-view-payment, .ctc-cancel-request-card, .ctc-view-actions { display: none !important; }
+        }
+        .cm-screen { display: flex; flex-direction: column; gap: 16px; max-width: 820px; margin: 0 auto; }
+        .cm-card { background: #fff; border: 1px solid var(--line, #E3E8EF); border-radius: 12px; box-shadow: 0 1px 2px rgba(16,32,56,.05), 0 8px 22px rgba(16,32,56,.05); overflow: hidden; }
+        .cm-summary { display: flex; align-items: center; justify-content: space-between; gap: 18px; flex-wrap: wrap; padding: 20px 22px; }
+        .cm-sum-l { font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--muted, #6b7685); }
+        .cm-sum-n { font-size: 22px; font-weight: 800; letter-spacing: -.01em; color: var(--ink, #1f2733); }
+        .cm-sum-m { font-size: 13px; color: var(--muted, #6b7685); margin-top: 2px; }
+        .cm-sum-amt { text-align: right; }
+        .cm-sum-al { font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--muted, #6b7685); }
+        .cm-sum-av { font-size: 26px; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--ink, #1f2733); }
+        .cm-h { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 14px 18px; border-bottom: 1px solid var(--line, #E3E8EF); background: var(--surface-2, #F7F9FB); }
+        .cm-k { font-size: 11px; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; color: var(--primary, #427AB5); }
+        .cm-sub { font-size: 12.5px; color: var(--muted, #6b7685); }
+        .cm-b { padding: 18px; }
+        .cm-stack { display: flex; flex-direction: column; gap: 16px; }
+        .cm-kv { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line, #E3E8EF); border: 1px solid var(--line, #E3E8EF); border-radius: 10px; overflow: hidden; }
+        .cm-cell { background: #fff; padding: 13px 15px; display: flex; flex-direction: column; gap: 3px; }
+        .cm-l { font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted, #6b7685); }
+        .cm-v { font-size: 14.5px; font-weight: 600; color: var(--ink, #1f2733); }
+        .cm-tbl-wrap { overflow-x: auto; }
+        .cm-tbl { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 420px; }
+        .cm-tbl thead th { text-align: left; font-size: 11px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted, #6b7685); font-weight: 700; padding: 11px 16px; border-bottom: 1px solid var(--line, #E3E8EF); background: var(--surface-2, #F7F9FB); }
+        .cm-tbl th.num, .cm-tbl td.num { text-align: right; font-variant-numeric: tabular-nums; }
+        .cm-tbl tbody td { padding: 13px 16px; border-bottom: 1px solid var(--line, #E3E8EF); color: var(--ink, #1f2733); }
+        .cm-tbl td.num { font-weight: 600; }
+        .cm-tbl tbody tr:last-child td { border-bottom: none; }
+        .cm-tbl tfoot td { padding: 13px 16px; font-weight: 800; font-variant-numeric: tabular-nums; border-top: 2px solid var(--line, #E3E8EF); }
+        .cm-lbl { text-align: right; color: var(--muted, #6b7685); font-weight: 700; text-transform: uppercase; font-size: 11px; letter-spacing: .05em; }
+        .cm-empty { color: var(--muted, #6b7685); font-style: italic; text-align: center; }
+        .cm-words { font-size: 14px; color: var(--ink, #1f2733); }
+        .cm-words .cm-l { display: block; margin-bottom: 3px; }
+        @media (max-width: 640px) { .cm-kv { grid-template-columns: 1fr 1fr; } .cm-summary .cm-sum-amt { text-align: left; } }
+    </style>
+
     <div class="x-header-container sub-nav-sticky">
         <div class="container-title">
             <div style="display: flex; flex-direction: column;">
@@ -135,6 +175,195 @@
                     </div>
                 </div>
             @else
+                {{-- ══ Clean read-only screen view ══════════════════════════ --}}
+                <div class="cm-screen">
+                    <div class="cm-card cm-summary">
+                        <div>
+                            <div class="cm-sum-l">{{ $formName }} · {{ $log->serial_number }}</div>
+                            <div class="cm-sum-n">{{ $log->payee }}</div>
+                            <div class="cm-sum-m">Issued {{ $log->transacted_at->format('F j, Y') }}</div>
+                        </div>
+                        <div class="cm-sum-amt">
+                            <div class="cm-sum-al">Amount</div>
+                            <div class="cm-sum-av">₱ {{ number_format((float) $log->amount, 2) }}</div>
+                        </div>
+                    </div>
+
+                    @switch($log->form_type)
+                        @case('Form 5IC')
+                            <div class="cm-card">
+                                <div class="cm-h"><span class="cm-k">Collection Details</span></div>
+                                <div class="cm-tbl-wrap"><table class="cm-tbl">
+                                    <thead><tr><th>Nature of Collection</th><th>Account Code</th><th class="num">Amount</th></tr></thead>
+                                    <tbody>
+                                        @forelse(collect($t->items ?? [])->filter(fn ($i) => ($i['description'] ?? '') !== '' || (float) ($i['amount'] ?? 0) > 0) as $item)
+                                            <tr><td>{{ $item['description'] ?? '—' }}</td><td>{{ $item['account_code'] ?? '—' }}</td><td class="num">{{ number_format((float) ($item['amount'] ?? 0), 2) }}</td></tr>
+                                        @empty
+                                            <tr><td colspan="3" class="cm-empty">No items.</td></tr>
+                                        @endforelse
+                                    </tbody>
+                                    <tfoot><tr><td class="cm-lbl" colspan="2">Total</td><td class="num">₱ {{ number_format((float) $t->total, 2) }}</td></tr></tfoot>
+                                </table></div>
+                            </div>
+                            <div class="cm-card">
+                                <div class="cm-h"><span class="cm-k">Receipt Information</span></div>
+                                <div class="cm-b cm-stack">
+                                    <div class="cm-kv">
+                                        <div class="cm-cell"><span class="cm-l">Payor</span><span class="cm-v">{{ $t->payor ?: '—' }}</span></div>
+                                        <div class="cm-cell"><span class="cm-l">Agency</span><span class="cm-v">{{ $t->agency ?: '—' }}</span></div>
+                                        <div class="cm-cell"><span class="cm-l">Fund</span><span class="cm-v">{{ $t->fund ?: '—' }}</span></div>
+                                        <div class="cm-cell"><span class="cm-l">Receipt No.</span><span class="cm-v">{{ $t->certificate_number }}</span></div>
+                                        <div class="cm-cell"><span class="cm-l">Date Issued</span><span class="cm-v">{{ $fmtDate($t->date_issued) ?: '—' }}</span></div>
+                                        <div class="cm-cell"><span class="cm-l">Form Type</span><span class="cm-v">{{ $formName }} · {{ $log->form_type }}</span></div>
+                                    </div>
+                                    @if($t->amount_in_words)<div class="cm-words"><span class="cm-l">Amount in Words</span>{{ $t->amount_in_words }}</div>@endif
+                                </div>
+                            </div>
+                            @break
+
+                        @case('BIR0016')
+                            <div class="cm-card">
+                                <div class="cm-h"><span class="cm-k">Certificate Holder</span></div>
+                                <div class="cm-b"><div class="cm-kv">
+                                    <div class="cm-cell"><span class="cm-l">Name</span><span class="cm-v">{{ trim($t->surname . ', ' . $t->first_name . ' ' . ($t->middle_name ?? '')) }}</span></div>
+                                    <div class="cm-cell"><span class="cm-l">TIN</span><span class="cm-v">{{ $t->tin ?: '—' }}</span></div>
+                                    <div class="cm-cell"><span class="cm-l">Sex</span><span class="cm-v">{{ $t->sex ?: '—' }}</span></div>
+                                    <div class="cm-cell"><span class="cm-l">Civil Status</span><span class="cm-v">{{ $t->civil_status ?: '—' }}</span></div>
+                                    <div class="cm-cell"><span class="cm-l">Citizenship</span><span class="cm-v">{{ $t->citizenship ?: '—' }}</span></div>
+                                    <div class="cm-cell"><span class="cm-l">Date of Birth</span><span class="cm-v">{{ $fmtDate($t->date_of_birth) ?: '—' }}</span></div>
+                                    <div class="cm-cell"><span class="cm-l">Place of Birth</span><span class="cm-v">{{ $t->place_of_birth ?: '—' }}</span></div>
+                                    <div class="cm-cell"><span class="cm-l">Profession</span><span class="cm-v">{{ $t->profession ?: '—' }}</span></div>
+                                    <div class="cm-cell"><span class="cm-l">Height / Weight</span><span class="cm-v">{{ $t->height ?: '—' }} / {{ $t->weight ?: '—' }}</span></div>
+                                    <div class="cm-cell"><span class="cm-l">Place of Issue</span><span class="cm-v">{{ $t->place_of_issue ?: '—' }}</span></div>
+                                    <div class="cm-cell"><span class="cm-l">Year</span><span class="cm-v">{{ $t->year ?: '—' }}</span></div>
+                                    <div class="cm-cell"><span class="cm-l">Date Issued</span><span class="cm-v">{{ $fmtDate($t->date_issued) ?: '—' }}</span></div>
+                                </div></div>
+                            </div>
+                            <div class="cm-card">
+                                <div class="cm-h"><span class="cm-k">Community Tax</span></div>
+                                <div class="cm-tbl-wrap"><table class="cm-tbl">
+                                    <thead><tr><th>Basis</th><th class="num">Taxable Amount</th><th class="num">Tax Due</th></tr></thead>
+                                    <tbody>
+                                        <tr><td>Basic Community Tax</td><td class="num">—</td><td class="num">{{ $fmt($t->a_community_tax_due) ?: '0.00' }}</td></tr>
+                                        @if($t->item1_taxable_amount)<tr><td>Additional — Item 1</td><td class="num">{{ $fmt($t->item1_taxable_amount) }}</td><td class="num">{{ $fmt($t->item1_community_tax_due) }}</td></tr>@endif
+                                        @if($t->item2_taxable_amount)<tr><td>Additional — Item 2</td><td class="num">{{ $fmt($t->item2_taxable_amount) }}</td><td class="num">{{ $fmt($t->item2_community_tax_due) }}</td></tr>@endif
+                                        @if($t->item3_taxable_amount)<tr><td>Additional — Item 3</td><td class="num">{{ $fmt($t->item3_taxable_amount) }}</td><td class="num">{{ $fmt($t->item3_community_tax_due) }}</td></tr>@endif
+                                        @if($t->interest)<tr><td>Interest</td><td class="num">—</td><td class="num">{{ $fmt($t->interest) }}</td></tr>@endif
+                                    </tbody>
+                                    <tfoot><tr><td class="cm-lbl" colspan="2">Total Tax Due</td><td class="num">₱ {{ $fmt($t->total_community_tax_due) ?: $fmt($t->amount_paid) }}</td></tr></tfoot>
+                                </table></div>
+                            </div>
+                            @break
+
+                        @case('BIR0017')
+                            <div class="cm-card">
+                                <div class="cm-h"><span class="cm-k">Corporation Details</span></div>
+                                <div class="cm-b"><div class="cm-kv">
+                                    <div class="cm-cell"><span class="cm-l">Company Name</span><span class="cm-v">{{ $t->company_name ?: '—' }}</span></div>
+                                    <div class="cm-cell"><span class="cm-l">TIN</span><span class="cm-v">{{ $t->tin ?: '—' }}</span></div>
+                                    <div class="cm-cell"><span class="cm-l">Address</span><span class="cm-v">{{ $t->address ?: '—' }}</span></div>
+                                    <div class="cm-cell"><span class="cm-l">Date of Registration</span><span class="cm-v">{{ $fmtDate($t->date_of_registration) ?: '—' }}</span></div>
+                                    <div class="cm-cell"><span class="cm-l">Kind of Organization</span><span class="cm-v">{{ $t->kind_of_organization ?: '—' }}</span></div>
+                                    <div class="cm-cell"><span class="cm-l">Nature of Business</span><span class="cm-v">{{ $t->nature_of_business ?: '—' }}</span></div>
+                                    <div class="cm-cell"><span class="cm-l">Place of Issue</span><span class="cm-v">{{ $t->place_of_issue ?: '—' }}</span></div>
+                                    <div class="cm-cell"><span class="cm-l">Year</span><span class="cm-v">{{ $t->year ?: '—' }}</span></div>
+                                    <div class="cm-cell"><span class="cm-l">Date Issued</span><span class="cm-v">{{ $fmtDate($t->date_issued) ?: '—' }}</span></div>
+                                </div></div>
+                            </div>
+                            <div class="cm-card">
+                                <div class="cm-h"><span class="cm-k">Community Tax</span></div>
+                                <div class="cm-tbl-wrap"><table class="cm-tbl">
+                                    <thead><tr><th>Basis</th><th class="num">Taxable Amount</th><th class="num">Tax Due</th></tr></thead>
+                                    <tbody>
+                                        <tr><td>Basic Community Tax</td><td class="num">—</td><td class="num">{{ $fmt($t->a_community_tax_due) ?: '0.00' }}</td></tr>
+                                        @if($t->item1_taxable_amount)<tr><td>Additional — Item 1</td><td class="num">{{ $fmt($t->item1_taxable_amount) }}</td><td class="num">{{ $fmt($t->item1_community_tax_due) }}</td></tr>@endif
+                                        @if($t->item2_taxable_amount)<tr><td>Additional — Item 2</td><td class="num">{{ $fmt($t->item2_taxable_amount) }}</td><td class="num">{{ $fmt($t->item2_community_tax_due) }}</td></tr>@endif
+                                        @if($t->interest)<tr><td>Interest</td><td class="num">—</td><td class="num">{{ $fmt($t->interest) }}</td></tr>@endif
+                                    </tbody>
+                                    <tfoot><tr><td class="cm-lbl" colspan="2">Total Tax Due</td><td class="num">₱ {{ $fmt($t->total_community_tax_due) ?: $fmt($t->amount_paid) }}</td></tr></tfoot>
+                                </table></div>
+                            </div>
+                            @break
+
+                        @case('Form 56')
+                            <div class="cm-card">
+                                <div class="cm-h"><span class="cm-k">Properties</span><span class="cm-sub">{{ $t->entries->count() }} property(ies)</span></div>
+                                <div class="cm-tbl-wrap"><table class="cm-tbl" style="min-width:640px">
+                                    <thead><tr><th>Declared Owner</th><th>TD No.</th><th>Location</th><th class="num">Assessed</th><th class="num">Tax Due</th><th class="num">Amount</th></tr></thead>
+                                    <tbody>
+                                        @forelse($t->entries as $e)
+                                            <tr>
+                                                <td>{{ $e->property->declared_owner ?? '—' }}</td>
+                                                <td>{{ $e->property->tax_declaration_number ?? '—' }}</td>
+                                                <td>{{ $e->property->location ?? '—' }}</td>
+                                                <td class="num">{{ $fmt($e->property->assessed_value_total ?? 0) }}</td>
+                                                <td class="num">{{ $fmt($e->tax_due) }}</td>
+                                                <td class="num">{{ $fmt($e->amount) }}</td>
+                                            </tr>
+                                        @empty
+                                            <tr><td colspan="6" class="cm-empty">No properties.</td></tr>
+                                        @endforelse
+                                    </tbody>
+                                    <tfoot><tr><td class="cm-lbl" colspan="5">Amount Paid</td><td class="num">₱ {{ $fmt($t->amount_paid) }}</td></tr></tfoot>
+                                </table></div>
+                            </div>
+                            <div class="cm-card">
+                                <div class="cm-h"><span class="cm-k">Receipt Information</span></div>
+                                <div class="cm-b cm-stack">
+                                    <div class="cm-kv">
+                                        <div class="cm-cell"><span class="cm-l">Client</span><span class="cm-v">{{ $t->client_name ?: '—' }}</span></div>
+                                        <div class="cm-cell"><span class="cm-l">Municipality / Province</span><span class="cm-v">{{ $t->municipality_province ?: '—' }}</span></div>
+                                        <div class="cm-cell"><span class="cm-l">City</span><span class="cm-v">{{ $t->city ?: '—' }}</span></div>
+                                        <div class="cm-cell"><span class="cm-l">Receipt No.</span><span class="cm-v">{{ $t->certificate_number }}</span></div>
+                                        <div class="cm-cell"><span class="cm-l">Prev. Receipt</span><span class="cm-v">{{ $t->previous_receipt_number ?: '—' }}</span></div>
+                                        <div class="cm-cell"><span class="cm-l">Date</span><span class="cm-v">{{ $fmtDate($t->transaction_date) ?: '—' }}</span></div>
+                                    </div>
+                                    @if($t->payment_in_words)<div class="cm-words"><span class="cm-l">Payment in Words</span>{{ $t->payment_in_words }}</div>@endif
+                                </div>
+                            </div>
+                            @break
+
+                        @case('Form 10')
+                            <div class="cm-card">
+                                <div class="cm-h"><span class="cm-k">Marriage Details</span></div>
+                                <div class="cm-b"><div class="cm-kv">
+                                    <div class="cm-cell"><span class="cm-l">Husband</span><span class="cm-v">{{ $t->husband_name ?: '—' }}</span></div>
+                                    <div class="cm-cell"><span class="cm-l">Husband Age</span><span class="cm-v">{{ $t->husband_age_years ? $t->husband_age_years . ' yrs' : '—' }}</span></div>
+                                    <div class="cm-cell"><span class="cm-l">Husband Address</span><span class="cm-v">{{ $t->husband_address ?: '—' }}</span></div>
+                                    <div class="cm-cell"><span class="cm-l">Wife</span><span class="cm-v">{{ $t->wife_name ?: '—' }}</span></div>
+                                    <div class="cm-cell"><span class="cm-l">Wife Age</span><span class="cm-v">{{ $t->wife_age_years ? $t->wife_age_years . ' yrs' : '—' }}</span></div>
+                                    <div class="cm-cell"><span class="cm-l">Wife Address</span><span class="cm-v">{{ $t->wife_address ?: '—' }}</span></div>
+                                    <div class="cm-cell"><span class="cm-l">Registry Number</span><span class="cm-v">{{ $t->registry_number ?: '—' }}</span></div>
+                                    <div class="cm-cell"><span class="cm-l">Local Civil Registrar</span><span class="cm-v">{{ $t->local_civil_registrar_of ?: '—' }}</span></div>
+                                    <div class="cm-cell"><span class="cm-l">Certificate No.</span><span class="cm-v">{{ $t->certificate_number }}</span></div>
+                                </div></div>
+                            </div>
+                            @break
+
+                        @case('Form 58')
+                            <div class="cm-card">
+                                <div class="cm-h"><span class="cm-k">Burial Permit Details</span></div>
+                                <div class="cm-b"><div class="cm-kv">
+                                    <div class="cm-cell"><span class="cm-l">Deceased</span><span class="cm-v">{{ $t->deceased_name ?: '—' }}</span></div>
+                                    <div class="cm-cell"><span class="cm-l">Nationality</span><span class="cm-v">{{ $t->nationality ?: '—' }}</span></div>
+                                    <div class="cm-cell"><span class="cm-l">Age / Sex</span><span class="cm-v">{{ $t->age ?: '—' }} / {{ $t->sex ?: '—' }}</span></div>
+                                    <div class="cm-cell"><span class="cm-l">Date of Death</span><span class="cm-v">{{ $fmtDate($t->date_of_death) ?: '—' }}</span></div>
+                                    <div class="cm-cell"><span class="cm-l">Cause of Death</span><span class="cm-v">{{ $t->cause_of_death ?: '—' }}</span></div>
+                                    <div class="cm-cell"><span class="cm-l">Cemetery</span><span class="cm-v">{{ $t->cemetery_name ?: '—' }}</span></div>
+                                    <div class="cm-cell"><span class="cm-l">Applicant</span><span class="cm-v">{{ $t->applicant_name ?: '—' }}</span></div>
+                                    <div class="cm-cell"><span class="cm-l">Permission</span><span class="cm-v">{{ $t->permission_type ?: '—' }}</span></div>
+                                    <div class="cm-cell"><span class="cm-l">City / Municipality</span><span class="cm-v">{{ $t->city_municipality ?: '—' }}</span></div>
+                                    <div class="cm-cell"><span class="cm-l">Province</span><span class="cm-v">{{ $t->province ?: '—' }}</span></div>
+                                    <div class="cm-cell"><span class="cm-l">Date Issued</span><span class="cm-v">{{ $fmtDate($t->date_issued) ?: '—' }}</span></div>
+                                    <div class="cm-cell"><span class="cm-l">Signed By</span><span class="cm-v">{{ $t->municipal_secretary ?: '—' }}</span></div>
+                                </div></div>
+                            </div>
+                            @break
+                    @endswitch
+                </div>
+
+                {{-- ══ Print-only receipt replica (unchanged; used for printing) ══ --}}
+                <div class="cm-print">
                 @switch($log->form_type)
 
                     {{-- ── BIR0016 — Individual Cedula ──────────────────── --}}
@@ -851,6 +1080,7 @@
                         </div>
                         @break
                 @endswitch
+                </div>{{-- /.cm-print --}}
             @endif
 
             {{-- ── Action buttons ─────────────────────────────────────────── --}}
