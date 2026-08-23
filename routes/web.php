@@ -42,7 +42,7 @@ Route::get('/collections', function (\Illuminate\Http\Request $request) {
     $perPageOptions = [10, 25, 50, 100];
     $perPage = in_array((int) $request->input('per_page'), $perPageOptions) ? (int) $request->input('per_page') : 10;
 
-    $sortable = ['serial_number', 'payee', 'transacted_at', 'form_type', 'status'];
+    $sortable = ['serial_number', 'payee', 'transacted_at', 'form_type', 'payment_method', 'amount', 'status'];
     $sort = in_array($request->input('sort'), $sortable) ? $request->input('sort') : 'transacted_at';
     $direction = $request->input('direction') === 'asc' ? 'asc' : 'desc';
 

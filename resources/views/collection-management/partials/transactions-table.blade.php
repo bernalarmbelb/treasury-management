@@ -28,6 +28,8 @@
                     ['transacted_at', 'Date'],
                     ['transacted_at', 'Time'],
                     ['form_type', 'Form Type'],
+                    ['payment_method', 'Payment Method'],
+                    ['amount', 'Amount'],
                     ['status', 'Status'],
                 ] as [$column, $label])
                     @php [$icon, $iconClass] = $sortIcon($column); @endphp
@@ -55,6 +57,8 @@
                     <td>{{ $transaction->transacted_at->format('F j, Y') }}</td>
                     <td>{{ $transaction->transacted_at->format('h:i:s A') }}</td>
                     <td>{{ $transaction->form_type }}</td>
+                    <td>{{ $transaction->payment_method ? ucwords(str_replace('_', ' ', $transaction->payment_method)) : '—' }}</td>
+                    <td style="font-variant-numeric:tabular-nums; white-space:nowrap;">{{ $transaction->amount !== null ? '₱ ' . number_format($transaction->amount, 2) : '—' }}</td>
                     <td>
                         <span class="status-badge status-{{ strtolower($transaction->status) }}">
                             {{ $transaction->status }}
@@ -90,7 +94,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="8" class="table-empty">No transactions found.</td>
+                    <td colspan="10" class="table-empty">No transactions found.</td>
                 </tr>
             @endforelse
         </tbody>
