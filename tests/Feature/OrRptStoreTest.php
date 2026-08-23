@@ -17,6 +17,7 @@ function validOrRptPayload(array $overrides = []): array
     return array_merge([
         'client_name' => 'Juan Dela Cruz',
         'amount_paid' => 500,
+        'payment_method' => 'cash',
         'entries' => [[
             'tax_declaration_number' => 'TD-001',
             'declared_owner' => 'Juan Dela Cruz',
