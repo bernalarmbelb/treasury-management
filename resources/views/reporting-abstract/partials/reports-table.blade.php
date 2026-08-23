@@ -12,7 +12,15 @@
                 <tr>
                     <td>{{ $report['label'] }}</td>
                     <td class="col-actions text-center">
-                        @if ($report['slug'])
+                        @if (! empty($report['url']))
+                            <button
+                                type="button"
+                                class="action-btn action-view"
+                                onclick="window.open('{{ $report['url'] }}', '_blank', 'noopener')"
+                            >
+                                Generate Report
+                            </button>
+                        @elseif ($report['slug'])
                             <button
                                 type="button"
                                 class="action-btn action-view"
@@ -46,7 +54,7 @@
                 <input type="hidden" name="search" value="{{ request('search') }}">
             @endif
             <label for="per_page" class="per-page-label">Rows per page</label>
-            <select name="per_page" id="per_page" class="form-select form-select-sm per-page-select" onchange="this.form.submit()">
+            <select name="per_page" id="per_page" class="form-select form-select-sm per-page-select js-cs" data-cs-inline onchange="this.form.submit()">
                 @foreach ($perPageOptions as $option)
                     <option value="{{ $option }}" @selected($perPage === $option)>{{ $option }}</option>
                 @endforeach

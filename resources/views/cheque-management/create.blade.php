@@ -326,5 +326,5 @@
         })();
     </script>
 
-    @include('cheque-management.partials.select-enhancer')
+    @include('partials.select-enhancer')
 </x-layout>

@@ -1210,7 +1210,7 @@ Route::get('/reporting-abstract', function (\Illuminate\Http\Request $request) {
         ['label' => "Treasurer's Monthly Report of Accountability for Accountable Forms", 'slug' => 'treasurers-monthly'],
         ['label' => 'Consolidated Report of Accountability for Accountable Forms (CRAAF)', 'slug' => 'craaf'],
         ['label' => 'Summary of Community Tax Certificate', 'slug' => 'summary-ctc'],
-        ['label' => 'Reports of Checks Issued', 'slug' => null],
+        ['label' => 'Reports of Checks Issued', 'slug' => null, 'url' => route('cheque-management.report', [], false)],
         ['label' => 'Report of Collection and Deposit', 'slug' => null],
         ['label' => 'Report of Accountability for Accountable Forms (RAAF)', 'slug' => 'raaf'],
         ['label' => 'Abstract of Community Tax Certificate', 'slug' => 'abstract-ctc'],
@@ -1491,10 +1491,11 @@ Route::post('/cheque-management/{cheque}/archive', function (\App\Models\Cheque 
 })->name('cheque-management.archive');
 
 /**
- * Slugs for the 5 currently-buildable RAM reports. The other 2 entries in
- * the Reporting & Abstract list (Reports of Checks Issued, Report of
- * Collection and Deposit) have no underlying data model yet, so their rows
- * show "Coming Soon" instead of a Generate Report button.
+ * Slugs for the 5 currently-buildable RAM reports (generated via the RAM
+ * modal/xlsx pipeline). "Reports of Checks Issued" links out to the Cheque
+ * Management report page instead (it carries a `url` in the list, not a slug).
+ * "Report of Collection and Deposit" has no underlying data model yet, so its
+ * row still shows "Coming Soon".
  */
 // These helpers live in the route file. Route files are re-included on every
 // app boot, so without this guard PHPUnit's multi-boot test process throws

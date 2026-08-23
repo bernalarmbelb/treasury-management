@@ -25,6 +25,7 @@
 
     @include('reporting-abstract.partials.period-select-modal')
     @include('reporting-abstract.partials.report-preview-modal')
+    @include('partials.select-enhancer')
 
     <style>
         @media print {
@@ -66,6 +67,7 @@
                         .then((html) => {
                             container.innerHTML = html;
                             window.history.replaceState({}, '', url);
+                            window.cqmEnhanceSelects?.(container);
                         });
                 }
 

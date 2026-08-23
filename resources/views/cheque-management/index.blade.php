@@ -72,7 +72,7 @@
             @include('cheque-management.partials.cheques-table')
         </div>
 
-        @include('cheque-management.partials.select-enhancer')
+        @include('partials.select-enhancer')
     </div>
 
     @push('scripts')
