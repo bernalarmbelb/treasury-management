@@ -1500,6 +1500,44 @@ Route::post('/cheque-management/{cheque}/archive', function (\App\Models\Cheque 
 // These helpers live in the route file. Route files are re-included on every
 // app boot, so without this guard PHPUnit's multi-boot test process throws
 // "Cannot redeclare ...". The guard declares them once per process.
+if (! function_exists('collection_payment_rules')) {
+
+/**
+ * Validation rules for the shared collection payment inputs. Merge into each
+ * collection form's $request->validate([...]) with the spread operator.
+ */
+function collection_payment_rules(): array
+{
+    return [
+        'payment_method'         => ['required', 'in:cash,cheque,online,money_order'],
+        'payer_bank_name'        => ['nullable', 'required_if:payment_method,cheque', 'string', 'max:255'],
+        'payment_channel'        => ['nullable', 'required_if:payment_method,online', 'in:GCash,LandBank Link.BizPortal,Maya,Other'],
+        'payment_reference'      => ['nullable', 'required_unless:payment_method,cash', 'string', 'max:255'],
+        'payment_reference_date' => ['nullable', 'required_unless:payment_method,cash', 'date'],
+    ];
+}
+
+/**
+ * Map the request's payment inputs + the transaction amount into the
+ * transaction_logs columns, nulling fields irrelevant to the chosen method.
+ */
+function collection_payment_log_fields(\Illuminate\Http\Request $request, float|int|string $amount): array
+{
+    $method = $request->input('payment_method', 'cash');
+
+    return [
+        'amount'                 => $amount,
+        'payment_method'         => $method,
+        'payment_channel'        => $method === 'online' ? $request->input('payment_channel') : null,
+        'payer_bank_name'        => $method === 'cheque' ? $request->input('payer_bank_name') : null,
+        'payment_reference'      => $method === 'cash' ? null : $request->input('payment_reference'),
+        'payment_reference_date' => $method === 'cash' ? null : $request->input('payment_reference_date'),
+        'recon_status'           => 'pending',
+    ];
+}
+
+}
+
 if (! function_exists('ram_report_slugs')) {
 
 function ram_report_slugs(): array
