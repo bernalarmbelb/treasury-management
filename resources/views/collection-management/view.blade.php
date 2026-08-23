@@ -24,7 +24,7 @@
             .cm-screen { display: none !important; }
             .ctc-view-meta, .cqm-view-payment, .ctc-cancel-request-card, .ctc-view-actions { display: none !important; }
         }
-        .cm-screen { display: flex; flex-direction: column; gap: 16px; max-width: 820px; margin: 0 auto; }
+        .cm-screen { display: flex; flex-direction: column; gap: 16px; width: 100%; max-width: 820px; margin: 0 auto; }
         .cm-card { background: #fff; border: 1px solid var(--line, #E3E8EF); border-radius: 12px; box-shadow: 0 1px 2px rgba(16,32,56,.05), 0 8px 22px rgba(16,32,56,.05); overflow: hidden; }
         .cm-summary { display: flex; align-items: center; justify-content: space-between; gap: 18px; flex-wrap: wrap; padding: 20px 22px; }
         .cm-sum-l { font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--muted, #6b7685); }
