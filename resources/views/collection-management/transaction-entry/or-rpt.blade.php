@@ -107,7 +107,7 @@
 
             @include('collection-management.transaction-entry.partials.ctc-or-rpt-preview')
 
-            @include('collection-management.transaction-entry.partials.payment-section')
+            @include('collection-management.transaction-entry.partials.payment-modal')
         </form>
     </div>
 
@@ -549,8 +549,11 @@
 
                 if (hasError) return;
 
-                populateRptPreview();
-                openRptPreview();
+                // New flow: capture payment first, then show the print-preview modal.
+                window.cqmOpenPaymentModal(function () {
+                    populateRptPreview();
+                    openRptPreview();
+                });
             });
 
             // Print: save the entry via AJAX, print the receipt, then redirect to Collection Management.
