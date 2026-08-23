@@ -653,6 +653,8 @@ Route::post('/collections/transaction-entry/{formStock}/marriage-certificate', f
         'local_civil_registrar_of' => ['nullable', 'string'],
         'email' => ['nullable', 'email'],
         'message' => ['nullable', 'string'],
+        'fee_amount' => ['nullable', 'numeric', 'min:0'],
+        ...collection_payment_rules(),
     ]);
 
     $mcTransaction = $formStock->marriageCertificateTransactions()->create($validated);
@@ -669,6 +671,7 @@ Route::post('/collections/transaction-entry/{formStock}/marriage-certificate', f
         'status'           => 'Completed',
         'transaction_id'   => $mcTransaction->id,
         'transaction_type' => \App\Models\MarriageCertificateTransaction::class,
+        ...collection_payment_log_fields($request, $validated['fee_amount'] ?? 0),
     ]);
 
     \App\Models\ActivityLog::record('Collection Management - Add Entry - ' . \App\Models\TransactionLog::formName($formStock->form_code) . ' - No. ' . $validated['certificate_number']);

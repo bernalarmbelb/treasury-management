@@ -114,6 +114,13 @@
                     </div>
                 </div>
 
+                <div class="ctc-or2-cell ctc-or2-cell--captioned">
+                    <input type="number" id="mc-fee-amount" name="fee_amount" placeholder=" " min="0" step="0.01">
+                    <label class="ctc-or2-caption" for="mc-fee-amount">Fee Amount</label>
+                </div>
+
+                @include('collection-management.transaction-entry.partials.payment-section')
+
                 <div class="ctc-or2-actions">
                     <button type="submit" class="ctc-or2-proceed-btn" id="mcProceedBtn">Proceed</button>
                 </div>
@@ -130,6 +137,7 @@
 
     @include('collection-management.transaction-entry.partials.mc-print-preview-modal')
     @include('collection-management.transaction-entry.partials.mc-send-modal')
+    @include('partials.select-enhancer')
 
     <script>
         (function () {
