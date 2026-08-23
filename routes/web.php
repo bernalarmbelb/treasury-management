@@ -587,6 +587,11 @@ Route::post('/collections/transaction-entry/{formStock}/official-receipt', funct
         'qty' => max(0, $formStock->qty - 1),
     ]);
 
+    // Official Receipt keeps its own receipt-layout payment fields (cash/check/
+    // money_order + drawee/check no./date). Map them onto the unified log,
+    // normalizing 'check' -> 'cheque' for the reconciliation vocabulary.
+    $orMethod = $validated['payment_method'] === 'check' ? 'cheque' : $validated['payment_method'];
+
     \App\Models\TransactionLog::create([
         'serial_number'    => 'No. ' . $validated['certificate_number'] . ' U',
         'payee'            => $validated['payor'],
@@ -595,6 +600,13 @@ Route::post('/collections/transaction-entry/{formStock}/official-receipt', funct
         'status'           => 'Completed',
         'transaction_id'   => $orTransaction->id,
         'transaction_type' => \App\Models\OrTransaction::class,
+        'amount'                 => $validated['total'],
+        'payment_method'         => $orMethod,
+        'payment_channel'        => null,
+        'payer_bank_name'        => $orMethod === 'cheque' ? ($validated['drawee_bank'] ?? null) : null,
+        'payment_reference'      => $orMethod === 'cheque' ? ($validated['check_number'] ?? null) : null,
+        'payment_reference_date' => $orMethod === 'cheque' ? ($validated['check_date'] ?? null) : null,
+        'recon_status'           => 'pending',
     ]);
 
     \App\Models\ActivityLog::record('Collection Management - Add Entry - ' . \App\Models\TransactionLog::formName($formStock->form_code) . ' - No. ' . $validated['certificate_number']);
