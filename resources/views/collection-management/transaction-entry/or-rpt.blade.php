@@ -575,17 +575,22 @@
                     headers: { 'X-Requested-With': 'XMLHttpRequest' },
                     body: formData,
                 })
-                    .then((response) => {
-                        if (!response.ok) throw new Error('Save failed');
-                        return response.json();
+                    .then(async (response) => {
+                        const data = await response.json().catch(() => ({}));
+                        if (!response.ok) {
+                            // Surface the real validation reason (e.g. tie-out mismatch) instead of a generic message.
+                            const msg = data.errors ? Object.values(data.errors)[0][0] : (data.message || 'Please review the form and try again.');
+                            throw new Error(msg);
+                        }
+                        return data;
                     })
                     .then((data) => {
                         closeRptPreview();
                         window.print();
                         window.location.href = data.redirect;
                     })
-                    .catch(() => {
-                        showToast('Action could not be completed', 'Something went wrong while saving. Please try again.', 'error');
+                    .catch((err) => {
+                        showToast('Could not save', err.message || 'Something went wrong while saving.', 'error');
                     });
             });
         })();
