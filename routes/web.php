@@ -1314,7 +1314,181 @@ Route::get('/reporting-abstract/{report}/export', function (\Illuminate\Http\Req
     );
 })->name('reporting-abstract.export');
 Route::get('/bank-deposit-reconciliation', function () { return view('bank-deposit-reconciliation.index'); })->name('bank-deposit-reconciliation');
-Route::get('/cheque-management', function () { return view('cheque-management.index'); })->name('cheque-management');
+// ── Cheque Management (disbursement) ──────────────────────────────────────
+Route::get('/cheque-management', function (\Illuminate\Http\Request $request) {
+    $perPageOptions = [10, 25, 50, 100];
+    $perPage = in_array((int) $request->input('per_page'), $perPageOptions) ? (int) $request->input('per_page') : 10;
+
+    $sortable = ['created_at', 'pay_to_order_of', 'check_number', 'amount', 'status'];
+    $sort = in_array($request->input('sort'), $sortable) ? $request->input('sort') : 'created_at';
+    $direction = $request->input('direction') === 'asc' ? 'asc' : 'desc';
+
+    $dateStart = $request->input('date_start');
+    $dateEnd = $request->input('date_end');
+
+    $cheques = \App\Models\Cheque::query()
+        ->with('bankAccount')
+        ->whereNull('archived_at')
+        ->when($request->input('search'), function ($query, $search) {
+            $query->where(function ($query) use ($search) {
+                $query->where('pay_to_order_of', 'like', "%{$search}%")
+                    ->orWhere('check_number', 'like', "%{$search}%");
+            });
+        })
+        ->when($dateStart, fn ($query, $dateStart) => $query->whereDate('created_at', '>=', $dateStart))
+        ->when($dateEnd, fn ($query, $dateEnd) => $query->whereDate('created_at', '<=', $dateEnd))
+        ->orderBy($sort, $direction)
+        ->paginate($perPage)
+        ->withQueryString();
+
+    $data = [
+        'cheques' => $cheques,
+        'perPageOptions' => $perPageOptions,
+        'perPage' => $perPage,
+        'sort' => $sort,
+        'direction' => $direction,
+    ];
+
+    if ($request->ajax()) {
+        return view('cheque-management.partials.cheques-table', $data);
+    }
+
+    return view('cheque-management.index', $data);
+})->name('cheque-management');
+
+Route::get('/cheque-management/create', function () {
+    return view('cheque-management.create', [
+        'bankAccounts' => \App\Models\BankAccount::where('is_active', true)->orderBy('bank_name')->get(),
+    ]);
+})->name('cheque-management.create');
+
+Route::post('/cheque-management', function (\Illuminate\Http\Request $request) {
+    $validated = $request->validate([
+        'bank_account_id'   => ['required', 'exists:bank_accounts,id'],
+        'cheque_date'       => ['required', 'date'],
+        'check_number'      => ['required', 'string', 'max:50'],
+        'pay_to_order_of'   => ['required', 'string', 'max:255'],
+        'amount'            => ['required', 'numeric', 'min:0'],
+        'amount_in_words'   => ['nullable', 'string', 'max:255'],
+        'nature_of_payment' => ['nullable', 'string', 'max:255'],
+    ]);
+
+    $bankAccount = \App\Models\BankAccount::findOrFail($validated['bank_account_id']);
+
+    // Guard: a cheque number may not be reused on the same bank account.
+    $exists = \App\Models\Cheque::where('bank_account_id', $bankAccount->id)
+        ->where('check_number', $validated['check_number'])
+        ->exists();
+
+    if ($exists) {
+        return response()->json([
+            'message' => 'Error in adding cheque: Check No. ' . $validated['check_number']
+                . ' has already been used for ' . $bankAccount->label() . '.',
+        ], 422);
+    }
+
+    $cheque = \App\Models\Cheque::create([
+        'bank_account_id'   => $bankAccount->id,
+        'account_name'      => $bankAccount->account_name,
+        'cheque_date'       => $validated['cheque_date'],
+        'check_number'      => $validated['check_number'],
+        'pay_to_order_of'   => $validated['pay_to_order_of'],
+        'amount'            => $validated['amount'],
+        'amount_in_words'   => ($validated['amount_in_words'] ?? null) ?: \App\Models\Cheque::spellAmount($validated['amount']),
+        'nature_of_payment' => $validated['nature_of_payment'] ?? null,
+        'status'            => 'Issued',
+        'created_by'        => $request->user()?->name,
+    ]);
+
+    \App\Models\ActivityLog::record('Cheque Management - Create Cheque - No. ' . $cheque->check_number . ' - ' . $cheque->pay_to_order_of);
+
+    return response()->json([
+        'message'  => 'Cheque saved successfully.',
+        'redirect' => route('cheque-management', [], false),
+    ]);
+})->name('cheque-management.store');
+
+Route::post('/cheque-management/bank-accounts', function (\Illuminate\Http\Request $request) {
+    $validated = $request->validate([
+        'bank_name'      => ['required', 'string', 'max:255'],
+        'account_number' => ['required', 'string', 'max:100', 'unique:bank_accounts,account_number'],
+        'account_name'   => ['required', 'string', 'max:255'],
+    ]);
+
+    $account = \App\Models\BankAccount::create($validated + ['is_active' => true]);
+
+    \App\Models\ActivityLog::record('Cheque Management - Add Bank Account - ' . $account->bank_name . ' · ' . $account->account_number);
+
+    return response()->json([
+        'id'             => $account->id,
+        'bank_name'      => $account->bank_name,
+        'account_number' => $account->account_number,
+        'account_name'   => $account->account_name,
+        'label'          => $account->bank_name . ' · ' . $account->account_number,
+    ]);
+})->name('cheque-management.bank-accounts.store');
+
+Route::get('/cheque-management/report', function (\Illuminate\Http\Request $request) {
+    $accounts = \App\Models\BankAccount::orderBy('bank_name')->get();
+
+    // Smart defaults: open the report on the most recent cheque's account and
+    // period so it lands on actual activity instead of an empty current month.
+    $latest = \App\Models\Cheque::whereNull('archived_at')
+        ->orderByDesc('cheque_date')
+        ->orderByDesc('id')
+        ->first();
+
+    $accountId = (int) $request->input('bank_account_id', $latest?->bank_account_id ?? $accounts->first()?->id);
+    $account = $accounts->firstWhere('id', $accountId) ?? $accounts->first();
+
+    $month = (int) $request->input('month', $latest?->cheque_date?->month ?? now()->month);
+    $year = (int) $request->input('year', $latest?->cheque_date?->year ?? now()->year);
+
+    $cheques = \App\Models\Cheque::query()
+        ->where('bank_account_id', $account?->id)
+        ->whereNull('archived_at')
+        ->whereMonth('cheque_date', $month)
+        ->whereYear('cheque_date', $year)
+        ->orderBy('cheque_date')
+        ->orderBy('check_number')
+        ->get();
+
+    return view('cheque-management.report', compact('accounts', 'account', 'cheques', 'month', 'year'));
+})->name('cheque-management.report');
+
+Route::get('/cheque-management/{cheque}', function (\App\Models\Cheque $cheque) {
+    return view('cheque-management.view', ['cheque' => $cheque->load('bankAccount')]);
+})->name('cheque-management.view');
+
+Route::get('/cheque-management/{cheque}/print', function (\App\Models\Cheque $cheque) {
+    return view('cheque-management.print-cheque', ['cheque' => $cheque->load('bankAccount')]);
+})->name('cheque-management.print');
+
+Route::get('/cheque-management/{cheque}/duplicate', function (\App\Models\Cheque $cheque) {
+    return view('cheque-management.duplicate', ['cheque' => $cheque->load('bankAccount')]);
+})->name('cheque-management.duplicate');
+
+Route::post('/cheque-management/{cheque}/cancel', function (\App\Models\Cheque $cheque) {
+    if ($cheque->status !== 'Issued') {
+        return response()->json(['message' => 'Only issued cheques can be cancelled.'], 422);
+    }
+
+    $cheque->update(['status' => 'Cancelled']);
+    \App\Models\ActivityLog::record('Cheque Management - Cancel Cheque - No. ' . $cheque->check_number);
+
+    return response()->json(['message' => 'Cheque cancelled successfully.']);
+})->name('cheque-management.cancel');
+
+Route::post('/cheque-management/{cheque}/archive', function (\App\Models\Cheque $cheque) {
+    if ($cheque->status !== 'Cancelled') {
+        return response()->json(['message' => 'Only cancelled cheques can be archived.'], 422);
+    }
+
+    $cheque->update(['archived_at' => now()]);
+    \App\Models\ActivityLog::record('Cheque Management - Archive Cheque - No. ' . $cheque->check_number);
+
+    return response()->json(['message' => 'Cheque archived successfully.']);
+})->name('cheque-management.archive');
 
 /**
  * Slugs for the 5 currently-buildable RAM reports. The other 2 entries in
