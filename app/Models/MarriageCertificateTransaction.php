@@ -28,6 +28,11 @@ class MarriageCertificateTransaction extends Model
         'local_civil_registrar_of',
         'email',
         'message',
+        'fee_amount',
+    ];
+
+    protected $casts = [
+        'fee_amount' => 'decimal:2',
     ];
 
     public function formStock(): BelongsTo

@@ -17,11 +17,20 @@ class TransactionLog extends Model
         'transaction_id',
         'transaction_type',
         'archived_at',
+        'amount',
+        'payment_method',
+        'payment_channel',
+        'payer_bank_name',
+        'payment_reference',
+        'payment_reference_date',
+        'recon_status',
     ];
 
     protected $casts = [
-        'transacted_at' => 'datetime',
-        'archived_at'   => 'datetime',
+        'transacted_at'          => 'datetime',
+        'archived_at'            => 'datetime',
+        'amount'                 => 'decimal:2',
+        'payment_reference_date' => 'date',
     ];
 
     public function transaction(): MorphTo
