@@ -162,14 +162,32 @@
             };
 
             const amountInput = form.querySelector('#rpt-amount-paid');
-            if (amountInput) {
-                amountInput.addEventListener('input', () => {
-                    const cursorFromEnd = amountInput.value.length - amountInput.selectionStart;
-                    amountInput.value = formatNumberInput(amountInput.value);
-                    const newPosition = amountInput.value.length - cursorFromEnd;
-                    amountInput.setSelectionRange(newPosition, newPosition);
-                });
-            }
+
+            // ── Receipt totals auto-fill ─────────────────────────────────────
+            // "P (Amount in numbers)" = sum of every entry's Total; "Payment (Sum
+            // in words)" is derived from it. Both read-only so they can't drift
+            // from the entries (which is what the server tie-out enforces).
+            const paymentWordsInput = form.querySelector('#rpt-payment-in-words');
+            if (amountInput) amountInput.readOnly = true;
+            if (paymentWordsInput) paymentWordsInput.readOnly = true;
+
+            const rptAmountToWords = (n) => {
+                n = Math.round((parseFloat(n) || 0) * 100) / 100;
+                const pesos = Math.floor(n), cents = Math.round((n - pesos) * 100);
+                const ones = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
+                const tens = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+                const scales = ['', ' thousand', ' million', ' billion', ' trillion'];
+                const hundreds = (g) => { let t = ''; const h = Math.floor(g / 100), r = g % 100; if (h) t += ones[h] + ' hundred'; if (r) { t += t ? ' ' : ''; if (r < 20) t += ones[r]; else { t += tens[Math.floor(r / 10)]; if (r % 10) t += ' ' + ones[r % 10]; } } return t; };
+                const intW = (x) => { if (x < 20) return ones[x]; const gs = []; while (x > 0) { gs.push(x % 1000); x = Math.floor(x / 1000); } const parts = []; gs.forEach((g, i) => { if (g) parts[i] = hundreds(g) + scales[i]; }); return parts.reverse().filter(Boolean).join(' ').trim(); };
+                const w = pesos === 0 ? 'zero' : intW(pesos);
+                return w.charAt(0).toUpperCase() + w.slice(1) + ' and ' + String(cents).padStart(2, '0') + '/100 pesos';
+            };
+
+            const updateReceiptTotals = () => {
+                const total = entries.reduce((s, e) => s + (e && e.amount ? Number(e.amount) : 0), 0);
+                if (amountInput) amountInput.value = total ? formatNumberInput(total.toFixed(2)) : '';
+                if (paymentWordsInput) paymentWordsInput.value = total ? rptAmountToWords(total) : '';
+            };
 
             // Two-way sync between the "Serial Number" field and the "No. ___ Z" badge in the preview.
             const serialNumberInput = form.querySelector('#rpt-serial-number');
@@ -335,6 +353,19 @@
             const entryPenaltyInput = addEntryModal.querySelector('[name="entry_penalty_per_cent"]');
             const entryTotalInput = addEntryModal.querySelector('[name="entry_total"]');
 
+            // Computed fields are auto-filled, never typed.
+            if (entryTotalInput) entryTotalInput.readOnly = true;
+            if (entryAssessedTotalInput) entryAssessedTotalInput.readOnly = true;
+
+            // Full Payment and Installment are mutually exclusive: using one disables the other.
+            const applyExclusivity = () => {
+                const hasFull = entryFullPaymentInput.value.trim() !== '';
+                const hasInst = entryInstallmentNoInput.value.trim() !== '' || entryInstallmentPaymentInput.value.trim() !== '';
+                entryInstallmentNoInput.disabled = hasFull;
+                entryInstallmentPaymentInput.disabled = hasFull;
+                entryFullPaymentInput.disabled = hasInst && !hasFull;
+            };
+
             const recomputeRowTotal = () => {
                 const taxDue = num(entryTaxDueInput.value);
                 const penalty = num(entryPenaltyInput.value);
@@ -349,7 +380,10 @@
                     if (!entryInstallmentPaymentInput.value && quarterly) entryInstallmentPaymentInput.value = formatAmount(quarterly);
                     const total = quarterly + penalty;
                     if (total) entryTotalInput.value = formatAmount(total);
+                } else {
+                    entryTotalInput.value = '';
                 }
+                applyExclusivity();
             };
 
             const computeTaxDue = () => {
@@ -471,12 +505,14 @@
 
             const resetAddEntryForm = () => {
                 addEntryModal.querySelectorAll('input').forEach((input) => { input.value = ''; });
+                applyExclusivity(); // both empty -> re-enable Full Payment + Installment
             };
 
             addAnotherEntryBtn.addEventListener('click', () => {
                 saveEntryToTable();
                 resetAddEntryForm();
                 updateProceedButtonVisibility();
+                updateReceiptTotals();
             });
 
             addEntrySaveBtn.addEventListener('click', () => {
@@ -484,6 +520,7 @@
                 resetAddEntryForm();
                 closeAddEntryModal();
                 updateProceedButtonVisibility();
+                updateReceiptTotals();
             });
 
             // Populate the Add Entry modal's fields from an existing table row's values, for editing.
@@ -507,6 +544,7 @@
                 setValue('entry_full_payment', unformatNumber(cells[10].textContent));
                 setValue('entry_penalty_per_cent', unformatNumber(cells[11].textContent));
                 setValue('entry_total', unformatNumber(cells[12].textContent));
+                applyExclusivity(); // reflect the loaded row's Full Payment vs Installment state
             };
 
             // Row actions: "Edit" opens the modal pre-filled with that row's data; "Remove" clears the row.
@@ -529,6 +567,7 @@
                     const removedIndex = [...preview.querySelectorAll('.ctcp-rpt-table tbody tr')].indexOf(row);
                     if (removedIndex > -1) delete entries[removedIndex];
                     if (editingRow === row) editingRow = null;
+                    updateReceiptTotals();
                 }
             });
 
