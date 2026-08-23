@@ -186,6 +186,7 @@ Route::post('/collections/transaction-entry/{formStock}/individual-cedula', func
         'year' => ['required', 'integer', 'min:1900', 'max:2100'],
         'surname' => ['required', 'string'],
         'first_name' => ['required', 'string'],
+        ...collection_payment_rules(),
         'amount_paid' => ['required', 'numeric', 'min:0'],
         'place_of_issue' => ['nullable', 'string'],
         'date_issued' => ['nullable', 'date'],
@@ -269,6 +270,7 @@ Route::post('/collections/transaction-entry/{formStock}/individual-cedula', func
         'status'           => 'Completed',
         'transaction_id'   => $ctcTransaction->id,
         'transaction_type' => \App\Models\CtcIndividualTransaction::class,
+        ...collection_payment_log_fields($request, $validated['amount_paid']),
     ]);
 
     \App\Models\ActivityLog::record('Collection Management - Add Entry - ' . \App\Models\TransactionLog::formName($formStock->form_code) . ' - ' . $serialNumber);
@@ -296,6 +298,7 @@ Route::post('/collections/transaction-entry/{formStock}/corporation-cedula', fun
         'certificate_number' => ['required', 'string'],
         'year' => ['required', 'integer', 'min:1900', 'max:2100'],
         'company_name' => ['required', 'string'],
+        ...collection_payment_rules(),
         'amount_paid' => ['required', 'numeric', 'min:0'],
         'place_of_issue' => ['nullable', 'string'],
         'date_issued' => ['nullable', 'date'],
@@ -363,6 +366,7 @@ Route::post('/collections/transaction-entry/{formStock}/corporation-cedula', fun
         'status'           => 'Completed',
         'transaction_id'   => $ctcCorpTransaction->id,
         'transaction_type' => \App\Models\CtcCorporationTransaction::class,
+        ...collection_payment_log_fields($request, $validated['amount_paid']),
     ]);
 
     \App\Models\ActivityLog::record('Collection Management - Add Entry - ' . \App\Models\TransactionLog::formName($formStock->form_code) . ' - ' . $serialNumber);

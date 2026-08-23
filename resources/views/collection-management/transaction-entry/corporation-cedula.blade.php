@@ -18,7 +18,7 @@
     </div>
 
     <div class="collection-content">
-        <form class="ctc-page ctc-page--corporation" id="ctcForm" method="POST" action="{{ route('transaction-entry.corporation-cedula.store', $form->id, false) }}">
+        <form class="ctc-page ctc-page--corporation" id="ctcForm" method="POST" action="{{ route('transaction-entry.corporation-cedula.store', $form->id, false) }}" style="height: 960px;">
             @csrf
             <div class="ctc-field ctc-field--title" style="left:40px; top:40px; width:438px; height:42px;">
                 <p>Community Tax Certificate</p>
@@ -186,11 +186,16 @@
                 </div>
             </div>
 
+            <div class="ctc-payment-block" style="position:absolute; left:40px; top:620px; width:1332px;">
+                @include('collection-management.transaction-entry.partials.payment-section')
+            </div>
+
             <button type="submit" class="ctc-proceed-btn">Proceed</button>
         </form>
     </div>
 
     @include('collection-management.transaction-entry.partials.ctc-corporation-preview-modal')
+    @include('partials.select-enhancer')
 
     <script>
         (function () {
