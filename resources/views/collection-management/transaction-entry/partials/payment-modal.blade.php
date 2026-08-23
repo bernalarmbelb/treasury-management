@@ -6,8 +6,9 @@
 <style>
     .pm-overlay { position: fixed; inset: 0; z-index: 2100; display: none; align-items: center; justify-content: center; background: rgba(20,30,50,.45); padding: 20px; }
     .pm-overlay.open { display: flex; }
-    .pm-modal { width: 100%; max-width: 460px; background: #fff; border-radius: 14px; box-shadow: 0 20px 50px rgba(16,32,56,.25); overflow: hidden; font-family: 'Manrope', sans-serif; }
-    .pm-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; background: var(--primary, #427AB5); color: #fff; }
+    /* overflow visible so the custom dropdown menu isn't clipped by the modal edge */
+    .pm-modal { width: 100%; max-width: 460px; background: #fff; border-radius: 14px; box-shadow: 0 20px 50px rgba(16,32,56,.25); overflow: visible; font-family: 'Manrope', sans-serif; }
+    .pm-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; background: var(--primary, #427AB5); color: #fff; border-radius: 14px 14px 0 0; }
     .pm-head .t { font-weight: 700; font-size: 15px; }
     .pm-head button { border: none; background: none; color: #fff; font-size: 22px; line-height: 1; cursor: pointer; }
     .pm-body { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
@@ -18,7 +19,7 @@
     .pm-group { display: none; flex-direction: column; gap: 14px; }
     .pm-group.active { display: flex; }
     .pm-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-    .pm-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 16px 20px; border-top: 1px solid var(--line, #E3E8EF); }
+    .pm-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 16px 20px; border-top: 1px solid var(--line, #E3E8EF); border-radius: 0 0 14px 14px; background: #fff; }
     .pm-btn { height: 42px; padding: 0 20px; border-radius: 8px; font-family: 'Manrope', sans-serif; font-weight: 600; font-size: 14px; cursor: pointer; border: 1px solid transparent; }
     .pm-btn-cancel { background: #fff; border-color: var(--line, #E3E8EF); color: var(--muted, #6b7685); }
     .pm-btn-confirm { background: var(--primary, #427AB5); color: #fff; }
