@@ -106,12 +106,16 @@
             </div>
 
             @include('collection-management.transaction-entry.partials.ctc-or-rpt-preview')
+
+            @include('collection-management.transaction-entry.partials.payment-section')
         </form>
     </div>
 
     @include('collection-management.transaction-entry.partials.ctc-or-rpt-add-entry-modal')
 
     @include('collection-management.transaction-entry.partials.ctc-or-rpt-preview-modal')
+
+    @include('partials.select-enhancer')
 
     <script>
         (function () {

@@ -420,6 +420,7 @@ Route::post('/collections/transaction-entry/{formStock}/or-rpt', function (\Illu
         'entries.*.penalty_percent' => ['nullable', 'numeric', 'min:0'],
         'entries.*.penalty_amount' => ['nullable', 'numeric', 'min:0'],
         'entries.*.amount' => ['required', 'numeric', 'min:0'],
+        ...collection_payment_rules(),
     ]);
 
     // Rule 1 & 2: exactly one scheme per row. 'full' must NOT carry a quarter;
@@ -447,7 +448,7 @@ Route::post('/collections/transaction-entry/{formStock}/or-rpt', function (\Illu
         throw new \Illuminate\Validation\ValidationException($validator);
     }
 
-    $payload = \Illuminate\Support\Facades\DB::transaction(function () use ($validated, $formStock) {
+    $payload = \Illuminate\Support\Facades\DB::transaction(function () use ($validated, $formStock, $request) {
         // Record the serial the clerk confirmed on the form (defaulted from the
         // booklet's next available serial); fall back to the batch serial
         // (prefix + number), then to a synthetic running number only if no
@@ -515,6 +516,7 @@ Route::post('/collections/transaction-entry/{formStock}/or-rpt', function (\Illu
             'status'           => 'Completed',
             'transaction_id'   => $orRptTransaction->id,
             'transaction_type' => \App\Models\OrRptTransaction::class,
+            ...collection_payment_log_fields($request, $validated['amount_paid']),
         ]);
 
         \App\Models\ActivityLog::record('Collection Management - Add Entry - ' . \App\Models\TransactionLog::formName($formStock->form_code) . ' - ' . $certificateNumber);
