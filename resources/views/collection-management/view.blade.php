@@ -56,6 +56,37 @@
                 @endif
             </div>
 
+            {{-- ── Payment (Phase 1 capture) ──────────────────────────────── --}}
+            @if($log->payment_method)
+            <style>
+                .cqm-view-payment { border: 1px solid var(--line, #E3E8EF); border-radius: 10px; padding: 14px 18px; margin-bottom: 16px; background: #fff; }
+                .cqm-vp-title { font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: .05em; color: var(--primary, #427AB5); }
+                .cqm-vp-grid { display: flex; flex-wrap: wrap; gap: 10px 28px; margin-top: 10px; }
+                .cqm-vp-grid > div { display: flex; flex-direction: column; gap: 2px; }
+                .cqm-vp-grid .l { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--muted, #6b7685); }
+                .cqm-vp-grid .v { font-size: 14px; font-weight: 600; font-family: 'Manrope', sans-serif; }
+            </style>
+            <div class="cqm-view-payment">
+                <span class="cqm-vp-title">Payment</span>
+                <div class="cqm-vp-grid">
+                    <div><span class="l">Method</span><span class="v">{{ ucwords(str_replace('_', ' ', $log->payment_method)) }}</span></div>
+                    <div><span class="l">Amount</span><span class="v" style="font-variant-numeric:tabular-nums">₱ {{ number_format((float) $log->amount, 2) }}</span></div>
+                    @if($log->payment_method === 'cheque')
+                        <div><span class="l">Bank</span><span class="v">{{ $log->payer_bank_name ?: '—' }}</span></div>
+                        <div><span class="l">Cheque No.</span><span class="v">{{ $log->payment_reference ?: '—' }}</span></div>
+                        <div><span class="l">Cheque Date</span><span class="v">{{ optional($log->payment_reference_date)->format('m/d/Y') ?: '—' }}</span></div>
+                    @elseif($log->payment_method === 'online')
+                        <div><span class="l">Channel</span><span class="v">{{ $log->payment_channel ?: '—' }}</span></div>
+                        <div><span class="l">Reference</span><span class="v">{{ $log->payment_reference ?: '—' }}</span></div>
+                        <div><span class="l">Date</span><span class="v">{{ optional($log->payment_reference_date)->format('m/d/Y') ?: '—' }}</span></div>
+                    @elseif($log->payment_method === 'money_order')
+                        <div><span class="l">MO No.</span><span class="v">{{ $log->payment_reference ?: '—' }}</span></div>
+                        <div><span class="l">Date</span><span class="v">{{ optional($log->payment_reference_date)->format('m/d/Y') ?: '—' }}</span></div>
+                    @endif
+                </div>
+            </div>
+            @endif
+
             {{-- ── Cancel request detail (admin view) ─────────────────────── --}}
             @if($hasPendingRequest && ($isAdmin ?? false) && isset($pendingRequest))
             <div class="ctc-cancel-request-card">
@@ -716,49 +747,83 @@
                         <div class="ctc-view-doc-wrap">
                             <div class="burial-doc burial-doc--view">
                                 <div class="burial-doc-meta">
-                                    <span>Accountable Form No. 51 · Revised 1993</span><span>ORIGINAL</span>
+                                    <span>Accountable Form No. 51</span><span>Revised 1993</span><span>ORIGINAL</span>
                                 </div>
+
                                 <div class="burial-doc-masthead">
-                                    <p class="burial-doc-or-title">OFFICIAL RECEIPT</p>
-                                    <p class="burial-doc-or-sub">of the Republic of the Philippines</p>
-                                    <p class="burial-doc-no">No. {{ $t->certificate_number }} {{ $t->series_letter }}</p>
+                                    <div class="burial-doc-mast-top">
+                                        <div class="burial-doc-mast-title">OFFICIAL RECEIPT</div>
+                                        <div class="burial-doc-mast-sub">OF THE REPUBLIC OF THE PHILIPPINES</div>
+                                    </div>
+                                    <div class="burial-doc-mast-bottom">
+                                        <div class="burial-doc-seal"><span class="burial-doc-seal-circle">SEAL</span></div>
+                                        <div class="burial-doc-no">N<sup>o</sup> <span class="bval">{{ $t->certificate_number }}</span> <span class="bval">{{ $t->series_letter }}</span></div>
+                                    </div>
                                 </div>
-                                <div class="burial-doc-title-bar">City / Municipal Burial Permit and Fee Receipt</div>
 
-                                <p class="burial-doc-line">Mr. <b>{{ $t->applicant_name }}</b></p>
-                                <p class="burial-doc-line">To the City / Municipality of <b>{{ $t->city_municipality }}</b></p>
-                                <p class="burial-doc-line">Province of <b>{{ $t->province }}</b></p>
+                                <div class="burial-doc-title">CITY/MUNICIPAL BURIAL PERMIT AND<br>FEE RECEIPT</div>
 
-                                <p class="burial-doc-line">Permission is hereby granted to <b>{{ $t->permission_type }}</b> the remains of —</p>
+                                <div class="burial-doc-mr">Mr. <span class="bfill">{{ $t->applicant_name }}</span></div>
 
-                                <ol class="burial-doc-list">
-                                    <li>Name <b>{{ $t->deceased_name }}</b></li>
-                                    <li>Nationality <b>{{ $t->nationality }}</b></li>
-                                    <li>Age <b>{{ $t->age }}</b> years. Sex <b>{{ $t->sex }}</b></li>
-                                    <li>Date of death <b>{{ $fmtDate($t->date_of_death) }}</b></li>
-                                    <li>Cause of death <b>{{ $t->cause_of_death }}</b></li>
-                                    <li>Name of cemetery <b>{{ $t->cemetery_name }}</b></li>
-                                </ol>
-                                <p class="burial-doc-note">* In case of disinterment—</p>
-                                <ol class="burial-doc-list" start="7">
-                                    <li>Infectious or non-infectious <b>{{ $t->infectious }}</b></li>
-                                    <li>Body embalmed or not embalmed <b>{{ $t->embalmed }}</b></li>
-                                    <li>Disposition of remains <b>{{ $t->disposition }}</b></li>
-                                    <li>Amount of the fee per city/municipal ordinance <b>₱ {{ $fmt($t->fee_amount) }}</b></li>
-                                </ol>
+                                <div class="burial-doc-dr">
+                                    <div class="burial-doc-dr-label">Dr.</div>
+                                    <div class="burial-doc-dr-fields">
+                                        <div class="burial-doc-dr-row">To the City/Municipality of: <span class="bval">{{ $t->city_municipality }}</span></div>
+                                        <div class="burial-doc-dr-row">Province of: <span class="bval">{{ $t->province }}</span></div>
+                                    </div>
+                                </div>
 
-                                <div class="burial-doc-fee-row">
-                                    <span>No. <b>{{ $t->certificate_number }}</b></span>
-                                    <span>Dated: <b>{{ $fmtDate($t->date_issued) }}</b></span>
+                                <div class="burial-doc-perm">
+                                    <span>Permission is hereby granted</span>
+                                    <div class="burial-doc-perm-box">
+                                        <div @class(['burial-doc-perm-opt', 'is-selected' => $t->permission_type === 'Inter'])>Inter</div>
+                                        <div @class(['burial-doc-perm-opt', 'is-selected' => $t->permission_type === 'Disinter'])>Disinter</div>
+                                        <div @class(['burial-doc-perm-opt', 'is-selected' => $t->permission_type === 'Remove'])>Remove</div>
+                                    </div>
+                                    <span>the remains of&mdash;</span>
+                                </div>
+
+                                <table class="burial-doc-items">
+                                    <tr><td>1.</td><td>Name <span class="bfill">{{ $t->deceased_name }}</span></td></tr>
+                                    <tr><td>2.</td><td>Nationality <span class="bfill">{{ $t->nationality }}</span></td></tr>
+                                    <tr><td>3.</td><td>Age <span class="bfill">{{ $t->age }}</span> years. Sex <span class="bfill">{{ $t->sex }}</span></td></tr>
+                                    <tr><td>4.</td><td>Date of death <span class="bfill">{{ $fmtDate($t->date_of_death) }}</span></td></tr>
+                                    <tr><td>5.</td><td>Cause of death <span class="bfill">{{ $t->cause_of_death }}</span></td></tr>
+                                    <tr><td>6.</td><td>Name of cemetery <span class="bfill">{{ $t->cemetery_name }}</span></td></tr>
+                                    <tr class="burial-doc-disinter"><td></td><td>* In case of disinterment&mdash;</td></tr>
+                                    <tr><td>*7.</td><td>Infectious or non-infectious <span class="bfill">{{ $t->infectious }}</span></td></tr>
+                                    <tr><td>*8.</td><td>Body embalmed or not embalmed <span class="bfill">{{ $t->embalmed }}</span></td></tr>
+                                    <tr><td>*9.</td><td>Disposition of remains <span class="bfill">{{ $t->disposition }}</span></td></tr>
+                                    <tr><td>10.</td><td>Amount of the fee per city/municipal ordinance</td></tr>
+                                </table>
+
+                                <div class="burial-doc-footgrid">
+                                    <div class="burial-doc-footgrid-row">
+                                        <div class="burial-doc-footgrid-cell burial-doc-footgrid-cell--l">No. <span class="bval">{{ $t->certificate_number }}</span></div>
+                                        <div class="burial-doc-footgrid-cell burial-doc-footgrid-cell--r">Dated: <span class="bval">{{ $fmtDate($t->date_issued) }}</span></div>
+                                    </div>
+                                    <div class="burial-doc-footgrid-row">
+                                        <div class="burial-doc-footgrid-cell burial-doc-footgrid-cell--l">&#8369; <span class="bval">{{ $fmt($t->fee_amount) }}</span></div>
+                                        <div class="burial-doc-footgrid-cell burial-doc-footgrid-cell--r"></div>
+                                    </div>
+                                    <div class="burial-doc-footgrid-row">
+                                        <div class="burial-doc-footgrid-cell burial-doc-footgrid-cell--l">City/Municipality</div>
+                                        <div class="burial-doc-footgrid-cell burial-doc-footgrid-cell--r">Province</div>
+                                    </div>
+                                    <div class="burial-doc-footgrid-row">
+                                        <div class="burial-doc-footgrid-cell burial-doc-footgrid-cell--full">Date <span class="bval">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> , 20<span class="bval">{{ $t->date_issued ? \Carbon\Carbon::parse($t->date_issued)->format('y') : '' }}</span></div>
+                                    </div>
                                 </div>
 
                                 <p class="burial-doc-cert">
-                                    I hereby certify that I have this day issued this burial permit and have received the fee above stated in the amount of
-                                    <b>₱ {{ $fmt($t->fee_amount) }}</b>.
+                                    <span class="burial-doc-cert-sc">I hereby certify</span> that I have this day issued this burial permit and have received the fee above stated in the amount of &#8369; <span class="bfill">{{ $fmt($t->fee_amount) }}</span>
                                 </p>
+
                                 <div class="burial-doc-sig">
-                                    <b>{{ $t->municipal_secretary }}</b>
-                                    <span>City / Municipal Secretary / Treasurer</span>
+                                    <div class="burial-doc-sig-inner">
+                                        <div class="burial-doc-sig-city">City <span class="bfill">{{ $t->municipal_secretary }}</span></div>
+                                        <div class="burial-doc-sig-title">Municipal Secretary</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -932,6 +997,26 @@
                 .mc-doc-sig-right,
                 .mc-doc-sig-left { font-size: 12pt !important; }
                 .mc-doc-no { font-size: 14pt !important; }
+
+                /* Form 58 — Burial permit: faithful replica, centered on the sheet, B/W. */
+                .quick-entry-bar { display: none !important; }
+                .burial-doc--view {
+                    width: 4.5in !important;
+                    margin: 0.7in auto !important;
+                    padding: 0 !important;
+                    border: none !important;
+                    border-radius: 0 !important;
+                    box-shadow: none !important;
+                    background: #fff !important;
+                }
+                .burial-doc--view,
+                .burial-doc--view * { color: #000 !important; }
+                .burial-doc--view .burial-doc-perm-opt.is-selected {
+                    background: #000 !important;
+                    color: #fff !important;
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
+                }
             }
         </style>
     @endpush
