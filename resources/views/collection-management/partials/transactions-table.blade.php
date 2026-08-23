@@ -28,17 +28,22 @@
                     ['transacted_at', 'Date'],
                     ['transacted_at', 'Time'],
                     ['form_type', 'Form Type'],
+                    [null, 'Form Name'],
                     ['payment_method', 'Payment Method'],
                     ['amount', 'Amount'],
                     ['status', 'Status'],
                 ] as [$column, $label])
-                    @php [$icon, $iconClass] = $sortIcon($column); @endphp
-                    <th>
-                        <a href="{{ $sortLink($column) }}" class="sortable-header">
-                            {{ $label }}
-                            <x-dynamic-component :component="'bx-' . $icon" class="sort-icon {{ $iconClass }}" />
-                        </a>
-                    </th>
+                    @if ($column === null)
+                        <th>{{ $label }}</th>
+                    @else
+                        @php [$icon, $iconClass] = $sortIcon($column); @endphp
+                        <th>
+                            <a href="{{ $sortLink($column) }}" class="sortable-header">
+                                {{ $label }}
+                                <x-dynamic-component :component="'bx-' . $icon" class="sort-icon {{ $iconClass }}" />
+                            </a>
+                        </th>
+                    @endif
                 @endforeach
                 <th class="col-actions text-center">Actions</th>
             </tr>
@@ -57,6 +62,7 @@
                     <td>{{ $transaction->transacted_at->format('F j, Y') }}</td>
                     <td>{{ $transaction->transacted_at->format('h:i:s A') }}</td>
                     <td>{{ $transaction->form_type }}</td>
+                    <td>{{ \App\Models\TransactionLog::formName($transaction->form_type) }}</td>
                     <td>{{ $transaction->payment_method ? ucwords(str_replace('_', ' ', $transaction->payment_method)) : '—' }}</td>
                     <td style="font-variant-numeric:tabular-nums; white-space:nowrap;">{{ $transaction->amount !== null ? '₱ ' . number_format($transaction->amount, 2) : '—' }}</td>
                     <td>
@@ -94,7 +100,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="10" class="table-empty">No transactions found.</td>
+                    <td colspan="11" class="table-empty">No transactions found.</td>
                 </tr>
             @endforelse
         </tbody>
