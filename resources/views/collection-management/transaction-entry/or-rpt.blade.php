@@ -187,6 +187,12 @@
                 const total = entries.reduce((s, e) => s + (e && e.amount ? Number(e.amount) : 0), 0);
                 if (amountInput) amountInput.value = total ? formatNumberInput(total.toFixed(2)) : '';
                 if (paymentWordsInput) paymentWordsInput.value = total ? rptAmountToWords(total) : '';
+                // Programmatic value changes don't fire input events, so float the labels manually.
+                [amountInput, paymentWordsInput].forEach((input) => {
+                    if (!input) return;
+                    toggleFilled(input);
+                    toggleEmpty(input);
+                });
             };
 
             // Two-way sync between the "Serial Number" field and the "No. ___ Z" badge in the preview.
