@@ -692,6 +692,7 @@ Route::post('/collections/transaction-entry/{formStock}/burial', function (\Illu
         'fee_amount' => ['nullable', 'numeric', 'min:0'],
         'date_issued' => ['nullable', 'date'],
         'municipal_secretary' => ['nullable', 'string'],
+        ...collection_payment_rules(),
     ]);
 
     // Fields 7–9 only apply to a disinterment; drop any stray values otherwise.
@@ -717,6 +718,7 @@ Route::post('/collections/transaction-entry/{formStock}/burial', function (\Illu
         'status'           => 'Completed',
         'transaction_id'   => $burialTransaction->id,
         'transaction_type' => \App\Models\BurialPermitTransaction::class,
+        ...collection_payment_log_fields($request, $validated['fee_amount'] ?? 0),
     ]);
 
     \App\Models\ActivityLog::record('Collection Management - Add Entry - ' . \App\Models\TransactionLog::formName($formStock->form_code) . ' - ' . $serial);

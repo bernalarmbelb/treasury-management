@@ -150,12 +150,16 @@
                 </div>
             </div>
 
+            @include('collection-management.transaction-entry.partials.payment-section')
+
             <div class="ctc-or2-actions">
                 <a href="{{ route('transaction-entry') }}" class="burial-cancel-btn">Cancel</a>
                 <button type="submit" class="ctc-or2-proceed-btn" id="burialProceedBtn">Proceed</button>
             </div>
         </form>
     </div>
+
+    @include('partials.select-enhancer')
 
     @include('collection-management.transaction-entry.partials.burial-preview-modal')
 
@@ -193,26 +197,40 @@
             form.querySelectorAll('input[name="permission_type"]').forEach((r) => r.addEventListener('change', () => { applyPermission(); syncPreviews(); }));
             applyPermission();
 
-            const pesoFmt = (v) => {
+            const num2 = (v) => {
                 const n = parseFloat(v);
-                return '₱ ' + (isNaN(n) ? '0.00' : n.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+                return isNaN(n) ? '' : n.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            };
+            const fmtDate = (v) => {
+                if (!v) return '';
+                const d = new Date(v + 'T00:00:00');
+                return isNaN(d) ? v : d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
             };
 
-            // Mirror the form into the preview modal.
+            // Mirror the form into the preview modal (faithful replica).
             const syncPreviews = () => {
                 document.querySelectorAll('[data-burial-preview]').forEach((el) => {
                     const name = el.dataset.burialPreview;
-                    if (name === 'permission_type') {
-                        el.textContent = form.querySelector('input[name="permission_type"]:checked')?.value || '';
+                    if (name === 'fee_amount') {
+                        el.textContent = num2(form.querySelector('[name="fee_amount"]').value);
                         return;
                     }
-                    if (name === 'fee_amount_words') {
-                        el.textContent = pesoFmt(form.querySelector('[name="fee_amount"]').value);
+                    if (name === 'date_of_death' || name === 'date_issued') {
+                        el.textContent = fmtDate(form.querySelector(`[name="${name}"]`)?.value);
+                        return;
+                    }
+                    if (name === 'date_issued_yy') {
+                        const v = form.querySelector('[name="date_issued"]').value;
+                        el.textContent = v ? v.slice(2, 4) : '';
                         return;
                     }
                     const input = form.querySelector(`[name="${name}"]`);
-                    if (!input) return;
-                    el.textContent = (name === 'fee_amount') ? pesoFmt(input.value) : (input.value || '');
+                    if (input) el.textContent = input.value || '';
+                });
+                // Highlight the chosen permission in the Inter/Disinter/Remove box.
+                const perm = form.querySelector('input[name="permission_type"]:checked')?.value;
+                document.querySelectorAll('.burial-doc-perm-opt').forEach((opt) => {
+                    opt.classList.toggle('is-selected', opt.dataset.permValue === perm);
                 });
             };
             form.querySelectorAll('input').forEach((input) => input.addEventListener('input', syncPreviews));
