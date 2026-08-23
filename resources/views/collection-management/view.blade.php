@@ -54,6 +54,8 @@
         .cm-empty { color: var(--muted, #6b7685); font-style: italic; text-align: center; }
         .cm-words { font-size: 14px; color: var(--ink, #1f2733); }
         .cm-words .cm-l { display: block; margin-bottom: 3px; }
+        .cm-payrow { display: flex; flex-wrap: wrap; gap: 12px 40px; }
+        .cm-payrow > div { display: flex; flex-direction: column; gap: 3px; }
         @media (max-width: 640px) { .cm-kv { grid-template-columns: 1fr 1fr; } .cm-summary .cm-sum-amt { text-align: left; } }
     </style>
 
@@ -95,37 +97,6 @@
                     <span class="ctc-view-pending-badge">Cancel Request Pending</span>
                 @endif
             </div>
-
-            {{-- ── Payment (Phase 1 capture) ──────────────────────────────── --}}
-            @if($log->payment_method)
-            <style>
-                .cqm-view-payment { border: 1px solid var(--line, #E3E8EF); border-radius: 10px; padding: 14px 18px; margin-bottom: 16px; background: #fff; }
-                .cqm-vp-title { font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: .05em; color: var(--primary, #427AB5); }
-                .cqm-vp-grid { display: flex; flex-wrap: wrap; gap: 10px 28px; margin-top: 10px; }
-                .cqm-vp-grid > div { display: flex; flex-direction: column; gap: 2px; }
-                .cqm-vp-grid .l { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--muted, #6b7685); }
-                .cqm-vp-grid .v { font-size: 14px; font-weight: 600; font-family: 'Manrope', sans-serif; }
-            </style>
-            <div class="cqm-view-payment">
-                <span class="cqm-vp-title">Payment</span>
-                <div class="cqm-vp-grid">
-                    <div><span class="l">Method</span><span class="v">{{ ucwords(str_replace('_', ' ', $log->payment_method)) }}</span></div>
-                    <div><span class="l">Amount</span><span class="v" style="font-variant-numeric:tabular-nums">₱ {{ number_format((float) $log->amount, 2) }}</span></div>
-                    @if($log->payment_method === 'cheque')
-                        <div><span class="l">Bank</span><span class="v">{{ $log->payer_bank_name ?: '—' }}</span></div>
-                        <div><span class="l">Cheque No.</span><span class="v">{{ $log->payment_reference ?: '—' }}</span></div>
-                        <div><span class="l">Cheque Date</span><span class="v">{{ optional($log->payment_reference_date)->format('m/d/Y') ?: '—' }}</span></div>
-                    @elseif($log->payment_method === 'online')
-                        <div><span class="l">Channel</span><span class="v">{{ $log->payment_channel ?: '—' }}</span></div>
-                        <div><span class="l">Reference</span><span class="v">{{ $log->payment_reference ?: '—' }}</span></div>
-                        <div><span class="l">Date</span><span class="v">{{ optional($log->payment_reference_date)->format('m/d/Y') ?: '—' }}</span></div>
-                    @elseif($log->payment_method === 'money_order')
-                        <div><span class="l">MO No.</span><span class="v">{{ $log->payment_reference ?: '—' }}</span></div>
-                        <div><span class="l">Date</span><span class="v">{{ optional($log->payment_reference_date)->format('m/d/Y') ?: '—' }}</span></div>
-                    @endif
-                </div>
-            </div>
-            @endif
 
             {{-- ── Cancel request detail (admin view) ─────────────────────── --}}
             @if($hasPendingRequest && ($isAdmin ?? false) && isset($pendingRequest))
@@ -188,6 +159,30 @@
                             <div class="cm-sum-av">₱ {{ number_format((float) $log->amount, 2) }}</div>
                         </div>
                     </div>
+
+                    @if($log->payment_method)
+                    <div class="cm-card">
+                        <div class="cm-h"><span class="cm-k">Payment</span></div>
+                        <div class="cm-b">
+                            <div class="cm-payrow">
+                                <div><span class="cm-l">Method</span><span class="cm-v">{{ ucwords(str_replace('_', ' ', $log->payment_method)) }}</span></div>
+                                <div><span class="cm-l">Amount</span><span class="cm-v" style="font-variant-numeric:tabular-nums">₱ {{ number_format((float) $log->amount, 2) }}</span></div>
+                                @if($log->payment_method === 'cheque')
+                                    <div><span class="cm-l">Bank</span><span class="cm-v">{{ $log->payer_bank_name ?: '—' }}</span></div>
+                                    <div><span class="cm-l">Cheque No.</span><span class="cm-v">{{ $log->payment_reference ?: '—' }}</span></div>
+                                    <div><span class="cm-l">Cheque Date</span><span class="cm-v">{{ optional($log->payment_reference_date)->format('m/d/Y') ?: '—' }}</span></div>
+                                @elseif($log->payment_method === 'online')
+                                    <div><span class="cm-l">Channel</span><span class="cm-v">{{ $log->payment_channel ?: '—' }}</span></div>
+                                    <div><span class="cm-l">Reference</span><span class="cm-v">{{ $log->payment_reference ?: '—' }}</span></div>
+                                    <div><span class="cm-l">Date</span><span class="cm-v">{{ optional($log->payment_reference_date)->format('m/d/Y') ?: '—' }}</span></div>
+                                @elseif($log->payment_method === 'money_order')
+                                    <div><span class="cm-l">MO No.</span><span class="cm-v">{{ $log->payment_reference ?: '—' }}</span></div>
+                                    <div><span class="cm-l">Date</span><span class="cm-v">{{ optional($log->payment_reference_date)->format('m/d/Y') ?: '—' }}</span></div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                    @endif
 
                     @switch($log->form_type)
                         @case('Form 5IC')
@@ -1084,7 +1079,7 @@
             @endif
 
             {{-- ── Action buttons ─────────────────────────────────────────── --}}
-            <div class="ctc-view-actions" style="max-width: {{ $paperMaxWidth }}">
+            <div class="ctc-view-actions" style="max-width: 820px; margin-left: auto; margin-right: auto;">
                 <button type="button" class="ctc-view-print-btn" onclick="window.print()">Print</button>
                 @if($log->archived_at)
                     <button type="button" class="ctc-view-cancel-request-btn" id="unarchiveBtn"
