@@ -8,7 +8,7 @@
     @endphp
 
     <div class="x-header-container sub-nav-sticky">
-        <x-header title="Bank Deposit &amp; Reconciliation" :tmpRoute="$tmpRoute" :routeName="$routeName">
+        <x-header title="Bank Deposit & Reconciliation" :tmpRoute="$tmpRoute" :routeName="$routeName">
             <x-slot:actions>
                 @include('bank-deposit-reconciliation.partials.sub-nav')
             </x-slot:actions>

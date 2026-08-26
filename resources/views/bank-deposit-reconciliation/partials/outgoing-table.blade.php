@@ -34,7 +34,7 @@
         </thead>
         <tbody>
             @forelse ($cheques as $cheque)
-                @php $st = $cheque->status === 'Cancelled' ? 'Void' : 'Pending'; @endphp
+                @php $st = $cheque->status === 'Cancelled' ? 'Void' : ucfirst($cheque->recon_status ?: 'pending'); @endphp
                 <tr>
                     <td>{{ $cheque->created_at->format('F j, Y · h:i A') }}</td>
                     <td>{{ $cheque->check_number }}</td>
@@ -44,6 +44,10 @@
                     <td><span class="bdr-status bdr-status--{{ strtolower($st) }}">{{ $st }}</span></td>
                     <td class="col-actions">
                         <div class="table-actions">
+                            @if(($isAdmin ?? false) && $cheque->status === 'Issued' && ($cheque->recon_status ?: 'pending') === 'pending')
+                                <button type="button" class="action-btn action-unarchive bdr-clear" data-id="{{ $cheque->id }}">Mark Cleared</button>
+                                <button type="button" class="action-btn action-cancel bdr-bounce" data-id="{{ $cheque->id }}">Bounce</button>
+                            @endif
                             <a href="{{ route('cheque-management.view', $cheque->id) }}" class="action-btn action-view">View</a>
                         </div>
                     </td>

@@ -9,49 +9,83 @@
 
             <div class="burial-doc">
                 <div class="burial-doc-meta">
-                    <span>Accountable Form No. 51 · Revised 1993</span><span>ORIGINAL</span>
+                    <span>Accountable Form No. 51</span><span>Revised 1993</span><span>ORIGINAL</span>
                 </div>
+
                 <div class="burial-doc-masthead">
-                    <p class="burial-doc-or-title">OFFICIAL RECEIPT</p>
-                    <p class="burial-doc-or-sub">of the Republic of the Philippines</p>
-                    <p class="burial-doc-no">No. <span data-burial-preview="certificate_number"></span> <span data-burial-preview="series_letter"></span></p>
+                    <div class="burial-doc-mast-top">
+                        <div class="burial-doc-mast-title">OFFICIAL RECEIPT</div>
+                        <div class="burial-doc-mast-sub">OF THE REPUBLIC OF THE PHILIPPINES</div>
+                    </div>
+                    <div class="burial-doc-mast-bottom">
+                        <div class="burial-doc-seal"><span class="burial-doc-seal-circle">SEAL</span></div>
+                        <div class="burial-doc-no">N<sup>o</sup> <span class="bval" data-burial-preview="certificate_number"></span> <span class="bval" data-burial-preview="series_letter"></span></div>
+                    </div>
                 </div>
-                <div class="burial-doc-title-bar">City / Municipal Burial Permit and Fee Receipt</div>
 
-                <p class="burial-doc-line">Mr. <b data-burial-preview="applicant_name"></b></p>
-                <p class="burial-doc-line">To the City / Municipality of <b data-burial-preview="city_municipality"></b></p>
-                <p class="burial-doc-line">Province of <b data-burial-preview="province"></b></p>
+                <div class="burial-doc-title">CITY/MUNICIPAL BURIAL PERMIT AND<br>FEE RECEIPT</div>
 
-                <p class="burial-doc-line">Permission is hereby granted to <b data-burial-preview="permission_type"></b> the remains of —</p>
+                <div class="burial-doc-mr">Mr. <span class="bfill" data-burial-preview="applicant_name"></span></div>
 
-                <ol class="burial-doc-list">
-                    <li>Name <b data-burial-preview="deceased_name"></b></li>
-                    <li>Nationality <b data-burial-preview="nationality"></b></li>
-                    <li>Age <b data-burial-preview="age"></b> years. Sex <b data-burial-preview="sex"></b></li>
-                    <li>Date of death <b data-burial-preview="date_of_death"></b></li>
-                    <li>Cause of death <b data-burial-preview="cause_of_death"></b></li>
-                    <li>Name of cemetery <b data-burial-preview="cemetery_name"></b></li>
-                </ol>
-                <p class="burial-doc-note">* In case of disinterment—</p>
-                <ol class="burial-doc-list" start="7">
-                    <li>Infectious or non-infectious <b data-burial-preview="infectious"></b></li>
-                    <li>Body embalmed or not embalmed <b data-burial-preview="embalmed"></b></li>
-                    <li>Disposition of remains <b data-burial-preview="disposition"></b></li>
-                    <li>Amount of the fee per city/municipal ordinance <b data-burial-preview="fee_amount"></b></li>
-                </ol>
+                <div class="burial-doc-dr">
+                    <div class="burial-doc-dr-label">Dr.</div>
+                    <div class="burial-doc-dr-fields">
+                        <div class="burial-doc-dr-row">To the City/Municipality of: <span class="bval" data-burial-preview="city_municipality"></span></div>
+                        <div class="burial-doc-dr-row">Province of: <span class="bval" data-burial-preview="province"></span></div>
+                    </div>
+                </div>
 
-                <div class="burial-doc-fee-row">
-                    <span>No. <b data-burial-preview="certificate_number"></b></span>
-                    <span>Dated: <b data-burial-preview="date_issued"></b></span>
+                <div class="burial-doc-perm">
+                    <span>Permission is hereby granted</span>
+                    <div class="burial-doc-perm-box">
+                        <div class="burial-doc-perm-opt" data-perm-value="Inter">Inter</div>
+                        <div class="burial-doc-perm-opt" data-perm-value="Disinter">Disinter</div>
+                        <div class="burial-doc-perm-opt" data-perm-value="Remove">Remove</div>
+                    </div>
+                    <span>the remains of&mdash;</span>
+                </div>
+
+                <table class="burial-doc-items">
+                    <tr><td>1.</td><td>Name <span class="bfill" data-burial-preview="deceased_name"></span></td></tr>
+                    <tr><td>2.</td><td>Nationality <span class="bfill" data-burial-preview="nationality"></span></td></tr>
+                    <tr><td>3.</td><td>Age <span class="bfill" data-burial-preview="age"></span> years. Sex <span class="bfill" data-burial-preview="sex"></span></td></tr>
+                    <tr><td>4.</td><td>Date of death <span class="bfill" data-burial-preview="date_of_death"></span></td></tr>
+                    <tr><td>5.</td><td>Cause of death <span class="bfill" data-burial-preview="cause_of_death"></span></td></tr>
+                    <tr><td>6.</td><td>Name of cemetery <span class="bfill" data-burial-preview="cemetery_name"></span></td></tr>
+                    <tr class="burial-doc-disinter"><td></td><td>* In case of disinterment&mdash;</td></tr>
+                    <tr><td>*7.</td><td>Infectious or non-infectious <span class="bfill" data-burial-preview="infectious"></span></td></tr>
+                    <tr><td>*8.</td><td>Body embalmed or not embalmed <span class="bfill" data-burial-preview="embalmed"></span></td></tr>
+                    <tr><td>*9.</td><td>Disposition of remains <span class="bfill" data-burial-preview="disposition"></span></td></tr>
+                    <tr><td>10.</td><td>Amount of the fee per city/municipal ordinance</td></tr>
+                </table>
+
+                <div class="burial-doc-footgrid">
+                    <div class="burial-doc-footgrid-row">
+                        <div class="burial-doc-footgrid-cell burial-doc-footgrid-cell--l">No. <span class="bval" data-burial-preview="certificate_number"></span></div>
+                        <div class="burial-doc-footgrid-cell burial-doc-footgrid-cell--r">Dated: <span class="bval" data-burial-preview="date_issued"></span></div>
+                    </div>
+                    <div class="burial-doc-footgrid-row">
+                        <div class="burial-doc-footgrid-cell burial-doc-footgrid-cell--l">&#8369; <span class="bval" data-burial-preview="fee_amount"></span></div>
+                        <div class="burial-doc-footgrid-cell burial-doc-footgrid-cell--r"></div>
+                    </div>
+                    <div class="burial-doc-footgrid-row">
+                        <div class="burial-doc-footgrid-cell burial-doc-footgrid-cell--l">City/Municipality</div>
+                        <div class="burial-doc-footgrid-cell burial-doc-footgrid-cell--r">Province</div>
+                    </div>
+                    <div class="burial-doc-footgrid-row">
+                        <div class="burial-doc-footgrid-cell burial-doc-footgrid-cell--full">Date <span class="bval">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> , 20<span class="bval" data-burial-preview="date_issued_yy"></span></div>
+                    </div>
                 </div>
 
                 <p class="burial-doc-cert">
-                    I hereby certify that I have this day issued this burial permit and have received the fee above stated in the amount of
-                    <b data-burial-preview="fee_amount_words"></b>.
+                    <span class="burial-doc-cert-sc">I hereby certify</span> that I have this day issued this burial permit and have received the fee above stated in the amount of &#8369; <span class="bfill" data-burial-preview="fee_amount"></span>
                 </p>
+
                 <div class="burial-doc-sig">
-                    <b data-burial-preview="municipal_secretary"></b>
-                    <span>City / Municipal Secretary / Treasurer</span>
+                    <div class="burial-doc-sig-inner">
+                        <div class="burial-doc-sig-city">City <span class="bfill" data-burial-preview="municipal_secretary"></span></div>
+                        <div class="burial-doc-sig-title">Municipal Secretary</div>
+                    </div>
                 </div>
             </div>
 

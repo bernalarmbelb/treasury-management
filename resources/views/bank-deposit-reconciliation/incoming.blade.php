@@ -8,7 +8,7 @@
     @endphp
 
     <div class="x-header-container sub-nav-sticky">
-        <x-header title="Bank Deposit &amp; Reconciliation" :tmpRoute="route('bank-deposit-reconciliation')" routeName="bank-deposit-reconciliation">
+        <x-header title="Bank Deposit & Reconciliation" :tmpRoute="route('bank-deposit-reconciliation')" routeName="bank-deposit-reconciliation">
             <x-slot:actions>
                 @include('bank-deposit-reconciliation.partials.sub-nav')
             </x-slot:actions>
@@ -36,6 +36,10 @@
         <div id="bdr-table-container">
             @include('bank-deposit-reconciliation.partials.incoming-table')
         </div>
+
+        @if ($isAdmin ?? false)
+            @include('bank-deposit-reconciliation.partials.deposit-flow')
+        @endif
 
         @include('partials.select-enhancer')
     </div>

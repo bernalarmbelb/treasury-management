@@ -3342,6 +3342,258 @@ select.form-batch-input {
     display: none;
 }
 
+/* Corporation Cedula (Form CCC) - modernized to match OR/RPT's sectioned,
+   floating-label layout. Scoped entirely under .ctcm-page so Individual
+   Cedula (still the old absolute-position paper replica) is unaffected. */
+.ctcm-page {
+    /* Redefines the site-wide "primary" font variable for this page only, so
+       every reused class below (.ctc-input, .ctc-amount-input, .ctc-radio-group
+       p, etc.) that reads var(--font-family-primary, ...) renders in Manrope
+       instead of Obviously, without touching the :root default other pages use. */
+    --font-family-primary: 'Manrope', sans-serif;
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    background-color: #fff;
+    box-shadow: 0 1px 4px rgba(51, 51, 51, 0.08);
+    font-family: var(--font-family-primary);
+}
+
+.ctcm-topbar {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 20px 24px;
+    border-bottom: 1px solid rgba(66, 122, 181, 0.16);
+    flex-wrap: wrap;
+}
+
+.ctcm-title-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.ctcm-title {
+    margin: 0;
+    font-weight: 600;
+    font-size: 20px;
+    text-transform: uppercase;
+    color: var(--fonts-black, #333);
+}
+
+.ctcm-badge {
+    font-family: var(--font-family-secondary, 'Manrope', sans-serif);
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #fff;
+    background-color: var(--primary, #427AB5);
+    padding: 5px 12px;
+    border-radius: 4px;
+}
+
+.ctcm-certno {
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.ctcm-certno .ctc-cert-no-prefix-input,
+.ctcm-certno .ctc-cert-no-input {
+    font-size: 17px;
+}
+
+.ctcm-certno-copy {
+    margin: 2px 0 0;
+    font-family: var(--font-family-secondary, 'Manrope', sans-serif);
+    font-weight: 600;
+    font-size: 9.5px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #6b7685;
+}
+
+.ctcm-body {
+    padding: 24px;
+}
+
+.ctcm-section {
+    margin-bottom: 22px;
+}
+
+.ctcm-role-note {
+    margin: 8px 0 0;
+    font-family: var(--font-family-secondary, 'Manrope', sans-serif);
+    font-size: 11px;
+    color: #97a1ad;
+}
+
+.ctcm-page .ctc-radio-group p {
+    font-family: 'Manrope', sans-serif;
+}
+
+.ctcm-page #ctc-treasurer-name {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.ctcm-section:last-child {
+    margin-bottom: 0;
+}
+
+.ctcm-page .ctc-field {
+    position: relative;
+    border-color: #E3E8EF;
+}
+
+.ctcm-page .ctc-field.is-empty {
+    background-color: #F7F9FB;
+}
+
+.ctcm-page .ctc-field.has-error {
+    border-color: #E04F4F;
+}
+
+.ctcm-tin {
+    align-items: center;
+    gap: 16px;
+    padding: 0 14px;
+}
+
+.ctcm-tin-label {
+    flex-shrink: 0;
+    font-family: var(--font-family-secondary, 'Manrope', sans-serif);
+    font-weight: 600;
+    font-size: 10.5px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: #6b7685;
+}
+
+.ctcm-tin-cells {
+    display: flex;
+    gap: 6px;
+}
+
+.ctcm-radio-row {
+    align-items: center;
+    gap: 22px;
+    padding: 0 14px;
+    flex-wrap: wrap;
+}
+
+.ctcm-radio-row-label {
+    margin: 0;
+    flex-shrink: 0;
+    font-family: var(--font-family-secondary, 'Manrope', sans-serif);
+    font-weight: 600;
+    font-size: 10.5px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: #6b7685;
+}
+
+.ctcm-tax-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid #E3E8EF;
+    font-family: var(--font-family-primary, 'Obviously', sans-serif);
+    font-size: 12px;
+    color: var(--fonts-black, #333);
+}
+
+.ctcm-tax-table th {
+    background-color: #F7F9FB;
+    color: #6b7685;
+    font-family: var(--font-family-secondary, 'Manrope', sans-serif);
+    font-weight: 700;
+    font-size: 10px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    text-align: right;
+    padding: 8px 10px;
+    border-bottom: 1px solid #E3E8EF;
+    border-left: 1px solid #E3E8EF;
+}
+
+.ctcm-tax-table th:first-child {
+    text-align: left;
+    border-left: none;
+}
+
+.ctcm-tax-table td {
+    padding: 9px 10px;
+    border-top: 1px solid #E3E8EF;
+    border-left: 1px solid #E3E8EF;
+    vertical-align: middle;
+}
+
+.ctcm-tax-table td:first-child {
+    border-left: none;
+}
+
+.ctcm-tax-table tr.ctcm-grp td {
+    background-color: #F7F9FB;
+    font-weight: 600;
+    color: #6b7685;
+}
+
+.ctcm-tax-table tr.ctcm-total td {
+    border-top: 2px solid rgba(66, 122, 181, 0.3);
+    font-weight: 700;
+}
+
+.ctcm-tax-table td.ctcm-fixed {
+    text-align: right;
+    color: #97a1ad;
+}
+
+.ctcm-tax-table td.ctcm-amt {
+    text-align: right;
+}
+
+.ctcm-amt-inner {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+}
+
+.ctcm-amt-inner .ctc-amount-input {
+    flex: 1 1 auto;
+    width: auto;
+    height: auto;
+    font-size: 12px;
+}
+
+.ctcm-amt-inner .ctc-amount-input:focus {
+    outline-color: var(--primary, #427AB5);
+}
+
+.ctcm-cert-box {
+    min-height: 64px;
+    display: flex;
+    align-items: flex-end;
+    border: 1px dashed #D7DEE8;
+    padding: 10px 14px;
+    font-family: var(--font-family-secondary, 'Manrope', sans-serif);
+    font-size: 11px;
+    color: #97a1ad;
+}
+
+.ctcm-foot {
+    display: flex;
+    justify-content: flex-end;
+    padding: 16px 24px;
+}
+
+.ctcm-foot .ctc-proceed-btn {
+    position: static;
+}
+
 /* Official Receipt (Form 5IC) - Figma node 270:2126 */
 .ctc-page--or {
     width: 100%;
@@ -4434,57 +4686,117 @@ select.form-batch-input {
     border-radius: 14px;
     box-shadow: 0 18px 50px rgba(0, 0, 0, 0.18);
 }
+/* ── Burial permit — faithful replica of the physical Accountable Form 51 ── */
 .burial-doc {
     width: 100%;
-    font-family: var(--font-family-secondary, 'Manrope', sans-serif);
-    color: #2b3543;
+    font-family: Georgia, 'Times New Roman', serif;
+    color: #111;
     font-size: 12px;
-    line-height: 1.5;
+    line-height: 1.25;
 }
 .burial-doc-meta {
     display: flex;
     justify-content: space-between;
-    font-size: 9px;
-    color: #8590a0;
+    font-size: 8px;
+    color: #333;
+    padding: 0 0 3px;
 }
-.burial-doc-masthead { text-align: center; margin: 6px 0; }
-.burial-doc-or-title { margin: 0; font-weight: 800; font-size: 18px; color: #2b3543; }
-.burial-doc-or-sub { margin: 0; font-size: 10px; color: #5a6675; }
-.burial-doc-no { margin: 6px 0 0; font-weight: 700; font-size: 15px; }
-.burial-doc-title-bar {
-    margin: 6px 0 10px;
-    padding: 6px;
-    text-align: center;
-    background-color: rgba(66, 122, 181, 0.08);
-    border: 1px solid rgba(66, 122, 181, 0.3);
-    border-radius: 4px;
-    font-weight: 700;
-    font-size: 12px;
-    text-transform: uppercase;
-    color: var(--primary, #427AB5);
+
+/* Masthead box */
+.burial-doc-masthead { border: 1.5px solid #111; }
+.burial-doc-mast-top { text-align: center; padding: 4px 6px; border-bottom: 1.5px solid #111; }
+.burial-doc-mast-title { font-weight: 700; font-size: 22px; letter-spacing: 0.5px; }
+.burial-doc-mast-sub { font-size: 11px; letter-spacing: 0.4px; }
+.burial-doc-mast-bottom { display: flex; align-items: stretch; min-height: 56px; }
+.burial-doc-seal {
+    width: 34%;
+    border-right: 1.5px solid #111;
+    display: flex; align-items: center; justify-content: center;
+    padding: 4px;
 }
-.burial-doc-line { margin: 4px 0; }
-.burial-doc-line b, .burial-doc-list b, .burial-doc-cert b, .burial-doc-sig b {
-    font-weight: 700;
-    border-bottom: 1px solid #c7d0dd;
+.burial-doc-seal-circle {
+    width: 50px; height: 50px; border-radius: 50%;
+    border: 1px solid #777;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 7px; color: #999; font-family: Arial, sans-serif;
+}
+.burial-doc-no {
+    flex: 1;
+    display: flex; align-items: center; gap: 8px;
+    padding: 0 10px;
+    font-weight: 700; font-size: 24px; letter-spacing: 1px;
+}
+.burial-doc-no sup { font-size: 10px; }
+
+.burial-doc-title {
+    text-align: center; font-weight: 700; font-size: 11px;
+    padding: 5px 0 3px; line-height: 1.2;
+}
+
+.burial-doc-mr {
+    border-bottom: 1px solid #111; padding: 5px 0 2px;
+    font-variant: small-caps;
+}
+
+.burial-doc-dr { display: flex; border-bottom: 1px solid #111; }
+.burial-doc-dr-label {
+    width: 20%; border-right: 1px solid #111;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+}
+.burial-doc-dr-fields { flex: 1; min-width: 0; }
+.burial-doc-dr-row { padding: 3px 6px; font-variant: small-caps; font-size: 10px; }
+.burial-doc-dr-row:first-child { border-bottom: 1px solid #111; }
+
+.burial-doc-perm {
+    display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+    padding: 5px 0; border-bottom: 1px solid #111;
+    font-variant: small-caps; font-size: 10px;
+}
+.burial-doc-perm-box { border: 1px solid #111; font-size: 8px; line-height: 1.5; font-variant: normal; }
+.burial-doc-perm-opt { padding: 0 6px; }
+.burial-doc-perm-opt:not(:last-child) { border-bottom: 1px solid #111; }
+.burial-doc-perm-opt.is-selected {
+    background: #111; color: #fff;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+
+.burial-doc-items { width: 100%; border-collapse: collapse; font-size: 12px; margin: 5px 0; }
+.burial-doc-items td { vertical-align: top; padding: 1px 0; }
+.burial-doc-items td:first-child { width: 24px; text-align: right; padding-right: 4px; }
+.burial-doc-items tr.burial-doc-disinter td { font-size: 10px; padding-left: 12px; }
+
+.bfill {
+    font-variant: normal;
+    border-bottom: 1px solid #111;
     padding: 0 4px;
-    min-width: 40px;
+    min-width: 55px;
     display: inline-block;
+    line-height: 1.05;
 }
-.burial-doc-list { margin: 6px 0; padding-left: 22px; }
-.burial-doc-list li { margin: 3px 0; }
-.burial-doc-note { margin: 6px 0 2px; font-style: italic; font-size: 10px; color: #6b7686; }
-.burial-doc-fee-row { display: flex; gap: 24px; margin: 8px 0; }
-.burial-doc-cert { margin: 10px 0; font-size: 11px; line-height: 1.55; }
-.burial-doc-sig { text-align: center; margin-top: 18px; }
-.burial-doc-sig b { border-bottom: none; }
-.burial-doc-sig span { display: block; border-top: 1px solid #c7d0dd; margin-top: 2px; padding-top: 3px; font-size: 9px; color: #8590a0; }
+.bval { font-variant: normal; }
+
+.burial-doc-footgrid { border: 1px solid #111; font-size: 10px; font-variant: small-caps; }
+.burial-doc-footgrid-row { display: flex; }
+.burial-doc-footgrid-row:not(:last-child) { border-bottom: 1px solid #111; }
+.burial-doc-footgrid-cell { padding: 3px 6px; min-height: 15px; box-sizing: border-box; }
+.burial-doc-footgrid-cell--l { width: 50%; border-right: 1px solid #111; }
+.burial-doc-footgrid-cell--r { width: 50%; }
+.burial-doc-footgrid-cell--full { width: 100%; }
+
+.burial-doc-cert { text-align: justify; padding: 8px 0 4px; font-size: 11px; line-height: 1.4; }
+.burial-doc-cert-sc { font-variant: small-caps; padding-left: 16px; }
+
+.burial-doc-sig { text-align: right; padding-top: 16px; }
+.burial-doc-sig-inner { display: inline-block; text-align: left; min-width: 190px; }
+.burial-doc-sig-city { font-size: 10px; }
+.burial-doc-sig-title { font-size: 9px; text-align: center; margin-top: 2px; }
 
 /* Standalone burial document on the transaction View page (no modal card). */
 .burial-doc--view {
-    width: 540px;
+    width: 460px;
     max-width: 100%;
-    padding: 20px 22px 24px;
+    padding: 18px 20px 22px;
     background-color: #fff;
     border: 1px solid #c7d0dd;
     border-radius: 10px;

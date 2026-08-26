@@ -265,12 +265,19 @@
                     headers: { 'X-Requested-With': 'XMLHttpRequest' },
                     body: new FormData(form),
                 })
-                    .then((r) => { if (!r.ok) throw new Error('save'); return r.json(); })
+                    .then(async (r) => {
+                        const data = await r.json().catch(() => ({}));
+                        if (!r.ok) {
+                            const msg = data.errors ? Object.values(data.errors)[0][0] : (data.message || 'Something went wrong while saving. Please try again.');
+                            throw new Error(msg);
+                        }
+                        return data;
+                    })
                     .then((data) => { window.location.href = data.redirect; })
-                    .catch(() => {
+                    .catch((err) => {
                         saveBtn.disabled = false;
                         saveBtn.textContent = original;
-                        showToast('Action could not be completed', 'Something went wrong while saving. Please try again.', 'error');
+                        showToast('Could not save', err.message || 'Something went wrong while saving. Please try again.', 'error');
                     });
             });
 

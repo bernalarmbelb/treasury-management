@@ -17,6 +17,7 @@ class Cheque extends Model
         'amount_in_words',
         'nature_of_payment',
         'status',
+        'recon_status',
         'created_by',
         'archived_at',
     ];

@@ -194,6 +194,7 @@ class FormBatch extends Model
                 ->map(fn ($t) => $this->trailingNumber($t->certificate_number)),
             'Form 5IC' => $formStock->orTransactions->map(fn ($t) => $this->trailingNumber($t->certificate_number)),
             'Form 10' => $formStock->marriageCertificateTransactions->map(fn ($t) => $this->trailingNumber($t->certificate_number)),
+            'Form 58' => $formStock->burialPermitTransactions->map(fn ($t) => $this->trailingNumber($t->certificate_number)),
             default => collect(),
         };
     }

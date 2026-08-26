@@ -24,6 +24,7 @@ class TransactionLog extends Model
         'payment_reference',
         'payment_reference_date',
         'recon_status',
+        'deposit_id',
     ];
 
     protected $casts = [
@@ -41,6 +42,11 @@ class TransactionLog extends Model
     public function cancelRequests(): HasMany
     {
         return $this->hasMany(CancelRequest::class);
+    }
+
+    public function deposit(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Deposit::class);
     }
 
     public static function formName(string $formType): string

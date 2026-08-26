@@ -18,179 +18,215 @@
     </div>
 
     <div class="collection-content">
-        <form class="ctc-page ctc-page--corporation" id="ctcForm" method="POST" action="{{ route('transaction-entry.corporation-cedula.store', $form->id, false) }}" style="height: 960px;">
+        <form class="ctcm-page" id="ctcForm" method="POST" action="{{ route('transaction-entry.corporation-cedula.store', $form->id, false) }}">
             @csrf
-            <div class="ctc-field ctc-field--title" style="left:40px; top:40px; width:438px; height:42px;">
-                <p>Community Tax Certificate</p>
-            </div>
-            <div class="ctc-field ctc-badge ctc-badge--corporation" style="left:478px; top:40px; width:172px; height:42px;">
-                <p>Corporation</p>
-            </div>
-            <div class="ctc-field ctc-cert-no" style="left:650px; top:40px; width:272px; height:58px;">
-                <input type="text" class="ctc-cert-no-prefix-input" id="ctc-cert-prefix" name="certificate_prefix" value="{{ $nextSerialPrefix ?? 'CCC2021' }}">
-                <input type="text" class="ctc-cert-no-input" id="ctc-cert-no" name="certificate_number" value="{{ $nextSerialNumber ?? '00259338' }}">
-            </div>
-            <div class="ctc-field ctc-divider" style="left:650px; top:98px; width:272px; height:5px;"></div>
-            <div class="ctc-field ctc-copy-label" style="left:650px; top:103px; width:272px; height:21px;">
-                <p>Taxpayer's Copy</p>
+
+            <div class="ctcm-topbar">
+                <div class="ctcm-title-group">
+                    <p class="ctcm-title">Community Tax Certificate</p>
+                    <span class="ctcm-badge">Corporation</span>
+                </div>
+                <div class="ctcm-certno">
+                    <div class="ctcm-certno-no">
+                        <input type="text" class="ctc-cert-no-prefix-input" id="ctc-cert-prefix" name="certificate_prefix" value="{{ $nextSerialPrefix ?? 'CCC2021' }}">
+                        <input type="text" class="ctc-cert-no-input" id="ctc-cert-no" name="certificate_number" value="{{ $nextSerialNumber ?? '00259338' }}">
+                    </div>
+                    <p class="ctcm-certno-copy">Taxpayer's Copy</p>
+                </div>
             </div>
 
-            <div class="ctc-field ctc-input-wrap" style="left:40px; top:82px; width:69px; height:42px;">
-                <input type="number" class="ctc-input" id="ctc-year" name="year" value="{{ now()->year }}" placeholder=" ">
-                <label class="ctc-input-caption" for="ctc-year">Year</label>
-            </div>
-            <div class="ctc-field ctc-input-wrap" style="left:109px; top:82px; width:369px; height:42px;">
-                <input type="text" class="ctc-input" id="ctc-place-of-issue" name="place_of_issue" placeholder=" ">
-                <label class="ctc-input-caption" for="ctc-place-of-issue">Place of Issue (City/Mun./Prov.)</label>
-            </div>
-            <div class="ctc-field ctc-input-wrap ctc-date" style="left:478px; top:82px; width:172px; height:42px;">
-                <input type="date" class="ctc-input" id="ctc-date-issued" name="date_issued">
-                <label class="ctc-input-caption" for="ctc-date-issued">Date Issued</label>
-            </div>
-
-            <div class="ctc-field ctc-input-wrap" style="left:40px; top:124px; width:610px; height:42px;">
-                <input type="text" class="ctc-input" id="ctc-company-name" name="company_name" placeholder=" ">
-                <label class="ctc-input-caption" for="ctc-company-name">Company's Full Name</label>
-            </div>
-
-            <div class="ctc-field ctc-field--tin-compact" style="left:650px; top:124px; width:272px; height:42px;">
-                <p class="ctc-tin-label">TIN (if Any)</p>
-                <div class="ctc-tin-group">
-                    @for ($group = 0; $group < 5; $group++)
-                        <div class="ctc-tin-cell-group">
-                            @for ($cell = 0; $cell < 3; $cell++)
-                                @php $tinIndex = $group * 3 + $cell; @endphp
-                                <input type="text" inputmode="numeric" maxlength="1" class="ctc-tin-cell" name="tin[]" data-tin-index="{{ $tinIndex }}">
-                            @endfor
+            <div class="ctcm-body">
+                <div class="ctcm-section">
+                    <div class="ctc-section-header"><p>Certificate Details</p></div>
+                        <div class="ctc-rpt-row">
+                            <div class="ctc-field ctc-input-wrap ctc-rpt-field ctc-rpt-field--narrow">
+                                <input type="number" class="ctc-input" id="ctc-year" name="year" value="{{ now()->year }}" placeholder=" ">
+                                <label class="ctc-input-caption" for="ctc-year">Year</label>
+                            </div>
+                            <div class="ctc-field ctc-input-wrap ctc-rpt-field">
+                                <input type="text" class="ctc-input" id="ctc-place-of-issue" name="place_of_issue" placeholder=" ">
+                                <label class="ctc-input-caption" for="ctc-place-of-issue">Place of Issue (City/Mun./Prov.)</label>
+                            </div>
+                            <div class="ctc-field ctc-input-wrap ctc-date ctc-rpt-field ctc-rpt-field--narrow">
+                                <input type="date" class="ctc-input" id="ctc-date-issued" name="date_issued">
+                                <label class="ctc-input-caption" for="ctc-date-issued">Date Issued</label>
+                            </div>
                         </div>
-                    @endfor
+                    </div>
+
+                    <div class="ctcm-section">
+                        <div class="ctc-section-header"><p>Company Information</p></div>
+                        <div class="ctc-rpt-row">
+                            <div class="ctc-field ctc-input-wrap ctc-rpt-field--full">
+                                <input type="text" class="ctc-input" id="ctc-company-name" name="company_name" placeholder=" ">
+                                <label class="ctc-input-caption" for="ctc-company-name">Company's Full Name</label>
+                            </div>
+                        </div>
+                        <div class="ctc-rpt-row">
+                            <div class="ctc-field ctcm-tin ctc-rpt-field--full">
+                                <span class="ctcm-tin-label">TIN (if any)</span>
+                                <div class="ctcm-tin-cells">
+                                    @for ($group = 0; $group < 5; $group++)
+                                        <div class="ctc-tin-cell-group">
+                                            @for ($cell = 0; $cell < 3; $cell++)
+                                                @php $tinIndex = $group * 3 + $cell; @endphp
+                                                <input type="text" inputmode="numeric" maxlength="1" class="ctc-tin-cell" name="tin[]" data-tin-index="{{ $tinIndex }}">
+                                            @endfor
+                                        </div>
+                                    @endfor
+                                </div>
+                            </div>
+                        </div>
+                        <div class="ctc-rpt-row">
+                            <div class="ctc-field ctc-input-wrap ctc-rpt-field">
+                                <input type="text" class="ctc-input" id="ctc-address" name="address" placeholder=" ">
+                                <label class="ctc-input-caption" for="ctc-address">Address of Principal Place of Business</label>
+                            </div>
+                            <div class="ctc-field ctc-input-wrap ctc-date ctc-rpt-field">
+                                <input type="date" class="ctc-input" id="ctc-date-of-registration" name="date_of_registration">
+                                <label class="ctc-input-caption" for="ctc-date-of-registration">Date of Registration / Incorporation</label>
+                            </div>
+                        </div>
+                        <div class="ctc-rpt-row">
+                            <div class="ctc-field ctcm-radio-row ctc-rpt-field--full">
+                                <p class="ctcm-radio-row-label">Kind of Organization</p>
+                                <label class="ctc-radio-group">
+                                    <input type="radio" name="kind_of_organization" class="ctc-radio" value="Corporation">
+                                    <p>Corporation</p>
+                                </label>
+                                <label class="ctc-radio-group">
+                                    <input type="radio" name="kind_of_organization" class="ctc-radio" value="Association">
+                                    <p>Association</p>
+                                </label>
+                                <label class="ctc-radio-group">
+                                    <input type="radio" name="kind_of_organization" class="ctc-radio" value="Partnership">
+                                    <p>Partnership</p>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="ctc-rpt-row">
+                            <div class="ctc-field ctc-input-wrap ctc-rpt-field--full">
+                                <input type="text" class="ctc-input" id="ctc-nature-of-business" name="nature_of_business" placeholder=" ">
+                                <label class="ctc-input-caption" for="ctc-nature-of-business">Kind / Nature of Business</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ctcm-section">
+                        <div class="ctc-section-header"><p>Community Tax Computation</p></div>
+                        <table class="ctcm-tax-table">
+                            <thead>
+                                <tr><th></th><th>Taxable Amount</th><th>Community Tax Due</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>A. Basic Community Tax (&#8369; 5.00)</td>
+                                    <td class="ctcm-fixed">&mdash;</td>
+                                    <td class="ctcm-amt">
+                                        <span class="ctcm-amt-inner">
+                                            <span class="ctc-peso-prefix">&#8369;</span>
+                                            <input type="number" step="0.01" min="0" class="ctc-amount-input" id="ctc-a-ctd" name="a_community_tax_due" placeholder="0.00">
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr class="ctcm-grp">
+                                    <td colspan="3">B. Additional Community Tax ( Tax not to exceed &#8369; 10,000.00 )</td>
+                                </tr>
+                                <tr>
+                                    <td>1. Assessed value of real property owned in the Philippines (&#8369;2.00 for every &#8369;5,000.00)</td>
+                                    <td class="ctcm-amt">
+                                        <span class="ctcm-amt-inner">
+                                            <span class="ctc-peso-prefix">&#8369;</span>
+                                            <input type="number" step="0.01" min="0" class="ctc-amount-input" id="ctc-1-taxable" name="item1_taxable_amount" placeholder="0.00">
+                                        </span>
+                                    </td>
+                                    <td class="ctcm-amt">
+                                        <span class="ctcm-amt-inner">
+                                            <span class="ctc-peso-prefix">&#8369;</span>
+                                            <input type="number" step="0.01" min="0" class="ctc-amount-input" id="ctc-1-ctd" name="item1_community_tax_due" placeholder="0.00">
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>2. Gross receipts, including dividends / Earnings derived from business in the Philippines during the preceding year (&#8369;2.00 for every &#8369;5,000.00)</td>
+                                    <td class="ctcm-amt">
+                                        <span class="ctcm-amt-inner">
+                                            <span class="ctc-peso-prefix">&#8369;</span>
+                                            <input type="number" step="0.01" min="0" class="ctc-amount-input" id="ctc-2-taxable" name="item2_taxable_amount" placeholder="0.00">
+                                        </span>
+                                    </td>
+                                    <td class="ctcm-amt">
+                                        <span class="ctcm-amt-inner">
+                                            <span class="ctc-peso-prefix">&#8369;</span>
+                                            <input type="number" step="0.01" min="0" class="ctc-amount-input" id="ctc-2-ctd" name="item2_community_tax_due" placeholder="0.00">
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr class="ctcm-total">
+                                    <td>Total</td>
+                                    <td class="ctcm-fixed">&mdash;</td>
+                                    <td class="ctcm-amt">
+                                        <span class="ctcm-amt-inner">
+                                            <span class="ctc-peso-prefix">&#8369;</span>
+                                            <input type="number" step="0.01" min="0" class="ctc-amount-input" id="ctc-total" name="total_community_tax_due" placeholder="0.00">
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Interest</td>
+                                    <td class="ctcm-fixed">&mdash;</td>
+                                    <td class="ctcm-amt">
+                                        <span class="ctcm-amt-inner">
+                                            <span class="ctc-peso-prefix">&#8369;</span>
+                                            <input type="number" step="0.01" min="0" class="ctc-amount-input" id="ctc-interest" name="interest" placeholder="0.00">
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                <div class="ctcm-section">
+                    <div class="ctc-section-header"><p>Certification</p></div>
+                    <div class="ctc-rpt-row">
+                        <div class="ctcm-cert-box">
+                            <span>Signature</span>
+                        </div>
+                        <div class="ctcm-cert-box">
+                            <span>Position of Authorized Officer</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ctcm-section">
+                    <div class="ctc-section-header"><p>Total &amp; Treasurer</p></div>
+                    <div class="ctc-rpt-row">
+                        <div class="ctc-field ctc-input-wrap ctc-rpt-field">
+                            <input type="text" class="ctc-input" id="ctc-amount-in-words" name="amount_in_words" value="Zero pesos only" readonly>
+                            <label class="ctc-input-caption" for="ctc-amount-in-words">Amount in Words</label>
+                        </div>
+                        <div class="ctc-field ctc-input-wrap ctc-rpt-field ctc-rpt-field--amount">
+                            <input type="text" class="ctc-input" id="ctc-amount-paid" name="amount_paid" value="0.00" readonly>
+                            <label class="ctc-input-caption" for="ctc-amount-paid">Total Amount Paid (&#8369;)</label>
+                        </div>
+                    </div>
+                    <div class="ctc-rpt-row">
+                        <div class="ctc-field ctc-input-wrap ctc-rpt-field--full">
+                            <input type="text" class="ctc-input" id="ctc-treasurer-name" name="treasurer_name" value="Gemma D. Ferrer">
+                            <label class="ctc-input-caption" for="ctc-treasurer-name">Municipal / City Treasurer</label>
+                        </div>
+                    </div>
+                    <p class="ctcm-role-note">Position: Municipal Treasurer</p>
                 </div>
             </div>
 
-            <div class="ctc-field ctc-input-wrap" style="left:40px; top:166px; width:700px; height:42px;">
-                <input type="text" class="ctc-input" id="ctc-address" name="address" placeholder=" ">
-                <label class="ctc-input-caption" for="ctc-address">Address of Principal Place of Business</label>
-            </div>
-            <div class="ctc-field ctc-input-wrap ctc-date" style="left:740px; top:166px; width:182px; height:84px;">
-                <input type="date" class="ctc-input" id="ctc-date-of-registration" name="date_of_registration">
-                <label class="ctc-input-caption ctc-caption-multiline" for="ctc-date-of-registration">Date of registration<br>/ incorporation</label>
-            </div>
-
-            <div class="ctc-field ctc-civil-row" style="left:40px; top:208px; width:700px; height:42px;">
-                <p class="ctc-radio-label">Kind of<br>Organization</p>
-                <label class="ctc-radio-group">
-                    <input type="radio" name="kind_of_organization" class="ctc-radio" value="Corporation">
-                    <p>Corporation</p>
-                </label>
-                <label class="ctc-radio-group">
-                    <input type="radio" name="kind_of_organization" class="ctc-radio" value="Association">
-                    <p>Association</p>
-                </label>
-                <label class="ctc-radio-group">
-                    <input type="radio" name="kind_of_organization" class="ctc-radio" value="Partnership">
-                    <p>Partnership</p>
-                </label>
-            </div>
-
-            <div class="ctc-field ctc-input-wrap" style="left:40px; top:250px; width:610px; height:42px;">
-                <input type="text" class="ctc-input" id="ctc-nature-of-business" name="nature_of_business" placeholder=" ">
-                <label class="ctc-input-caption" for="ctc-nature-of-business">Kind / Nature of Business</label>
-            </div>
-            <div class="ctc-field ctc-col-header" style="left:650px; top:250px; width:136px; height:42px;">
-                <div>
-                    <p>Taxable</p>
-                    <p>amount</p>
-                </div>
-            </div>
-            <div class="ctc-field ctc-col-header" style="left:786px; top:250px; width:136px; height:42px;">
-                <div>
-                    <p>Community</p>
-                    <p>Tax due</p>
-                </div>
-            </div>
-
-            <div class="ctc-field ctc-tax-row" style="left:40px; top:292px; width:610px; height:42px;">
-                <p>A. Basic Community Tax (&#8369; 5.00)</p>
-            </div>
-            <div class="ctc-field ctc-cell-grey" style="left:650px; top:292px; width:136px; height:42px;"></div>
-            <div class="ctc-field ctc-amount-cell" style="left:786px; top:292px; width:136px; height:42px;">
-                <span class="ctc-peso-prefix">&#8369;</span>
-                <input type="number" step="0.01" min="0" class="ctc-amount-input" id="ctc-a-ctd" name="a_community_tax_due" placeholder="0.00">
-            </div>
-
-            <div class="ctc-field ctc-tax-row" style="left:40px; top:334px; width:610px; height:42px;">
-                <p>B. Additional Community Tax ( Tax not to exceed &#8369; 10,000.00 )</p>
-            </div>
-            <div class="ctc-field ctc-cell-grey" style="left:650px; top:334px; width:136px; height:42px;"></div>
-            <div class="ctc-field ctc-cell-grey" style="left:786px; top:334px; width:136px; height:42px;"></div>
-
-            <div class="ctc-field ctc-tax-item" style="left:40px; top:376px; width:610px; height:42px;">
-                <ol start="1">
-                    <li>Assessed value of real property owned in the Philippines (&#8369;2.00 for every &#8369;5,000.00)</li>
-                </ol>
-            </div>
-            <div class="ctc-field ctc-amount-cell" style="left:650px; top:376px; width:136px; height:42px;">
-                <span class="ctc-peso-prefix">&#8369;</span>
-                <input type="number" step="0.01" min="0" class="ctc-amount-input" id="ctc-1-taxable" name="item1_taxable_amount" placeholder="0.00">
-            </div>
-            <div class="ctc-field ctc-amount-cell" style="left:786px; top:376px; width:136px; height:42px;">
-                <input type="number" step="0.01" min="0" class="ctc-amount-input" id="ctc-1-ctd" name="item1_community_tax_due" placeholder="0.00">
-            </div>
-
-            <div class="ctc-field ctc-tax-item" style="left:40px; top:418px; width:610px; height:42px;">
-                <ol start="2">
-                    <li>Gross receipts, including dividends / Earnings derived from business in the Philippines during the preceding year (&#8369;2.00 for every &#8369;5,000.00)</li>
-                </ol>
-            </div>
-            <div class="ctc-field ctc-amount-cell" style="left:650px; top:418px; width:136px; height:42px;">
-                <input type="number" step="0.01" min="0" class="ctc-amount-input" id="ctc-2-taxable" name="item2_taxable_amount" placeholder="0.00">
-            </div>
-            <div class="ctc-field ctc-amount-cell" style="left:786px; top:418px; width:136px; height:42px;">
-                <input type="number" step="0.01" min="0" class="ctc-amount-input" id="ctc-2-ctd" name="item2_community_tax_due" placeholder="0.00">
-            </div>
-
-            <div class="ctc-field ctc-signature-box" style="left:40px; top:460px; width:610px; height:84px;">
-                <p>Signature / Position of Authorized Officer</p>
-            </div>
-            <div class="ctc-field ctc-cell-label" style="left:650px; top:460px; width:136px; height:42px;">
-                Total
-            </div>
-            <div class="ctc-field ctc-amount-cell" style="left:786px; top:460px; width:136px; height:42px;">
-                <span class="ctc-peso-prefix">&#8369;</span>
-                <input type="number" step="0.01" min="0" class="ctc-amount-input" id="ctc-total" name="total_community_tax_due" placeholder="0.00">
-            </div>
-
-            <div class="ctc-field ctc-cell-label" style="left:650px; top:502px; width:136px; height:42px;">
-                Interest
-            </div>
-            <div class="ctc-field ctc-amount-cell" style="left:786px; top:502px; width:136px; height:42px;">
-                <input type="number" step="0.01" min="0" class="ctc-amount-input" id="ctc-interest" name="interest" placeholder="0.00">
-            </div>
-
-            <div class="ctc-field ctc-sidebar-amount" style="left:960px; top:40px; width:412px; height:84px;">
-                <p class="ctc-sidebar-label">Total Amount Paid</p>
-                <div class="ctc-sidebar-amount-value">
-                    <span>&#8369;</span>
-                    <input type="text" class="ctc-sidebar-input ctc-sidebar-amount-input" id="ctc-amount-paid" name="amount_paid" value="0.00" readonly>
-                </div>
-            </div>
-            <div class="ctc-field ctc-sidebar-words" style="left:960px; top:124px; width:412px; height:84px;">
-                <p class="ctc-sidebar-label">Amount in Words</p>
-                <input type="text" class="ctc-sidebar-input ctc-sidebar-words-input" id="ctc-amount-in-words" name="amount_in_words" value="Zero pesos only" readonly>
-            </div>
-            <div class="ctc-field ctc-sidebar-treasurer" style="left:960px; top:208px; width:412px; height:126px;">
-                <p class="ctc-sidebar-label">Municipal / City Treasurer</p>
-                <div class="ctc-sidebar-treasurer-content">
-                    <input type="text" class="ctc-sidebar-treasurer-name-input" id="ctc-treasurer-name" name="treasurer_name" value="Gemma D. Ferrer">
-                    <p class="ctc-sidebar-treasurer-title">Municipal Treasurer</p>
-                </div>
-            </div>
-
-            <div class="ctc-payment-block" style="position:absolute; left:40px; top:620px; width:1332px;">
+            <div class="ctcm-section" style="padding: 0 24px;">
                 @include('collection-management.transaction-entry.partials.payment-section')
             </div>
 
-            <button type="submit" class="ctc-proceed-btn">Proceed</button>
+            <div class="ctcm-foot">
+                <button type="submit" class="ctc-proceed-btn">Proceed</button>
+            </div>
         </form>
     </div>
 
@@ -219,15 +255,22 @@
                 if (field) field.classList.toggle('is-empty', input.value.trim() === '');
             };
 
-            form.querySelectorAll('.ctc-input, .ctc-amount-input, .ctc-cert-no-prefix-input, .ctc-cert-no-input, .ctc-sidebar-input, .ctc-sidebar-treasurer-name-input').forEach((input) => {
+            form.querySelectorAll('.ctc-input, .ctc-amount-input, .ctc-cert-no-prefix-input, .ctc-cert-no-input').forEach((input) => {
                 toggleEmpty(input);
                 input.addEventListener('input', () => toggleEmpty(input));
             });
 
             // Certificate prefix/number: size each input to its content so the
             // two fields render as one continuous string with no gap between them.
+            // Measured in real pixels (not `ch`) because bold uppercase letters
+            // render wider than the digit-based `ch` unit, which was clipping
+            // the prefix text against its own input box.
+            const certMeasureCtx = document.createElement('canvas').getContext('2d');
             const autosizeCert = (input) => {
-                input.style.width = Math.max(input.value.length, 1) + 'ch';
+                const style = getComputedStyle(input);
+                certMeasureCtx.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+                const width = certMeasureCtx.measureText(input.value || ' ').width;
+                input.style.width = Math.ceil(width) + 2 + 'px';
             };
 
             form.querySelectorAll('.ctc-cert-no-prefix-input, .ctc-cert-no-input').forEach((input) => {

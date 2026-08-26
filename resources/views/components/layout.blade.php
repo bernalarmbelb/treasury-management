@@ -13,7 +13,7 @@
 			<img src="{{ asset('images/logo.webp') }}" alt="Logo" class="logo-image">
 			<div class="nav-branding-text">
 				<span class="nav-branding-sub">Republic of the Philippines</span>
-				<span class="nav-branding-name">MUNICIPALITY OF PRIETO DIAZ</span>
+				<span class="nav-branding-name">SOLEM IT & Digital Solutions Co.</span>
 			</div>
 		</a>
 

@@ -716,6 +716,20 @@ Route::post('/collections/transaction-entry/{formStock}/burial', function (\Illu
         ...collection_payment_rules(),
     ]);
 
+    if (! $formStock->hasAvailableSerial('', $validated['certificate_number'])) {
+        return response()->json([
+            'message' => "Serial number {$validated['certificate_number']} was not found in the available stock. Cannot proceed.",
+        ], 422);
+    }
+
+    if ($formStock->burialPermitTransactions()
+        ->where('certificate_number', $validated['certificate_number'])
+        ->exists()) {
+        return response()->json([
+            'message' => "Serial number {$validated['certificate_number']} is already taken.",
+        ], 422);
+    }
+
     // Fields 7–9 only apply to a disinterment; drop any stray values otherwise.
     if (($validated['permission_type'] ?? null) !== 'Disinter') {
         $validated['infectious'] = null;
@@ -729,11 +743,11 @@ Route::post('/collections/transaction-entry/{formStock}/burial', function (\Illu
         'qty' => max(0, $formStock->qty - 1),
     ]);
 
-    $serial = 'No. ' . $validated['certificate_number'] . ($validated['series_letter'] ? ' ' . $validated['series_letter'] : '');
+    $serial = 'No. ' . $validated['certificate_number'] . (($validated['series_letter'] ?? null) ? ' ' . $validated['series_letter'] : '');
 
     \App\Models\TransactionLog::create([
         'serial_number'    => $serial,
-        'payee'            => $validated['applicant_name'] ?: $validated['deceased_name'],
+        'payee'            => ($validated['applicant_name'] ?? '') ?: $validated['deceased_name'],
         'transacted_at'    => now(),
         'form_type'        => $formStock->form_code,
         'status'           => 'Completed',
@@ -1234,7 +1248,7 @@ Route::get('/reporting-abstract', function (\Illuminate\Http\Request $request) {
         ['label' => 'Consolidated Report of Accountability for Accountable Forms (CRAAF)', 'slug' => 'craaf'],
         ['label' => 'Summary of Community Tax Certificate', 'slug' => 'summary-ctc'],
         ['label' => 'Reports of Checks Issued', 'slug' => null, 'url' => route('cheque-management.report', [], false)],
-        ['label' => 'Report of Collection and Deposit', 'slug' => null],
+        ['label' => 'Report of Collection and Deposit', 'slug' => 'collections-deposits'],
         ['label' => 'Report of Accountability for Accountable Forms (RAAF)', 'slug' => 'raaf'],
         ['label' => 'Abstract of Community Tax Certificate', 'slug' => 'abstract-ctc'],
     ])->when($request->input('search'), function ($collection, $search) {
@@ -1358,7 +1372,7 @@ Route::get('/bank-deposit-reconciliation', function (\Illuminate\Http\Request $r
         'reference' => 'Cheque ' . $c->check_number,
         'party'     => $c->pay_to_order_of ?: '—',
         'amount'    => (float) $c->amount,
-        'status'    => $c->status === 'Cancelled' ? 'Void' : 'Pending',
+        'status'    => $c->status === 'Cancelled' ? 'Void' : ucfirst($c->recon_status ?: 'pending'),
         'view_url'  => route('cheque-management.view', $c->id, false),
     ]);
 
@@ -1417,7 +1431,11 @@ Route::get('/bank-deposit-reconciliation/incoming', function (\Illuminate\Http\R
         ->paginate($perPage)
         ->withQueryString();
 
-    $data = ['logs' => $logs, 'perPageOptions' => $perPageOptions, 'perPage' => $perPage, 'sort' => $sort, 'direction' => $direction];
+    $data = [
+        'logs' => $logs, 'perPageOptions' => $perPageOptions, 'perPage' => $perPage, 'sort' => $sort, 'direction' => $direction,
+        'isAdmin' => $request->user()?->hasRole('admin') ?? false,
+        'bankAccounts' => \App\Models\BankAccount::where('is_active', true)->orderBy('bank_name')->get(),
+    ];
 
     if ($request->ajax()) {
         return view('bank-deposit-reconciliation.partials.incoming-table', $data);
@@ -1444,7 +1462,10 @@ Route::get('/bank-deposit-reconciliation/outgoing', function (\Illuminate\Http\R
         ->paginate($perPage)
         ->withQueryString();
 
-    $data = ['cheques' => $cheques, 'perPageOptions' => $perPageOptions, 'perPage' => $perPage, 'sort' => $sort, 'direction' => $direction];
+    $data = [
+        'cheques' => $cheques, 'perPageOptions' => $perPageOptions, 'perPage' => $perPage, 'sort' => $sort, 'direction' => $direction,
+        'isAdmin' => $request->user()?->hasRole('admin') ?? false,
+    ];
 
     if ($request->ajax()) {
         return view('bank-deposit-reconciliation.partials.outgoing-table', $data);
@@ -1452,6 +1473,94 @@ Route::get('/bank-deposit-reconciliation/outgoing', function (\Illuminate\Http\R
 
     return view('bank-deposit-reconciliation.outgoing', $data);
 })->name('bank-deposit-reconciliation.outgoing');
+
+// ── Phase 2b: reconciliation actions (treasurer/admin only) ───────────────
+Route::post('/bank-deposit-reconciliation/deposits', function (\Illuminate\Http\Request $request) {
+    if (! $request->user()?->hasRole('admin')) {
+        return response()->json(['message' => 'Unauthorized.'], 403);
+    }
+
+    $validated = $request->validate([
+        'ids'             => ['required', 'array', 'min:1'],
+        'ids.*'           => ['integer'],
+        'bank_account_id' => ['required', 'exists:bank_accounts,id'],
+        'deposit_date'    => ['required', 'date'],
+        'slip_number'     => ['nullable', 'string', 'max:100'],
+    ]);
+
+    // Only pending cash/cheque/money-order collections that aren't already deposited.
+    // Online payments land in the bank directly and are confirmed separately.
+    $logs = \App\Models\TransactionLog::whereIn('id', $validated['ids'])
+        ->where('recon_status', 'pending')
+        ->whereIn('payment_method', ['cash', 'cheque', 'money_order'])
+        ->whereNull('deposit_id')
+        ->get();
+
+    if ($logs->isEmpty()) {
+        return response()->json(['message' => 'No eligible cash/cheque collections to deposit. Online payments are confirmed separately.'], 422);
+    }
+
+    $deposit = \App\Models\Deposit::create([
+        'deposit_date'    => $validated['deposit_date'],
+        'bank_account_id' => $validated['bank_account_id'],
+        'slip_number'     => $validated['slip_number'] ?? null,
+        'prepared_by'     => $request->user()?->name,
+    ]);
+
+    \App\Models\TransactionLog::whereIn('id', $logs->pluck('id'))
+        ->update(['deposit_id' => $deposit->id, 'recon_status' => 'completed']);
+
+    \App\Models\ActivityLog::record('Bank Deposit - Record Deposit - ' . $logs->count() . ' collection(s) - ₱' . number_format($logs->sum('amount'), 2));
+
+    return response()->json(['message' => $logs->count() . ' collection(s) deposited successfully.', 'deposit_id' => $deposit->id]);
+})->name('bank-deposit-reconciliation.deposits.store');
+
+Route::post('/bank-deposit-reconciliation/incoming/{log}/confirm', function (\Illuminate\Http\Request $request, \App\Models\TransactionLog $log) {
+    if (! $request->user()?->hasRole('admin')) {
+        return response()->json(['message' => 'Unauthorized.'], 403);
+    }
+    if ($log->payment_method !== 'online') {
+        return response()->json(['message' => 'Only online payments are confirmed this way.'], 422);
+    }
+
+    $log->update(['recon_status' => 'completed']);
+    \App\Models\ActivityLog::record('Bank Deposit - Confirm Online - ' . $log->serial_number);
+
+    return response()->json(['message' => 'Online payment confirmed.']);
+})->name('bank-deposit-reconciliation.incoming.confirm');
+
+Route::post('/bank-deposit-reconciliation/incoming/{log}/bounce', function (\Illuminate\Http\Request $request, \App\Models\TransactionLog $log) {
+    if (! $request->user()?->hasRole('admin')) {
+        return response()->json(['message' => 'Unauthorized.'], 403);
+    }
+
+    $log->update(['recon_status' => 'failed']);
+    \App\Models\ActivityLog::record('Bank Deposit - Mark Bounced (incoming) - ' . $log->serial_number);
+
+    return response()->json(['message' => 'Marked as bounced.']);
+})->name('bank-deposit-reconciliation.incoming.bounce');
+
+Route::post('/bank-deposit-reconciliation/cheques/{cheque}/clear', function (\Illuminate\Http\Request $request, \App\Models\Cheque $cheque) {
+    if (! $request->user()?->hasRole('admin')) {
+        return response()->json(['message' => 'Unauthorized.'], 403);
+    }
+
+    $cheque->update(['recon_status' => 'completed']);
+    \App\Models\ActivityLog::record('Bank Deposit - Mark Cleared - Cheque ' . $cheque->check_number);
+
+    return response()->json(['message' => 'Cheque marked cleared.']);
+})->name('bank-deposit-reconciliation.cheques.clear');
+
+Route::post('/bank-deposit-reconciliation/cheques/{cheque}/bounce', function (\Illuminate\Http\Request $request, \App\Models\Cheque $cheque) {
+    if (! $request->user()?->hasRole('admin')) {
+        return response()->json(['message' => 'Unauthorized.'], 403);
+    }
+
+    $cheque->update(['recon_status' => 'failed']);
+    \App\Models\ActivityLog::record('Bank Deposit - Mark Bounced - Cheque ' . $cheque->check_number);
+
+    return response()->json(['message' => 'Cheque marked bounced.']);
+})->name('bank-deposit-reconciliation.cheques.bounce');
 // ── Cheque Management (disbursement) ──────────────────────────────────────
 Route::get('/cheque-management', function (\Illuminate\Http\Request $request) {
     $perPageOptions = [10, 25, 50, 100];
@@ -1629,11 +1738,9 @@ Route::post('/cheque-management/{cheque}/archive', function (\App\Models\Cheque 
 })->name('cheque-management.archive');
 
 /**
- * Slugs for the 5 currently-buildable RAM reports (generated via the RAM
+ * Slugs for the 6 currently-buildable RAM reports (generated via the RAM
  * modal/xlsx pipeline). "Reports of Checks Issued" links out to the Cheque
  * Management report page instead (it carries a `url` in the list, not a slug).
- * "Report of Collection and Deposit" has no underlying data model yet, so its
- * row still shows "Coming Soon".
  */
 // These helpers live in the route file. Route files are re-included on every
 // app boot, so without this guard PHPUnit's multi-boot test process throws
@@ -1680,7 +1787,7 @@ if (! function_exists('ram_report_slugs')) {
 
 function ram_report_slugs(): array
 {
-    return ['treasurers-monthly', 'craaf', 'summary-ctc', 'raaf', 'abstract-ctc'];
+    return ['treasurers-monthly', 'craaf', 'summary-ctc', 'raaf', 'abstract-ctc', 'collections-deposits'];
 }
 
 /**
@@ -2298,10 +2405,15 @@ function ram_build_craaf(\Illuminate\Support\Carbon $from, \Illuminate\Support\C
 /**
  * Report of Accountability for Accountable Forms — Section C reuses the
  * same system-wide form breakdown (renamed columns to match RAAF's
- * Beginning/Receipt/Issued/Ending wording); Section D summarizes cash
- * collections for the period. There is no remittance/deposit or cash
+ * Beginning/Receipt/Issued/Ending wording); the second section summarizes
+ * cash collections for the period. There is no remittance/deposit or cash
  * carry-over ledger in this system, so Beginning Balance and
- * Remittances/Deposit are shown as 0 rather than fabricated.
+ * Remittances/Deposit are shown as 0 rather than fabricated. Unlettered
+ * (no "C."/"D." prefix) — the real filed RAAF sample
+ * (docs/tasks/newtask-tmpfiles/RAAF .jpg) has no section lettering; the
+ * C/D prefix previously used here was mistakenly copied from a different,
+ * unrelated multi-page annex reference where those letters mark page 2 of
+ * a document whose page 1 (sections A/B) was never provided.
  */
 function ram_build_raaf(\Illuminate\Support\Carbon $from, \Illuminate\Support\Carbon $to): array
 {
@@ -2316,7 +2428,7 @@ function ram_build_raaf(\Illuminate\Support\Carbon $from, \Illuminate\Support\Ca
         'title' => 'Report of Accountability for Accountable Forms (RAAF)',
         'sections' => [
             [
-                'heading' => 'C. Accountability for Accountable Forms',
+                'heading' => 'Accountability for Accountable Forms',
                 'columns' => [
                     ['label' => 'Forms', 'align' => 'left'],
                     ['label' => 'Beginning Balance', 'align' => 'left'],
@@ -2328,7 +2440,7 @@ function ram_build_raaf(\Illuminate\Support\Carbon $from, \Illuminate\Support\Ca
                 'rows' => $sectionC['rows'],
             ],
             [
-                'heading' => 'D. Summary of Collections and Remittances/Deposit',
+                'heading' => 'Summary of Collections and Remittances/Deposit',
                 'columns' => [
                     ['label' => 'Beginning Balance', 'align' => 'right'],
                     ['label' => 'Collections', 'align' => 'right'],
@@ -2347,6 +2459,96 @@ function ram_build_raaf(\Illuminate\Support\Carbon $from, \Illuminate\Support\Ca
 }
 
 /**
+ * Report of Collections and Deposits — Section A lists every collection
+ * (TransactionLog) recorded in the period, Section B lists every bank
+ * deposit recorded in the period (Bank Deposit & Reconciliation), and
+ * Section C summarizes the two so the treasurer can see how much of the
+ * period's collections have not yet been deposited. Uses `TransactionLog
+ * ->amount` directly (the normalized amount every collection form writes)
+ * rather than `ram_transaction_amount()`, since the latter only reads the
+ * morphed transaction's own `amount_paid`/`total` field and predates the
+ * Marriage/Burial fee columns. Like the Treasurer's Monthly Report and RAAF,
+ * this is system-wide — the system tracks a single Treasury custody, not
+ * named per-collector accountable officers, so it does not split by officer
+ * the way the paper form's "Name of Accountable Officer" field implies.
+ */
+function ram_build_collections_and_deposits(\Illuminate\Support\Carbon $from, \Illuminate\Support\Carbon $to): array
+{
+    $logs = \App\Models\TransactionLog::whereBetween('transacted_at', [$from, $to])
+        ->whereNull('archived_at')
+        ->orderBy('transacted_at')
+        ->get();
+
+    $collectionsTotal = (float) $logs->sum('amount');
+
+    $collectionRows = $logs->map(fn ($log) => [
+        $log->transacted_at->format('m/d/Y'),
+        $log->serial_number,
+        $log->payee,
+        \App\Models\TransactionLog::formName($log->form_type),
+        number_format((float) $log->amount, 2),
+    ])->all();
+
+    $deposits = \App\Models\Deposit::with('bankAccount')
+        ->whereBetween('deposit_date', [$from, $to])
+        ->orderBy('deposit_date')
+        ->get();
+
+    $depositsTotal = $deposits->sum(fn ($deposit) => $deposit->total());
+
+    $depositRows = $deposits->map(fn ($deposit) => [
+        $deposit->deposit_date->format('m/d/Y'),
+        $deposit->bankAccount?->label() ?? '—',
+        $deposit->slip_number ?: '—',
+        $deposit->prepared_by ?: '—',
+        number_format($deposit->total(), 2),
+    ])->all();
+
+    return [
+        'title' => 'Report of Collections and Deposits',
+        'sections' => [
+            [
+                'heading' => 'A. Collections',
+                'columns' => [
+                    ['label' => 'Date', 'align' => 'left'],
+                    ['label' => 'Serial Number', 'align' => 'left'],
+                    ['label' => 'Payor', 'align' => 'left'],
+                    ['label' => 'Particulars', 'align' => 'left'],
+                    ['label' => 'Amount', 'align' => 'right'],
+                ],
+                'rows' => $collectionRows,
+                'totals' => ['', '', '', 'Total', number_format($collectionsTotal, 2)],
+            ],
+            [
+                'heading' => 'B. Deposits',
+                'columns' => [
+                    ['label' => 'Date', 'align' => 'left'],
+                    ['label' => 'Bank Account', 'align' => 'left'],
+                    ['label' => 'Deposit Slip No.', 'align' => 'left'],
+                    ['label' => 'Prepared By', 'align' => 'left'],
+                    ['label' => 'Amount', 'align' => 'right'],
+                ],
+                'rows' => $depositRows,
+                'totals' => ['', '', '', 'Total', number_format($depositsTotal, 2)],
+            ],
+            [
+                'heading' => 'C. Summary of Collections and Deposits',
+                'columns' => [
+                    ['label' => 'Total Collections', 'align' => 'right'],
+                    ['label' => 'Total Deposits', 'align' => 'right'],
+                    ['label' => 'Undeposited Balance', 'align' => 'right'],
+                ],
+                'rows' => [[
+                    number_format($collectionsTotal, 2),
+                    number_format($depositsTotal, 2),
+                    number_format($collectionsTotal - $depositsTotal, 2),
+                ]],
+            ],
+        ],
+    ];
+}
+
+/**
  * Dispatches to the report-specific builder for a given RAM slug.
  */
 function ram_build_report(string $slug, \Illuminate\Support\Carbon $from, \Illuminate\Support\Carbon $to): array
@@ -2357,6 +2559,7 @@ function ram_build_report(string $slug, \Illuminate\Support\Carbon $from, \Illum
         'treasurers-monthly' => ram_build_treasurers_monthly_detailed($from, $to),
         'craaf' => ram_build_craaf($from, $to),
         'raaf' => ram_build_raaf($from, $to),
+        'collections-deposits' => ram_build_collections_and_deposits($from, $to),
     };
 }
 

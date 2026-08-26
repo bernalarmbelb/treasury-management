@@ -10,6 +10,7 @@ uses(RefreshDatabase::class);
 it('captures cheque payment on a burial transaction log', function () {
     $user = User::factory()->create(['status' => User::STATUS_ACTIVATED]);
     $stock = FormStock::create(['qty' => 5, 'form_name' => 'Burial', 'form_code' => 'Form 58', 'added_date' => now()->toDateString(), 'added_by' => 'T']);
+    $stock->batches()->create(['registration_date' => now(), 'purchase_date' => now(), 'starting_serial_number' => '0000001', 'ending_serial_number' => '0000010', 'added_by' => 'T']);
 
     $this->actingAs($user)->postJson("/collections/transaction-entry/{$stock->id}/burial", [
         'certificate_number' => '0000001',
@@ -34,6 +35,7 @@ it('captures cheque payment on a burial transaction log', function () {
 it('captures cash payment with null detail fields', function () {
     $user = User::factory()->create(['status' => User::STATUS_ACTIVATED]);
     $stock = FormStock::create(['qty' => 5, 'form_name' => 'Burial', 'form_code' => 'Form 58', 'added_date' => now()->toDateString(), 'added_by' => 'T']);
+    $stock->batches()->create(['registration_date' => now(), 'purchase_date' => now(), 'starting_serial_number' => '0000001', 'ending_serial_number' => '0000010', 'added_by' => 'T']);
 
     $this->actingAs($user)->postJson("/collections/transaction-entry/{$stock->id}/burial", [
         'certificate_number' => '0000002',
