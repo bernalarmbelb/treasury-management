@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\BankAccount;
 use App\Models\Cheque;
+use App\Models\FormStock;
 use App\Models\TransactionLog;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
@@ -151,5 +152,26 @@ class DashboardMetrics
             ->map(fn ($r) => ['channel' => $r->channel ?: 'Other', 'count' => (int) $r->cnt])->all();
 
         return ['methods' => $methods, 'channels' => $channels];
+    }
+
+    public function formsUtilization(): array
+    {
+        $rows = FormStock::with('batches')->get()->map(function (FormStock $s) {
+            $registered = $s->batches->sum(fn ($b) => $b->startingQty());
+            $used = $s->batches->sum(fn ($b) => $b->usedQty());
+            $void = TransactionLog::where('form_type', $s->form_code)->where('status', 'Cancelled')->count();
+            return [
+                'name' => $s->form_name, 'code' => $s->form_code,
+                'registered' => (int) $registered, 'used' => (int) $used, 'void' => (int) $void,
+                'remaining' => (int) max(0, $registered - $used),
+            ];
+        })->values();
+
+        return [
+            'rows' => $rows->all(),
+            'totalRegistered' => (int) $rows->sum('registered'),
+            'usedThisPeriod' => (int) $rows->sum('used'),
+            'lowStock' => (int) $rows->where('remaining', '<', 50)->count(),
+        ];
     }
 }

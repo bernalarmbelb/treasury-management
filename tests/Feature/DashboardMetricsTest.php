@@ -123,3 +123,17 @@ it('breaks down payment methods and online channels', function () {
     expect(collect($pm['methods'])->firstWhere('method', 'online')['count'])->toBe(3);
     expect(collect($pm['channels'])->firstWhere('channel', 'GCash')['count'])->toBe(2);
 });
+
+it('summarizes accountable forms utilization', function () {
+    $stock = App\Models\FormStock::firstOrCreate(['form_code' => 'Form 58'], ['qty' => 100, 'form_name' => 'Burial Permit', 'added_date' => now()->toDateString(), 'added_by' => 'T']);
+    App\Models\FormBatch::create(['form_stock_id' => $stock->id, 'registration_date' => now(), 'purchase_date' => now(), 'starting_serial_number' => '0001', 'ending_serial_number' => '0100', 'added_by' => 'T']);
+    seedCollection('cash', 100, 'Cancelled'); // a void for Form 58
+
+    $m = new App\Services\DashboardMetrics(now()->startOfMonth(), now()->endOfMonth());
+    $f = $m->formsUtilization();
+    $row = collect($f['rows'])->firstWhere('code', 'Form 58');
+
+    expect($row['registered'])->toBe(100);
+    expect($row['void'])->toBe(1);
+    expect($f['totalRegistered'])->toBeGreaterThanOrEqual(100);
+});
