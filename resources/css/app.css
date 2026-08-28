@@ -8375,7 +8375,7 @@ select.form-batch-input {
 }
 
 .dash-donut-chart {
-    width: 130px;
+    width: 150px;
     flex-shrink: 0;
 }
 
@@ -8397,6 +8397,14 @@ select.form-batch-input {
 .dash-legend-list .amt {
     color: var(--fonts-black-50);
     font-size: 10px;
+}
+
+/* Payment Methods legend dots only — wider gap + larger dot than the
+   shared .dash-dot (used elsewhere e.g. the Collections KPI delta). */
+.dash-legend-list .dash-dot {
+    width: 11px;
+    height: 11px;
+    margin-right: 10px;
 }
 
 /* Online channels sub-breakdown */

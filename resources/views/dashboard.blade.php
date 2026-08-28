@@ -42,14 +42,14 @@
                     <div class="dash-num">&#8369;{{ number_format($collections['total'], 2) }}</div>
                     <div class="dash-lbl">Collections</div>
                     @if (is_null($collections['deltaPct']))
-                        <div class="dash-sub" style="color:var(--fonts-black-50)">{{ $collections['count'] }} txns</div>
+                        <div class="dash-sub" style="color:var(--fonts-black-50)">{{ $collections['count'] }} transactions</div>
                     @else
                         <div class="dash-sub">
                             <span class="dash-dot" style="background:{{ $collections['deltaPct'] >= 0 ? 'var(--success)' : 'var(--danger)' }}"></span>
                             <span style="color:{{ $collections['deltaPct'] >= 0 ? 'var(--success)' : 'var(--danger)' }}">
                                 {{ $collections['deltaPct'] >= 0 ? '▲' : '▼' }} {{ number_format(abs($collections['deltaPct']), 1) }}%
                             </span>
-                            &middot; {{ $collections['count'] }} txns
+                            &middot; {{ $collections['count'] }} transactions
                         </div>
                     @endif
                 </div>
@@ -121,7 +121,7 @@
                         </div>
 
                         <div class="dash-subsection">
-                            <div class="cap">Online Channels &middot; {{ $onlineTxns }} txns</div>
+                            <div class="cap">Online Channels &middot; {{ $onlineTxns }} transactions</div>
                             @forelse ($payments['channels'] as $channel)
                                 @php $chanPct = $maxChannelCount > 0 ? round(($channel['count'] / $maxChannelCount) * 100) : 0; @endphp
                                 <div class="dash-chan">
@@ -333,7 +333,7 @@
             if (payEl) {
                 var colorMap = { cash: '#427AB5', cheque: '#F7DD7D', online: '#0FA958' };
                 new ApexCharts(payEl, {
-                    chart: { type: 'donut', height: 130 },
+                    chart: { type: 'donut', height: 150 },
                     series: payMethods.map(function (m) { return m.count; }),
                     labels: payMethods.map(function (m) { return m.method ? (m.method.charAt(0).toUpperCase() + m.method.slice(1)) : 'Unknown'; }),
                     colors: payMethods.map(function (m) { return colorMap[(m.method || '').toLowerCase()] || '#B7BBC1'; }),
@@ -343,13 +343,13 @@
                     plotOptions: {
                         pie: {
                             donut: {
-                                size: '68%',
+                                size: '74%',
                                 labels: {
                                     show: true,
                                     total: {
                                         show: true,
-                                        label: 'txns',
-                                        fontSize: '9px',
+                                        label: 'transactions',
+                                        fontSize: '8px',
                                         formatter: function (w) {
                                             return w.globals.seriesTotals.reduce(function (a, b) { return a + b; }, 0);
                                         },
@@ -360,7 +360,7 @@
                         },
                     },
                     tooltip: {
-                        y: { formatter: function (val) { return val + ' txns'; } },
+                        y: { formatter: function (val) { return val + ' transactions'; } },
                     },
                 }).render();
             }
