@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\BankAccount;
 use App\Models\Cheque;
 use App\Models\TransactionLog;
 use Carbon\Carbon;
@@ -63,5 +64,19 @@ class DashboardMetrics
             ->where('status', 'Issued');
 
         return ['total' => (float) (clone $base)->sum('amount'), 'count' => (clone $base)->count()];
+    }
+
+    public function cashPosition(): array
+    {
+        $accounts = BankAccount::all();
+
+        $total = $accounts->sum(function (BankAccount $acc) {
+            $in = (float) TransactionLog::whereHas('deposit', fn ($q) => $q->where('bank_account_id', $acc->id))
+                ->sum('amount');
+            $out = (float) Cheque::where('bank_account_id', $acc->id)->where('status', 'Issued')->sum('amount');
+            return (float) $acc->opening_balance + $in - $out;
+        });
+
+        return ['total' => (float) $total, 'accounts' => $accounts->count()];
     }
 }

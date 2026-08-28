@@ -44,3 +44,17 @@ it('sums issued cheques as disbursed and ignores cancelled', function () {
     expect($m->disbursed()['total'])->toEqual(1000.0);
     expect($m->disbursed()['count'])->toBe(1);
 });
+
+it('computes cash position as opening + deposits in - cheques out', function () {
+    $acc = App\Models\BankAccount::create(['bank_name' => 'LBP', 'account_number' => '9', 'account_name' => 'M', 'is_active' => true, 'opening_balance' => 100000]);
+    $dep = App\Models\Deposit::create(['deposit_date' => now(), 'bank_account_id' => $acc->id, 'slip_number' => 'S1', 'prepared_by' => 'T']);
+    $c = seedCollection('cash', 5000);
+    $c->update(['deposit_id' => $dep->id]);
+    App\Models\Cheque::create(['bank_account_id' => $acc->id, 'account_name' => 'M', 'cheque_date' => now(), 'check_number' => 'X1', 'pay_to_order_of' => 'A', 'amount' => 20000, 'amount_in_words' => 'x', 'status' => 'Issued', 'recon_status' => 'pending']);
+
+    $m = new App\Services\DashboardMetrics(now()->startOfMonth(), now()->endOfMonth());
+
+    // 100000 + 5000 - 20000
+    expect($m->cashPosition()['total'])->toEqual(85000.0);
+    expect($m->cashPosition()['accounts'])->toBe(1);
+});
