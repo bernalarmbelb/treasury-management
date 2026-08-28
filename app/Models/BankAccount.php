@@ -12,10 +12,12 @@ class BankAccount extends Model
         'account_number',
         'account_name',
         'is_active',
+        'opening_balance',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'opening_balance' => 'decimal:2',
     ];
 
     public function cheques(): HasMany
