@@ -109,3 +109,17 @@ it('builds a daily collections trend with summary', function () {
     expect($t['total'])->toEqual(1300.0);
     expect($t['peak']['amount'])->toEqual(900.0);
 });
+
+it('breaks down payment methods and online channels', function () {
+    seedCollection('cash', 100);
+    seedCollection('cheque', 200);
+    $o1 = seedCollection('online', 300); $o1->update(['payment_channel' => 'GCash']);
+    $o2 = seedCollection('online', 400); $o2->update(['payment_channel' => 'GCash']);
+    $o3 = seedCollection('online', 500); $o3->update(['payment_channel' => 'Maya']);
+
+    $m = new App\Services\DashboardMetrics(now()->startOfMonth(), now()->endOfMonth());
+    $pm = $m->paymentMethods();
+
+    expect(collect($pm['methods'])->firstWhere('method', 'online')['count'])->toBe(3);
+    expect(collect($pm['channels'])->firstWhere('channel', 'GCash')['count'])->toBe(2);
+});

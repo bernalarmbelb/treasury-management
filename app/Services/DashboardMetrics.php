@@ -134,4 +134,22 @@ class DashboardMetrics
             'chequesMatchedPct'  => $chqTotal ? (int) round($chqDone / $chqTotal * 100) : 0,
         ];
     }
+
+    public function paymentMethods(): array
+    {
+        $base = TransactionLog::whereBetween('transacted_at', [$this->from, $this->to])
+            ->where('status', '!=', 'Cancelled');
+
+        $methods = (clone $base)
+            ->selectRaw('payment_method as method, count(*) as cnt, sum(amount) as amt')
+            ->groupBy('payment_method')->get()
+            ->map(fn ($r) => ['method' => $r->method, 'count' => (int) $r->cnt, 'amount' => (float) $r->amt])->all();
+
+        $channels = (clone $base)->where('payment_method', 'online')
+            ->selectRaw('payment_channel as channel, count(*) as cnt')
+            ->groupBy('payment_channel')->orderByDesc('cnt')->get()
+            ->map(fn ($r) => ['channel' => $r->channel ?: 'Other', 'count' => (int) $r->cnt])->all();
+
+        return ['methods' => $methods, 'channels' => $channels];
+    }
 }
