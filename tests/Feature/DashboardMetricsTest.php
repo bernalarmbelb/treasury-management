@@ -59,6 +59,24 @@ it('computes cash position as opening + deposits in - cheques out', function () 
     expect($m->cashPosition()['accounts'])->toBe(1);
 });
 
+it('excludes cancelled collections from cash position even if deposited', function () {
+    $acc = App\Models\BankAccount::create(['bank_name' => 'LBP', 'account_number' => '10', 'account_name' => 'M', 'is_active' => true, 'opening_balance' => 100000]);
+    $dep = App\Models\Deposit::create(['deposit_date' => now(), 'bank_account_id' => $acc->id, 'slip_number' => 'S2', 'prepared_by' => 'T']);
+
+    // A deposited collection that is later cancelled must not count as cash in.
+    $good = seedCollection('cash', 5000);
+    $good->update(['deposit_id' => $dep->id]);
+
+    $cancelled = seedCollection('cash', 7000);
+    $cancelled->update(['deposit_id' => $dep->id, 'status' => 'Cancelled']);
+
+    $m = new App\Services\DashboardMetrics(now()->startOfMonth(), now()->endOfMonth());
+
+    // 100000 + 5000 (cancelled 7000 excluded) - 0
+    expect($m->cashPosition()['total'])->toEqual(105000.0);
+    expect($m->cashPosition()['accounts'])->toBe(1);
+});
+
 it('counts failed cheques and payments as exceptions', function () {
     $acc = App\Models\BankAccount::create(['bank_name' => 'LBP', 'account_number' => '7', 'account_name' => 'M', 'is_active' => true]);
     App\Models\Cheque::create(['bank_account_id' => $acc->id, 'account_name' => 'M', 'cheque_date' => now(), 'check_number' => 'B1', 'pay_to_order_of' => 'A', 'amount' => 12000, 'amount_in_words' => 'x', 'status' => 'Issued', 'recon_status' => 'failed']);

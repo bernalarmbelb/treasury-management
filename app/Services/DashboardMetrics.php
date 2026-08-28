@@ -38,7 +38,7 @@ class DashboardMetrics
     /** @return array{from: Carbon, to: Carbon} */
     protected function previousPeriod(): array
     {
-        $lengthDays = $this->from->diffInDays($this->to) + 1;
+        $lengthDays = (int) $this->from->diffInDays($this->to) + 1;
         $to = $this->from->copy()->subDay()->endOfDay();
         $fromPrev = $to->copy()->subDays($lengthDays - 1)->startOfDay();
         return ['from' => $fromPrev, 'to' => $to];
@@ -73,7 +73,8 @@ class DashboardMetrics
         $accounts = BankAccount::all();
 
         $total = $accounts->sum(function (BankAccount $acc) {
-            $in = (float) TransactionLog::whereHas('deposit', fn ($q) => $q->where('bank_account_id', $acc->id))
+            $in = (float) TransactionLog::where('status', '!=', 'Cancelled')
+                ->whereHas('deposit', fn ($q) => $q->where('bank_account_id', $acc->id))
                 ->sum('amount');
             $out = (float) Cheque::where('bank_account_id', $acc->id)->where('status', 'Issued')->sum('amount');
             return (float) $acc->opening_balance + $in - $out;

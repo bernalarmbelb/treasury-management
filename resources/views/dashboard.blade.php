@@ -232,7 +232,7 @@
                 </div>
                 <div class="dash-ins">
                     <div class="n">{{ number_format($forms['usedThisPeriod']) }}</div>
-                    <div class="l">Used This Period</div>
+                    <div class="l">Used (to date)</div>
                     <div class="s" style="color:var(--success)">{{ $utilizationPct }}% utilization</div>
                 </div>
                 <div class="dash-ins">
