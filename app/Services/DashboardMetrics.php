@@ -79,4 +79,36 @@ class DashboardMetrics
 
         return ['total' => (float) $total, 'accounts' => $accounts->count()];
     }
+
+    public function exceptions(): array
+    {
+        $cheques = Cheque::where('recon_status', 'failed')
+            ->orderByDesc('updated_at')->limit(6)->get()
+            ->map(fn ($c) => ['type' => 'bounced-cheque', 'label' => 'Cheque #' . $c->check_number . ' · ' . $c->pay_to_order_of, 'amount' => (float) $c->amount]);
+
+        $logs = TransactionLog::where('recon_status', 'failed')
+            ->orderByDesc('updated_at')->limit(6)->get()
+            ->map(fn ($l) => ['type' => 'failed-payment', 'label' => $l->serial_number . ' · ' . $l->payee, 'amount' => (float) $l->amount]);
+
+        $items = $cheques->concat($logs)->take(6)->values()->all();
+        $count = Cheque::where('recon_status', 'failed')->count() + TransactionLog::where('recon_status', 'failed')->count();
+
+        return ['count' => $count, 'items' => $items];
+    }
+
+    public function reconciliation(): array
+    {
+        $liveLogs = TransactionLog::where('status', '!=', 'Cancelled');
+        $logTotal = (clone $liveLogs)->count();
+        $logDone  = (clone $liveLogs)->where('recon_status', 'completed')->count();
+
+        $issued = Cheque::where('status', 'Issued');
+        $chqTotal = (clone $issued)->count();
+        $chqDone  = (clone $issued)->where('recon_status', 'completed')->count();
+
+        return [
+            'depositsMatchedPct' => $logTotal ? (int) round($logDone / $logTotal * 100) : 0,
+            'chequesMatchedPct'  => $chqTotal ? (int) round($chqDone / $chqTotal * 100) : 0,
+        ];
+    }
 }

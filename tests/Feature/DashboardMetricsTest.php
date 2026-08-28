@@ -58,3 +58,27 @@ it('computes cash position as opening + deposits in - cheques out', function () 
     expect($m->cashPosition()['total'])->toEqual(85000.0);
     expect($m->cashPosition()['accounts'])->toBe(1);
 });
+
+it('counts failed cheques and payments as exceptions', function () {
+    $acc = App\Models\BankAccount::create(['bank_name' => 'LBP', 'account_number' => '7', 'account_name' => 'M', 'is_active' => true]);
+    App\Models\Cheque::create(['bank_account_id' => $acc->id, 'account_name' => 'M', 'cheque_date' => now(), 'check_number' => 'B1', 'pay_to_order_of' => 'A', 'amount' => 12000, 'amount_in_words' => 'x', 'status' => 'Issued', 'recon_status' => 'failed']);
+    $bad = seedCollection('online', 1200); $bad->update(['recon_status' => 'failed']);
+    seedCollection('cash', 300); // fine
+
+    $m = new App\Services\DashboardMetrics(now()->startOfMonth(), now()->endOfMonth());
+
+    expect($m->exceptions()['count'])->toBe(2);
+    expect($m->exceptions()['items'])->toHaveCount(2);
+});
+
+it('computes reconciliation matched percentages', function () {
+    $ok = seedCollection('cash', 100); $ok->update(['recon_status' => 'completed']);
+    seedCollection('cash', 100); // pending
+    $acc = App\Models\BankAccount::create(['bank_name' => 'LBP', 'account_number' => '5', 'account_name' => 'M', 'is_active' => true]);
+    App\Models\Cheque::create(['bank_account_id' => $acc->id, 'account_name' => 'M', 'cheque_date' => now(), 'check_number' => 'C1', 'pay_to_order_of' => 'A', 'amount' => 1, 'amount_in_words' => 'x', 'status' => 'Issued', 'recon_status' => 'completed']);
+
+    $m = new App\Services\DashboardMetrics(now()->startOfMonth(), now()->endOfMonth());
+
+    expect($m->reconciliation()['depositsMatchedPct'])->toBe(50);
+    expect($m->reconciliation()['chequesMatchedPct'])->toBe(100);
+});
