@@ -137,3 +137,15 @@ it('summarizes accountable forms utilization', function () {
     expect($row['void'])->toBe(1);
     expect($f['totalRegistered'])->toBeGreaterThanOrEqual(100);
 });
+
+it('returns a merged recent activity feed newest first', function () {
+    seedCollection('cash', 150);
+    $acc = App\Models\BankAccount::create(['bank_name' => 'LBP', 'account_number' => '3', 'account_name' => 'M', 'is_active' => true]);
+    App\Models\Cheque::create(['bank_account_id' => $acc->id, 'account_name' => 'M', 'cheque_date' => now(), 'check_number' => 'A9', 'pay_to_order_of' => 'A', 'amount' => 25000, 'amount_in_words' => 'x', 'status' => 'Issued', 'recon_status' => 'pending']);
+
+    $m = new App\Services\DashboardMetrics(now()->startOfMonth(), now()->endOfMonth());
+    $feed = $m->recentActivity();
+
+    expect(count($feed))->toBeGreaterThanOrEqual(2);
+    expect($feed[0])->toHaveKeys(['label', 'module', 'amount', 'at']);
+});

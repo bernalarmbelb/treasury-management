@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\BankAccount;
 use App\Models\Cheque;
+use App\Models\Deposit;
 use App\Models\FormStock;
 use App\Models\TransactionLog;
 use Carbon\Carbon;
@@ -173,5 +174,20 @@ class DashboardMetrics
             'usedThisPeriod' => (int) $rows->sum('used'),
             'lowStock' => (int) $rows->where('remaining', '<', 50)->count(),
         ];
+    }
+
+    public function recentActivity(int $limit = 8): array
+    {
+        $logs = TransactionLog::latest()->limit($limit)->get()
+            ->map(fn ($l) => ['label' => $l->serial_number . ' · ' . $l->payee, 'module' => 'Collections', 'amount' => (float) $l->amount, 'at' => (string) $l->created_at]);
+
+        $cheques = Cheque::latest()->limit($limit)->get()
+            ->map(fn ($c) => ['label' => 'Cheque #' . $c->check_number . ' issued', 'module' => 'Cheque Mgmt', 'amount' => (float) $c->amount, 'at' => (string) $c->created_at]);
+
+        $deposits = Deposit::latest()->limit($limit)->get()
+            ->map(fn ($d) => ['label' => 'Deposit slip #' . ($d->slip_number ?: $d->id) . ' recorded', 'module' => 'Bank Recon', 'amount' => null, 'at' => (string) $d->created_at]);
+
+        return $logs->concat($cheques)->concat($deposits)
+            ->sortByDesc('at')->take($limit)->values()->all();
     }
 }
