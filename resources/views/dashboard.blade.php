@@ -1,5 +1,15 @@
 <x-layout>
-    <x-header title="Dashboard" :tmpRoute="route('home')" routeName="home" />
+    <div class="x-header-container">
+        <x-header title="Dashboard" :tmpRoute="route('home')" routeName="home">
+            <x-slot:actions>
+                <div class="dash-filter" role="group" aria-label="Dashboard period filter">
+                    <a href="{{ route('home', ['range' => 'today']) }}" class="dash-filter-btn {{ $range === 'today' ? 'active' : '' }}">Today</a>
+                    <a href="{{ route('home', ['range' => 'week']) }}" class="dash-filter-btn {{ $range === 'week' ? 'active' : '' }}">This Week</a>
+                    <a href="{{ route('home', ['range' => 'month']) }}" class="dash-filter-btn {{ $range === 'month' ? 'active' : '' }}">This Month</a>
+                </div>
+            </x-slot:actions>
+        </x-header>
+    </div>
 
     @php
         $lowRows = collect($forms['rows'])->filter(fn ($r) => $r['remaining'] < 50)->values();
@@ -112,7 +122,7 @@
                                     @endphp
                                     <div class="row">
                                         <span><span class="dash-dot" style="background:{{ $color }}"></span>{{ ucfirst($method['method']) }}</span>
-                                        <span><b>{{ $pct }}%</b> <span class="dash-amt">&#8369;{{ number_format($method['amount'], 0) }}</span></span>
+                                        <span><b>{{ $pct }}%</b> <span class="dash-amt">&#8369;{{ number_format($method['amount'], 2) }}</span></span>
                                     </div>
                                 @empty
                                     <div class="row"><span style="color:var(--fonts-black-50)">No payment data for this period.</span></div>

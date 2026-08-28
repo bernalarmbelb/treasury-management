@@ -8251,6 +8251,42 @@ select.form-batch-input {
     color: var(--fonts-black-50);
 }
 
+/* ---- Period filter (Today / This Week / This Month) ---- */
+.dash-filter {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    background: #fff;
+    border: 1px solid #E3E6EA;
+    border-radius: 8px;
+    padding: 3px;
+}
+
+.dash-filter-btn {
+    font-family: var(--font-family-secondary, 'Manrope', sans-serif);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--fonts-black-50);
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 14px;
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.dash-filter-btn:hover {
+    color: var(--fonts-black);
+}
+
+.dash-filter-btn.active {
+    background: var(--primary, #427AB5);
+    color: #fff;
+}
+
 /* ---- KPI row ---- */
 .dash-kpis {
     display: grid;

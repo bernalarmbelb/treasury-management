@@ -32,3 +32,13 @@ it('renders the dashboard for an authenticated user with the real controller pay
 
     expect($response->viewData('collections')['total'])->toEqual(1500.00);
 });
+
+it('honors the range query parameter', function () {
+    $role = Role::firstOrCreate(['slug' => 'admin'], ['name' => 'Admin']);
+    $user = User::factory()->create(['status' => User::STATUS_ACTIVATED]);
+    $user->roles()->sync([$role->id]);
+
+    $this->actingAs($user)->get('/?range=today')->assertOk()->assertViewHas('range', 'today');
+    $this->actingAs($user)->get('/?range=week')->assertOk()->assertViewHas('range', 'week');
+    $this->actingAs($user)->get('/')->assertOk()->assertViewHas('range', 'month');
+});
