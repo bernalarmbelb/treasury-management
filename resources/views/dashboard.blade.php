@@ -52,14 +52,14 @@
                     <div class="dash-num">&#8369;{{ number_format($collections['total'], 2) }}</div>
                     <div class="dash-lbl">Collections</div>
                     @if (is_null($collections['deltaPct']))
-                        <div class="dash-sub" style="color:var(--fonts-black-50)">{{ $collections['count'] }} transactions</div>
+                        <div class="dash-sub" style="color:var(--fonts-black-50)">{{ $collections['count'] }} Transactions</div>
                     @else
                         <div class="dash-sub">
                             <span class="dash-dot" style="background:{{ $collections['deltaPct'] >= 0 ? 'var(--success)' : 'var(--danger)' }}"></span>
                             <span style="color:{{ $collections['deltaPct'] >= 0 ? 'var(--success)' : 'var(--danger)' }}">
                                 {{ $collections['deltaPct'] >= 0 ? '▲' : '▼' }} {{ number_format(abs($collections['deltaPct']), 1) }}%
                             </span>
-                            &middot; {{ $collections['count'] }} transactions
+                            &middot; {{ $collections['count'] }} Transactions
                         </div>
                     @endif
                 </div>
@@ -131,7 +131,7 @@
                         </div>
 
                         <div class="dash-subsection">
-                            <div class="cap">Online Channels &middot; {{ $onlineTxns }} transactions</div>
+                            <div class="cap">Online Channels &middot; {{ $onlineTxns }} Transactions</div>
                             @forelse ($payments['channels'] as $channel)
                                 @php $chanPct = $maxChannelCount > 0 ? round(($channel['count'] / $maxChannelCount) * 100) : 0; @endphp
                                 <div class="dash-chan">
@@ -140,7 +140,7 @@
                                     <span class="ct"><b>{{ $channel['count'] }}</b></span>
                                 </div>
                             @empty
-                                <div class="dash-chan"><span style="color:var(--fonts-black-50)">No online transactions yet.</span></div>
+                                <div class="dash-chan"><span style="color:var(--fonts-black-50)">No online Transactions yet.</span></div>
                             @endforelse
                         </div>
                     </div>
@@ -331,7 +331,7 @@
                             var date = new Date(point.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                             return '<div style="padding:6px 10px; font-size:11px; font-family:Manrope,sans-serif;">' +
                                 '<div style="font-weight:700;">' + date + ' &middot; ' + amt + '</div>' +
-                                '<div style="color:#888;">' + point.txns + ' transaction' + (point.txns === 1 ? '' : 's') + '</div>' +
+                                '<div style="color:#888;">' + point.txns + ' Transaction' + (point.txns === 1 ? '' : 's') + '</div>' +
                                 '</div>';
                         },
                     },
@@ -358,7 +358,7 @@
                                     show: true,
                                     total: {
                                         show: true,
-                                        label: 'transactions',
+                                        label: 'Transactions',
                                         fontSize: '8px',
                                         formatter: function (w) {
                                             return w.globals.seriesTotals.reduce(function (a, b) { return a + b; }, 0);
@@ -370,7 +370,7 @@
                         },
                     },
                     tooltip: {
-                        y: { formatter: function (val) { return val + ' transactions'; } },
+                        y: { formatter: function (val) { return val + ' Transactions'; } },
                     },
                 }).render();
             }
