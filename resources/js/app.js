@@ -1,5 +1,8 @@
 import 'bootstrap';
 
+import ApexCharts from 'apexcharts';
+window.ApexCharts = ApexCharts;
+
 import 'bootstrap';
 
 // ===== Date and Time ===== //

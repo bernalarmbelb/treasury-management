@@ -4,7 +4,7 @@
     "src": "resources/assets/login/seal.png"
   },
   "resources/css/app.css": {
-    "file": "assets/app-DMB318Q2.css",
+    "file": "assets/app-CivI1F31.css",
     "name": "app",
     "names": [
       "app.css"
@@ -16,7 +16,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-Bl0lTTNI.js",
+    "file": "assets/app-Dpz6xFhL.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true
