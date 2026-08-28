@@ -31,6 +31,7 @@ Thumbs.db
 # (Matches names/paths, NOT file contents.)
 /.claude/
 /.codex/
+/.superpowers/
 CLAUDE.md
 AGENTS.md
 GEMINI.md
