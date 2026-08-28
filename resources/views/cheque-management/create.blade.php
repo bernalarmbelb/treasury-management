@@ -153,6 +153,11 @@
                     <label class="cqm-label" for="new_account_name">Account Name <span class="req">*</span></label>
                     <input type="text" class="cqm-input" id="new_account_name" autocomplete="off" value="Municipality of Prieto Diaz">
                 </div>
+                <div class="cqm-field">
+                    <label class="cqm-label" for="new_opening_balance">Opening Balance</label>
+                    <input type="number" step="0.01" min="0" class="cqm-input" id="new_opening_balance" placeholder="0.00">
+                    <span class="cqm-hint">Optional. This account's starting balance, used to compute the dashboard's Cash Position.</span>
+                </div>
             </div>
             <div class="cqm-modal-foot">
                 <button type="button" class="cqm-btn cqm-btn-cancel" id="cancelAddAccountBtn">Cancel</button>
@@ -266,6 +271,7 @@
             const bankName = document.getElementById('new_bank_name');
             const accountNumber = document.getElementById('new_account_number');
             const accountName = document.getElementById('new_account_name');
+            const openingBalance = document.getElementById('new_opening_balance');
             const saveBtn = document.getElementById('saveAddAccountBtn');
             const csrf = () => document.querySelector('meta[name="csrf-token"]')?.content ?? '';
 
@@ -292,6 +298,7 @@
                         bank_name: bankName.value.trim(),
                         account_number: accountNumber.value.trim(),
                         account_name: accountName.value.trim(),
+                        opening_balance: openingBalance.value.trim(),
                     }),
                 })
                     .then((r) => r.json().then((d) => ({ ok: r.ok, d })))
@@ -314,6 +321,7 @@
                         select.dispatchEvent(new Event('change'));
                         bankName.value = '';
                         accountNumber.value = '';
+                        openingBalance.value = '';
                         close();
                         if (window.showToast) showToast('Bank account added', d.label, 'success');
                     })

@@ -1,6 +1,6 @@
 -- MySQL / MariaDB dump generated from SQLite
 -- Source: database/database.sqlite
--- Generated: 2026-06-20T12:47:13
+-- Generated: 2026-08-29T02:49:16
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
@@ -17,133 +17,97 @@ CREATE TABLE `activity_logs` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `activity_logs` (`id`, `user_id`, `action`, `created_at`, `updated_at`) VALUES
-(1, 1, 'User Management - Add User', '2023-01-14 09:00:00', '2023-01-14 09:00:00'),
-(2, 1, 'Collection Management - Add Entry', '2023-03-02 10:30:00', '2023-03-02 10:30:00'),
-(3, 1, 'Collection Management - Add Entry', '2023-08-19 11:15:00', '2023-08-19 11:15:00'),
-(4, 1, 'Collection Management - Add Entry', '2024-02-05 14:20:00', '2024-02-05 14:20:00'),
-(5, 1, 'User Management - Add User', '2024-06-17 09:45:00', '2024-06-17 09:45:00'),
-(6, 1, 'Collection Management - Add Entry', '2024-11-30 13:10:00', '2024-11-30 13:10:00'),
-(7, 1, 'User Management - Add User', '2025-04-12 08:30:00', '2025-04-12 08:30:00'),
-(8, 1, 'Collection Management - Add Entry', '2025-09-25 16:00:00', '2025-09-25 16:00:00'),
-(9, 1, 'User Management - Activate User', '2026-06-15 23:37:48', '2026-06-15 23:37:48'),
-(10, 1, 'User Management - Disable User', '2026-06-15 23:37:52', '2026-06-15 23:37:52'),
-(11, 1, 'User Management - Activate User', '2026-06-15 23:44:04', '2026-06-15 23:44:04'),
-(12, 1, 'User Management - Disable User', '2026-06-15 23:44:11', '2026-06-15 23:44:11'),
-(13, 1, 'User Management - Add User', '2026-06-15 23:48:29', '2026-06-15 23:48:29'),
-(14, 1, 'User Management - Activate User', '2026-06-15 23:48:40', '2026-06-15 23:48:40'),
-(15, 1, 'User Management - Edit User', '2026-06-15 23:51:07', '2026-06-15 23:51:07'),
-(16, 1, 'User Management - Reset Password', '2026-06-15 23:52:09', '2026-06-15 23:52:09'),
-(17, 1, 'User Management - Disable User', '2026-06-15 23:53:19', '2026-06-15 23:53:19'),
-(18, 1, 'User Management - Activate User', '2026-06-15 23:54:03', '2026-06-15 23:54:03'),
-(19, 1, 'User Management - Change Permission', '2026-06-15 23:58:22', '2026-06-15 23:58:22'),
-(20, 1, 'User Management - Change Permission', '2026-06-15 23:58:30', '2026-06-15 23:58:30'),
-(21, 1, 'User Management - Change Permission', '2026-06-15 23:58:58', '2026-06-15 23:58:58'),
-(22, 1, 'User Management - Change Permission', '2026-06-15 23:59:33', '2026-06-15 23:59:33'),
-(23, 1, 'User Management - Change Permission', '2026-06-15 23:59:57', '2026-06-15 23:59:57'),
-(24, 1, 'User Management - Change Permission', '2026-06-16 00:00:59', '2026-06-16 00:00:59'),
-(25, 1, 'User Management - Change Permission', '2026-06-16 00:01:40', '2026-06-16 00:01:40'),
-(26, 1, 'User Management - Change Permission', '2026-06-16 00:02:05', '2026-06-16 00:02:05'),
-(27, 1, 'User Management - Archive User', '2026-06-16 00:06:39', '2026-06-16 00:06:39'),
-(28, 1, 'User Management - Change Permission', '2026-06-16 00:21:10', '2026-06-16 00:21:10'),
-(29, 1, 'User Management - Disable User', '2026-06-16 00:34:49', '2026-06-16 00:34:49'),
-(30, 1, 'User Management - Disable User', '2026-06-16 00:34:53', '2026-06-16 00:34:53'),
-(31, 1, 'User Management - Disable User', '2026-06-16 00:41:20', '2026-06-16 00:41:20'),
-(32, 1, 'User Management - Disable User', '2026-06-16 00:41:21', '2026-06-16 00:41:21'),
-(33, 1, 'User Management - Disable User', '2026-06-16 00:41:23', '2026-06-16 00:41:23'),
-(34, 1, 'User Management - Activate User', '2026-06-16 00:41:25', '2026-06-16 00:41:25'),
-(35, 1, 'User Management - Disable User', '2026-06-16 00:41:28', '2026-06-16 00:41:28'),
-(36, 1, 'User Management - Disable User', '2026-06-16 00:41:33', '2026-06-16 00:41:33'),
-(37, 1, 'User Management - Activate User', '2026-06-16 00:45:36', '2026-06-16 00:45:36'),
-(38, 1, 'User Management - Activate User', '2026-06-16 00:45:36', '2026-06-16 00:45:36'),
-(39, 1, 'User Management - Disable User', '2026-06-16 00:45:43', '2026-06-16 00:45:43'),
-(40, 1, 'User Management - Disable User', '2026-06-16 00:45:43', '2026-06-16 00:45:43'),
-(41, 1, 'User Management - Add User', '2026-06-16 00:46:58', '2026-06-16 00:46:58'),
-(42, 1, 'User Management - Change Permission', '2026-06-16 00:52:54', '2026-06-16 00:52:54'),
-(43, 1, 'User Management - Change Permission', '2026-06-16 00:53:06', '2026-06-16 00:53:06'),
-(44, 1, 'User Management - Change Permission', '2026-06-16 00:53:57', '2026-06-16 00:53:57'),
-(45, 1, 'User Management - Change Permission', '2026-06-16 00:54:46', '2026-06-16 00:54:46'),
-(46, 1, 'User Management - Change Permission', '2026-06-16 00:54:59', '2026-06-16 00:54:59'),
-(47, 1, 'User Management - Change Permission', '2026-06-16 00:55:09', '2026-06-16 00:55:09'),
-(48, 1, 'User Management - Disable User', '2026-06-16 01:38:02', '2026-06-16 01:38:02'),
-(49, 1, 'User Management - Activate User', '2026-06-16 01:39:22', '2026-06-16 01:39:22'),
-(50, 1, 'User Management - Disable User', '2026-06-16 02:27:03', '2026-06-16 02:27:03'),
-(51, 1, 'User Management - Change Permission', '2026-06-16 03:22:24', '2026-06-16 03:22:24'),
-(52, 1, 'User Management - Change Permission', '2026-06-16 03:22:53', '2026-06-16 03:22:53'),
-(53, 10, 'User Management - Disable User', '2026-06-16 07:01:00', '2026-06-16 07:01:00'),
-(56, 10, 'Collection Management - Add Entry', '2026-06-16 07:45:07', '2026-06-16 07:45:07'),
-(57, 10, 'Collection Management - Add Entry', '2026-06-16 08:34:03', '2026-06-16 08:34:03'),
-(58, 10, 'Collection Management - Add Entry', '2026-06-16 08:43:02', '2026-06-16 08:43:02'),
-(59, 10, 'Collection Management - Add Entry', '2026-06-16 08:49:20', '2026-06-16 08:49:20'),
-(60, 10, 'Collection Management - Add Entry', '2026-06-16 09:06:26', '2026-06-16 09:06:26'),
-(61, 10, 'User Management - Reset Password', '2026-06-16 12:27:38', '2026-06-16 12:27:38'),
-(62, 10, 'User Management - Activate User', '2026-06-16 12:28:15', '2026-06-16 12:28:15'),
-(63, 1, 'User Management - Reset Password', '2026-06-16 12:28:41', '2026-06-16 12:28:41'),
-(64, 1, 'User Management - Archive User', '2026-06-16 12:30:43', '2026-06-16 12:30:43'),
-(65, 1, 'User Management - Add User', '2026-06-16 12:32:24', '2026-06-16 12:32:24'),
-(66, 1, 'Collection Management - Add Entry', '2026-06-16 12:35:17', '2026-06-16 12:35:17'),
-(67, 1, 'Collection Management - Add Entry', '2026-06-16 12:41:25', '2026-06-16 12:41:25'),
-(68, 1, 'Collection Management - Add Entry', '2026-06-16 12:46:12', '2026-06-16 12:46:12'),
-(69, 1, 'Collection Management - Add Entry', '2026-06-16 12:57:05', '2026-06-16 12:57:05'),
-(70, 1, 'Collection Management - Add Entry', '2026-06-16 12:59:27', '2026-06-16 12:59:27'),
-(71, 1, 'Collection Management - Add Entry', '2026-06-16 13:16:21', '2026-06-16 13:16:21'),
-(72, 1, 'Collection Management - Add Entry', '2026-06-16 13:26:34', '2026-06-16 13:26:34'),
-(73, 1, 'Collection Management - Add Entry', '2026-06-16 13:42:54', '2026-06-16 13:42:54'),
-(74, 1, 'Collection Management - Add Entry', '2026-06-16 13:47:57', '2026-06-16 13:47:57'),
-(75, 12, 'User Management - Change Permission', '2026-06-17 16:58:19', '2026-06-17 16:58:19'),
-(76, 12, 'Collection Management - Add Entry', '2026-06-17 17:18:17', '2026-06-17 17:18:17'),
-(77, 12, 'Collection Management - Add Entry', '2026-06-17 21:00:20', '2026-06-17 21:00:20'),
-(78, 12, 'Collection Management - Add Entry', '2026-06-17 23:43:28', '2026-06-17 23:43:28'),
-(79, 12, 'Collection Management - Add Entry', '2026-06-17 23:55:16', '2026-06-17 23:55:16'),
-(80, 12, 'Collection Management - Add Entry', '2026-06-18 00:15:33', '2026-06-18 00:15:33'),
-(81, 12, 'Collection Management - Add Entry', '2026-06-18 00:38:14', '2026-06-18 00:38:14'),
-(82, 12, 'Collection Management - Add Entry', '2026-06-18 00:40:27', '2026-06-18 00:40:27'),
-(83, 12, 'User Management - Change Permission', '2026-06-18 00:46:20', '2026-06-18 00:46:20'),
-(84, 12, 'Collection Management - Add Entry', '2026-06-18 00:51:31', '2026-06-18 00:51:31'),
-(85, 12, 'Collection Management - Cancel Transaction', '2026-06-19 00:49:33', '2026-06-19 00:49:33'),
-(86, 12, 'Collection Management - Cancel Transaction', '2026-06-19 00:49:45', '2026-06-19 00:49:45'),
-(87, 12, 'Collection Management - Cancel Transaction', '2026-06-19 00:50:12', '2026-06-19 00:50:12'),
-(88, 12, 'Collection Management - Cancel Transaction', '2026-06-19 00:55:37', '2026-06-19 00:55:37'),
-(89, 12, 'Collection Management - Cancel Transaction', '2026-06-19 00:57:17', '2026-06-19 00:57:17'),
-(90, 12, 'Collection Management - Cancel Transaction', '2026-06-19 00:57:27', '2026-06-19 00:57:27'),
-(91, 12, 'Collection Management - Bulk Cancel Transaction', '2026-06-19 01:01:32', '2026-06-19 01:01:32'),
-(92, 12, 'Collection Management - Bulk Archive Transaction', '2026-06-19 01:07:07', '2026-06-19 01:07:07'),
-(93, 12, 'Collection Management - Archive Transaction', '2026-06-19 01:11:41', '2026-06-19 01:11:41'),
-(94, 12, 'Collection Management - Bulk Archive Transaction', '2026-06-19 01:15:42', '2026-06-19 01:15:42'),
-(95, 12, 'Collection Management - Bulk Archive Transaction', '2026-06-19 01:22:31', '2026-06-19 01:22:31'),
-(96, 12, 'Collection Management - Cancel Transaction', '2026-06-19 01:22:37', '2026-06-19 01:22:37'),
-(97, 12, 'User Management - Activate User', '2026-06-19 01:28:19', '2026-06-19 01:28:19'),
-(98, 12, 'User Management - Change Permission', '2026-06-19 01:29:26', '2026-06-19 01:29:26'),
-(99, 12, 'User Management - Change Permission', '2026-06-19 01:29:29', '2026-06-19 01:29:29'),
-(100, 8, 'Collection Management - Request Cancel', '2026-06-19 01:32:22', '2026-06-19 01:32:22'),
-(101, 8, 'Collection Management - Request Cancel', '2026-06-19 01:40:07', '2026-06-19 01:40:07'),
-(102, 8, 'Collection Management - Request Cancel', '2026-06-19 01:40:58', '2026-06-19 01:40:58'),
-(103, 12, 'Collection Management - Reject Cancel Request', '2026-06-19 01:52:15', '2026-06-19 01:52:15'),
-(104, 12, 'Collection Management - Reject Cancel Request', '2026-06-19 01:58:03', '2026-06-19 01:58:03'),
-(105, 12, 'User Management - Unarchive User', '2026-06-19 02:32:23', '2026-06-19 02:32:23'),
-(106, 12, 'User Management - Archive User', '2026-06-19 02:32:38', '2026-06-19 02:32:38'),
-(107, 12, 'Collection Management - Reject Cancel Request', '2026-06-19 13:17:05', '2026-06-19 13:17:05'),
-(108, 8, 'Collection Management - Request Cancel - Marriage License - Armbel Besalo Bernal & Cleofe Dioneda Villanueva - No. 2027024', '2026-06-19 13:27:26', '2026-06-19 13:27:26'),
-(109, 12, 'Collection Management - Reject Cancel Request - Marriage License - Armbel Besalo Bernal & Cleofe Dioneda Villanueva - No. 2027024 - requested by Ramon Torres', '2026-06-19 13:28:27', '2026-06-19 13:28:27'),
-(110, 12, 'Reporting & Abstract - Export Report - Consolidated Report of Accountability for Accountable Forms (CRAAF) - June 2026', '2026-06-19 17:32:33', '2026-06-19 17:32:33'),
-(111, 1, 'Reporting & Abstract - Export Report - Consolidated Report of Accountability for Accountable Forms (CRAAF) - June 2026', '2026-06-19 17:37:37', '2026-06-19 17:37:37'),
-(112, 12, 'Reporting & Abstract - Export Report - Treasurer\'s Monthly Report of Accountability for Accountable Forms - June 2026', '2026-06-19 17:38:02', '2026-06-19 17:38:02'),
-(113, 12, 'Reporting & Abstract - Export Report - Treasurer\'s Monthly Report of Accountability for Accountable Forms - June 2026', '2026-06-19 17:38:24', '2026-06-19 17:38:24'),
-(114, 12, 'Reporting & Abstract - Export Report - Treasurer\'s Monthly Report of Accountability for Accountable Forms - June 2026', '2026-06-19 19:26:14', '2026-06-19 19:26:14'),
-(115, 12, 'Reporting & Abstract - Export Report - Treasurer\'s Monthly Report of Accountability for Accountable Forms - June 2026', '2026-06-19 19:26:18', '2026-06-19 19:26:18'),
-(116, 1, 'Reporting & Abstract - Export Report - Treasurer\'s Monthly Report of Accountability for Accountable Forms - June 2026', '2026-06-19 19:27:26', '2026-06-19 19:27:26'),
-(117, 1, 'Reporting & Abstract - Export Report - Treasurer\'s Monthly Report of Accountability for Accountable Forms - June 2026', '2026-06-19 19:29:19', '2026-06-19 19:29:19'),
-(118, 12, 'Reporting & Abstract - Export Report - Treasurer\'s Monthly Report of Accountability for Accountable Forms - June 2026', '2026-06-19 19:29:59', '2026-06-19 19:29:59'),
-(119, 1, 'Reporting & Abstract - Export Report - Treasurer\'s Monthly Report of Accountability for Accountable Forms - June 2026', '2026-06-19 19:29:59', '2026-06-19 19:29:59'),
-(120, 1, 'Reporting & Abstract - Export Report - Treasurer\'s Monthly Report of Accountability for Accountable Forms - June 2026', '2026-06-19 19:30:26', '2026-06-19 19:30:26'),
-(121, 12, 'Reporting & Abstract - Export Report - Treasurer\'s Monthly Report of Accountability for Accountable Forms - June 2026', '2026-06-19 19:45:29', '2026-06-19 19:45:29'),
-(122, 12, 'Reporting & Abstract - Export Report - Treasurer\'s Monthly Report of Accountability for Accountable Forms - June 2026', '2026-06-19 19:45:54', '2026-06-19 19:45:54'),
-(123, 12, 'Reporting & Abstract - Export Report - Treasurer\'s Monthly Report of Accountability for Accountable Forms - June 2026', '2026-06-19 19:46:04', '2026-06-19 19:46:04'),
-(124, 12, 'Reporting & Abstract - Export Report - Treasurer\'s Monthly Report of Accountability for Accountable Forms - June 2026', '2026-06-19 19:46:10', '2026-06-19 19:46:10'),
-(125, 12, 'Reporting & Abstract - Export Report - Treasurer\'s Monthly Report of Accountability for Accountable Forms - June 2026', '2026-06-19 19:53:36', '2026-06-19 19:53:36'),
-(126, 12, 'Reporting & Abstract - Export Report - Treasurer\'s Monthly Report of Accountability for Accountable Forms - June 2026', '2026-06-19 19:53:50', '2026-06-19 19:53:50'),
-(127, 12, 'Reporting & Abstract - Export Report - Treasurer\'s Monthly Report of Accountability for Accountable Forms - June 2026', '2026-06-19 20:02:05', '2026-06-19 20:02:05'),
-(128, 12, 'Reporting & Abstract - Export Report - Treasurer\'s Monthly Report of Accountability for Accountable Forms - June 2026', '2026-06-19 20:05:32', '2026-06-19 20:05:32'),
-(129, 12, 'User Management - Activate User - Carmen Lopez', '2026-06-19 22:32:04', '2026-06-19 22:32:04');
+(138, 10, 'Collection Management - Add Entry - Corporation Cedula - CCC 202600001', '2026-07-06 00:59:54', '2026-07-06 00:59:54'),
+(139, 10, 'Collection Management - Add Entry - Individual Cedula - CCI 202600001', '2026-07-06 02:54:26', '2026-07-06 02:54:26'),
+(140, 10, 'Collection Management - Add Entry - Corporation Cedula - CCC 202600002', '2026-07-06 02:56:01', '2026-07-06 02:56:01'),
+(141, 10, 'Collection Management - Add Entry - Marriage License - No. 8104351', '2026-07-06 03:04:59', '2026-07-06 03:04:59'),
+(142, 10, 'Reporting & Abstract - Export Report - Treasurer\'s Monthly Report of Accountability for Accountable Forms - July 2026', '2026-07-06 03:09:26', '2026-07-06 03:09:26'),
+(143, 10, 'Reporting & Abstract - Export Report - Consolidated Report of Accountability for Accountable Forms (CRAAF) - July 2026', '2026-07-06 03:11:40', '2026-07-06 03:11:40'),
+(144, 10, 'Reporting & Abstract - Export Report - Summary of Community Tax Certificate - July 2026', '2026-07-06 03:12:17', '2026-07-06 03:12:17'),
+(145, 10, 'Reporting & Abstract - Export Report - Abstract of Community Tax Certificate - July 2026', '2026-07-06 03:50:41', '2026-07-06 03:50:41'),
+(146, 10, 'Reporting & Abstract - Export Report - Abstract of Community Tax Certificate - July 2026', '2026-07-06 04:12:24', '2026-07-06 04:12:24'),
+(147, 10, 'Reporting & Abstract - Export Report - Abstract of Community Tax Certificate - July 2026', '2026-07-06 04:30:17', '2026-07-06 04:30:17'),
+(148, 10, 'Collection Management - Add Entry - Burial - No. 6551381 C', '2026-07-06 15:38:18', '2026-07-06 15:38:18'),
+(149, 10, 'Reporting & Abstract - Export Report - Treasurer\'s Monthly Report of Accountability for Accountable Forms - July 2026 – August 2026', '2026-08-23 15:57:34', '2026-08-23 15:57:34'),
+(150, 10, 'Reporting & Abstract - Export Report - Abstract of Community Tax Certificate - July 2026 – August 2026', '2026-08-23 15:58:48', '2026-08-23 15:58:48'),
+(151, 10, 'Collection Management - Add Entry - Burial - No. 6551381 C', '2026-08-23 16:22:43', '2026-08-23 16:22:43'),
+(152, 10, 'Collection Management - Add Entry - Burial - No. 6551381 C', '2026-08-23 17:24:09', '2026-08-23 17:24:09'),
+(153, 10, 'User Management - Reset Password - Cleofe Villanueva', '2026-08-23 17:29:06', '2026-08-23 17:29:06'),
+(154, 10, 'Collection Management - Add Entry - Marriage License - No. 8104352', '2026-08-23 18:19:46', '2026-08-23 18:19:46'),
+(155, 10, 'Collection Management - Add Entry - OR RPT - 4218271', '2026-08-23 19:46:12', '2026-08-23 19:46:12'),
+(156, 10, 'Collection Management - Add Entry - Official Receipt - No. 0000001', '2026-08-23 19:48:23', '2026-08-23 19:48:23'),
+(157, 10, 'Collection Management - Cancel Transaction - Burial - Armbel Bernal - No. 6551381 C', '2026-08-24 00:30:31', '2026-08-24 00:30:31'),
+(158, 10, 'Collection Management - Cancel Transaction - Marriage License - Armbel Besalo Bernal & Cleofe Dioneda Villanueva - No. 8104351', '2026-08-24 00:30:43', '2026-08-24 00:30:43'),
+(159, 10, 'Collection Management - Add Entry - Burial - No. 6551381 C', '2026-08-24 00:43:42', '2026-08-24 00:43:42'),
+(160, 10, 'Collection Management - Add Entry - Corporation Cedula - CCC 202600003', '2026-08-24 00:55:19', '2026-08-24 00:55:19'),
+(161, 10, 'Bank Deposit - Record Deposit - 4 collection(s) - ₱75,871.00', '2026-08-24 00:57:43', '2026-08-24 00:57:43'),
+(162, 10, 'Bank Deposit - Confirm Online - CCC 202600003', '2026-08-24 00:57:46', '2026-08-24 00:57:46'),
+(163, 10, 'Bank Deposit - Confirm Online - No. 6551381 C', '2026-08-24 00:57:47', '2026-08-24 00:57:47'),
+(164, 10, 'Bank Deposit - Confirm Online - 4218271', '2026-08-24 00:57:48', '2026-08-24 00:57:48'),
+(165, 10, 'Bank Deposit - Confirm Online - No. 6551381 C', '2026-08-24 00:57:49', '2026-08-24 00:57:49'),
+(166, 10, 'Bank Deposit - Mark Bounced - Cheque 626895', '2026-08-24 01:01:37', '2026-08-24 01:01:37'),
+(167, 10, 'Collection Management - Add Entry - Burial - No. 6551382 C', '2026-08-24 04:59:12', '2026-08-24 04:59:12'),
+(168, 10, 'Cheque Management - Cancel Cheque - No. 626923', '2026-08-24 05:02:53', '2026-08-24 05:02:53'),
+(169, 10, 'User Management - Reset Password - Ramon Torres', '2026-08-24 12:41:06', '2026-08-24 12:41:06'),
+(170, 10, 'Collection Management - Add Entry - Burial - No. 6551383 C', '2026-08-24 13:03:06', '2026-08-24 13:03:06'),
+(171, 10, 'Collection Management - Add Entry - Burial - No. 6551384 C', '2026-08-24 13:03:26', '2026-08-24 13:03:26'),
+(172, 10, 'Bank Deposit - Confirm Online - No. 6551382 C', '2026-08-24 14:18:25', '2026-08-24 14:18:25'),
+(173, 10, 'Bank Deposit - Mark Bounced - Cheque 626932', '2026-08-24 14:18:44', '2026-08-24 14:18:44'),
+(174, 10, 'Collection Management - Cancel Transaction - Official Receipt - Marlaw Emata - No. 0000001 U', '2026-08-24 14:19:03', '2026-08-24 14:19:03');
+
+DROP TABLE IF EXISTS `bank_accounts`;
+CREATE TABLE `bank_accounts` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `bank_name` VARCHAR(255) NOT NULL,
+  `account_number` VARCHAR(255) NOT NULL,
+  `account_name` VARCHAR(255) NOT NULL,
+  `is_active` TINYINT(1) NOT NULL DEFAULT '1',
+  `created_at` DATETIME NULL,
+  `updated_at` DATETIME NULL,
+  `opening_balance` DECIMAL(15,2) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO `bank_accounts` (`id`, `bank_name`, `account_number`, `account_name`, `is_active`, `created_at`, `updated_at`, `opening_balance`) VALUES
+(1, 'LBP — Sorsogon Branch', '00782-1019-43', 'Municipality of Prieto Diaz', 1, '2026-08-23 00:38:28', '2026-08-23 00:38:28', 0),
+(2, 'DBP — Sorsogon Branch', '1462-1005-88', 'Municipality of Prieto Diaz', 1, '2026-08-23 00:38:28', '2026-08-23 00:38:28', 0);
+
+DROP TABLE IF EXISTS `burial_permit_transactions`;
+CREATE TABLE `burial_permit_transactions` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `form_stock_id` BIGINT NOT NULL,
+  `certificate_number` VARCHAR(255) NOT NULL,
+  `series_letter` VARCHAR(255) NULL,
+  `applicant_name` VARCHAR(255) NULL,
+  `city_municipality` VARCHAR(255) NULL,
+  `province` VARCHAR(255) NULL,
+  `permission_type` VARCHAR(255) NULL,
+  `deceased_name` VARCHAR(255) NOT NULL,
+  `nationality` VARCHAR(255) NULL,
+  `age` BIGINT NULL,
+  `sex` VARCHAR(255) NULL,
+  `date_of_death` DATE NULL,
+  `cause_of_death` VARCHAR(255) NULL,
+  `cemetery_name` VARCHAR(255) NULL,
+  `infectious` VARCHAR(255) NULL,
+  `embalmed` VARCHAR(255) NULL,
+  `disposition` VARCHAR(255) NULL,
+  `fee_amount` DECIMAL(15,2) NULL,
+  `date_issued` DATE NULL,
+  `municipal_secretary` VARCHAR(255) NULL,
+  `created_at` DATETIME NULL,
+  `updated_at` DATETIME NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO `burial_permit_transactions` (`id`, `form_stock_id`, `certificate_number`, `series_letter`, `applicant_name`, `city_municipality`, `province`, `permission_type`, `deceased_name`, `nationality`, `age`, `sex`, `date_of_death`, `cause_of_death`, `cemetery_name`, `infectious`, `embalmed`, `disposition`, `fee_amount`, `date_issued`, `municipal_secretary`, `created_at`, `updated_at`) VALUES
+(1, 8, '6551381', 'C', 'Armbel Bernal', 'Sorsogon City', 'Sorsogon', 'Remove', 'Sample deceased', 'Filipino', 100, 'Male', '1971-01-29 00:00:00', 'got scared of beetle', 'acretia', NULL, NULL, NULL, 25000, '2026-07-06 00:00:00', 'Armbel Bernal', '2026-07-06 15:38:18', '2026-07-06 15:38:18'),
+(2, 8, '6551381', 'C', 'Armbel Bernal', 'Sorsogon City', 'Sorsogon', 'Remove', 'Sample deceased', 'Filipino', 35, 'Male', '2026-08-23 00:00:00', 'got scared of beetle', 'acretia', NULL, NULL, NULL, 500, '2026-08-23 00:00:00', 'Gemma D. Ferrer', '2026-08-23 16:22:43', '2026-08-23 16:22:43'),
+(3, 8, '6551381', 'C', 'Armbel Bernal', 'Sorsogon City', 'Sorsogon', 'Inter', 'Sample deceased', 'Filipino', 123, 'Male', '2026-08-23 00:00:00', NULL, NULL, NULL, NULL, NULL, 500, '2026-08-23 00:00:00', 'Armbel Bernal', '2026-08-23 17:24:09', '2026-08-23 17:24:09'),
+(4, 8, '6551381', 'C', 'Armbel Bernal', 'Sorsogon City', 'Sorsogon', 'Inter', 'Sample deceased', 'Filipino', 35, 'Male', '2026-08-24 00:00:00', 'got scared of beetle', 'acretia', NULL, NULL, NULL, 5000, '2026-08-24 00:00:00', 'Armbel Bernal', '2026-08-24 00:43:42', '2026-08-24 00:43:42'),
+(5, 8, '6551382', 'C', 'Armbel Bernal', 'Sorsogon City', 'Sorsogon', 'Disinter', 'Sample deceased', 'Filipino', 34, 'Male', '2026-08-24 00:00:00', 'got scared of beetle', NULL, 'zomboid', 'Yes', 'test', 5000, '2026-08-24 00:00:00', 'Gemma D. Ferrer', '2026-08-24 04:59:12', '2026-08-24 04:59:12'),
+(6, 8, '6551383', 'C', 'Armbel Bernal', 'Sorsogon City', 'Sorsogon', 'Inter', 'Sample deceased', 'Filipino', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 500, '2026-08-24 00:00:00', 'Armbel Bernal', '2026-08-24 13:03:06', '2026-08-24 13:03:06'),
+(7, 8, '6551384', 'C', 'Armbel Bernal', NULL, NULL, 'Inter', 'Sample deceased', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 500, '2026-08-24 00:00:00', 'Armbel Bernal', '2026-08-24 13:03:25', '2026-08-24 13:03:25');
 
 DROP TABLE IF EXISTS `cache`;
 CREATE TABLE `cache` (
@@ -182,11 +146,84 @@ CREATE TABLE `cancel_requests` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO `cancel_requests` (`id`, `transaction_log_id`, `requested_by`, `reason`, `status`, `reviewed_by`, `reviewed_at`, `created_at`, `updated_at`, `notified_at`) VALUES
-(1, 120, 8, NULL, 'rejected', 12, '2026-06-19 01:58:03', '2026-06-19 01:32:22', '2026-06-19 01:58:19', '2026-06-19 01:58:19'),
-(2, 15, 8, 'There are so many reasons to cancel', 'rejected', 12, '2026-06-19 13:17:05', '2026-06-19 01:40:07', '2026-06-19 13:28:35', '2026-06-19 13:28:35'),
-(3, 119, 8, NULL, 'rejected', 12, '2026-06-19 01:52:15', '2026-06-19 01:40:58', '2026-06-19 01:52:24', '2026-06-19 01:52:24'),
-(4, 107, 8, 'For testing some modules.', 'rejected', 12, '2026-06-19 13:28:27', '2026-06-19 13:27:25', '2026-06-19 13:28:35', '2026-06-19 13:28:35');
+DROP TABLE IF EXISTS `cheques`;
+CREATE TABLE `cheques` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `bank_account_id` BIGINT NOT NULL,
+  `account_name` VARCHAR(255) NOT NULL,
+  `cheque_date` DATE NOT NULL,
+  `check_number` VARCHAR(255) NOT NULL,
+  `pay_to_order_of` VARCHAR(255) NOT NULL,
+  `amount` DECIMAL(15,2) NOT NULL,
+  `amount_in_words` VARCHAR(255) NOT NULL,
+  `nature_of_payment` VARCHAR(255) NULL,
+  `status` VARCHAR(255) NOT NULL DEFAULT 'Issued',
+  `created_by` VARCHAR(255) NULL,
+  `archived_at` DATETIME NULL,
+  `created_at` DATETIME NULL,
+  `updated_at` DATETIME NULL,
+  `recon_status` VARCHAR(255) NOT NULL DEFAULT 'pending',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `cheques_bank_account_id_check_number_unique` (`bank_account_id`, `check_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO `cheques` (`id`, `bank_account_id`, `account_name`, `cheque_date`, `check_number`, `pay_to_order_of`, `amount`, `amount_in_words`, `nature_of_payment`, `status`, `created_by`, `archived_at`, `created_at`, `updated_at`, `recon_status`) VALUES
+(1, 1, 'Municipality of Prieto Diaz', '2013-12-09 00:00:00', '626877', 'JRE Agrivet Supply', 19772.79, 'Nineteen thousand seven hundred seventy two and 79/100 pesos', 'purchase', 'Issued', 'Seeder', NULL, '2013-12-09 09:54:00', '2026-08-23 00:38:28', 'pending'),
+(2, 1, 'Municipality of Prieto Diaz', '2013-12-10 00:00:00', '626878', 'B. Esperida Trading', 24523.86, 'Twenty four thousand five hundred twenty three and 86/100 pesos', 'purchase', 'Issued', 'Seeder', NULL, '2013-12-10 09:58:00', '2026-08-23 00:38:28', 'pending'),
+(3, 1, 'Municipality of Prieto Diaz', '2013-12-11 00:00:00', '626880', '', 0, '', NULL, 'Cancelled', 'Seeder', NULL, '2013-12-11 09:53:00', '2026-08-23 00:38:28', 'pending'),
+(4, 1, 'Municipality of Prieto Diaz', '2013-12-16 00:00:00', '626882', 'CEE / Municipal Treasurer', 22800, 'Twenty two thousand eight hundred and 00/100 pesos', 'withdrawal', 'Issued', 'Seeder', NULL, '2013-12-16 09:15:00', '2026-08-23 00:38:28', 'pending'),
+(5, 1, 'Municipality of Prieto Diaz', '2013-12-19 00:00:00', '626884', 'Sirit Const. & Supply', 31787.7, 'Thirty one thousand seven hundred eighty seven and 70/100 pesos', 'purchase', 'Issued', 'Seeder', NULL, '2013-12-19 09:48:00', '2026-08-23 00:38:28', 'pending'),
+(6, 1, 'Municipality of Prieto Diaz', '2013-12-27 00:00:00', '626886', 'CEE / Municipal Treasurer', 6090, 'Six thousand ninety and 00/100 pesos', 'withdrawal', 'Issued', 'Seeder', NULL, '2013-12-27 09:01:00', '2026-08-23 00:38:28', 'pending'),
+(7, 1, 'Municipality of Prieto Diaz', '2026-08-04 09:07:00', '626887', 'JRE Agrivet Supply', 61822.08, 'Sixty one thousand eight hundred twenty two and 08/100 pesos', 'purchase', 'Issued', 'Seeder', NULL, '2026-08-04 09:07:00', '2026-08-04 09:07:00', 'pending'),
+(8, 1, 'Municipality of Prieto Diaz', '2026-08-07 09:14:00', '626888', 'B. Esperida Trading', 20604.33, 'Twenty thousand six hundred four and 33/100 pesos', 'withdrawal', 'Issued', 'Seeder', NULL, '2026-08-07 09:14:00', '2026-08-07 09:14:00', 'pending'),
+(9, 1, 'Municipality of Prieto Diaz', '2026-08-10 09:21:00', '626889', 'Sirit Const. & Supply', 80717.15, 'Eighty thousand seven hundred seventeen and 15/100 pesos', 'salary', 'Issued', 'Seeder', NULL, '2026-08-10 09:21:00', '2026-08-10 09:21:00', 'pending'),
+(10, 1, 'Municipality of Prieto Diaz', '2026-08-13 09:28:00', '626890', 'Electroworld Inc.', 78729.09, 'Seventy eight thousand seven hundred twenty nine and 09/100 pesos', 'supplies', 'Issued', 'Seeder', NULL, '2026-08-13 09:28:00', '2026-08-13 09:28:00', 'pending'),
+(11, 1, 'Municipality of Prieto Diaz', '2026-08-16 09:35:00', '626891', 'Sorsogon Electric Coop II', 66669.87, 'Sixty six thousand six hundred sixty nine and 87/100 pesos', 'services', 'Issued', 'Seeder', NULL, '2026-08-16 09:35:00', '2026-08-16 09:35:00', 'pending'),
+(12, 1, 'Municipality of Prieto Diaz', '2026-08-19 09:42:00', '626892', 'Prieto Diaz Waterworks', 54414.89, 'Fifty four thousand four hundred fourteen and 89/100 pesos', 'fuel', 'Issued', 'Seeder', NULL, '2026-08-19 09:42:00', '2026-08-19 09:42:00', 'pending'),
+(13, 1, 'Municipality of Prieto Diaz', '2026-08-22 09:49:00', '626893', 'Grand Imperial Hardware', 56183.58, 'Fifty six thousand one hundred eighty three and 58/100 pesos', 'remittance', 'Issued', 'Seeder', NULL, '2026-08-22 09:49:00', '2026-08-22 09:49:00', 'pending'),
+(14, 1, 'Municipality of Prieto Diaz', '2026-08-25 09:56:00', '626894', 'Petron - Prieto Diaz', 67407.46, 'Sixty seven thousand four hundred seven and 46/100 pesos', 'purchase', 'Issued', 'Seeder', NULL, '2026-08-25 09:56:00', '2026-08-25 09:56:00', 'pending'),
+(15, 1, 'Municipality of Prieto Diaz', '2026-08-28 09:03:00', '626895', 'MDF Office Supplies', 32340.87, 'Thirty two thousand three hundred forty and 87/100 pesos', 'withdrawal', 'Issued', 'Seeder', NULL, '2026-08-28 09:03:00', '2026-08-24 01:01:37', 'failed'),
+(16, 1, 'Municipality of Prieto Diaz', '2026-08-03 09:10:00', '626896', 'Bicol Medical Supplies', 76157.71, 'Seventy six thousand one hundred fifty seven and 71/100 pesos', 'salary', 'Issued', 'Seeder', NULL, '2026-08-03 09:10:00', '2026-08-03 09:10:00', 'pending'),
+(17, 1, 'Municipality of Prieto Diaz', '2026-08-06 09:17:00', '626897', 'Sorsogon Printing Press', 52966.48, 'Fifty two thousand nine hundred sixty six and 48/100 pesos', 'supplies', 'Issued', 'Seeder', NULL, '2026-08-06 09:17:00', '2026-08-06 09:17:00', 'pending'),
+(18, 1, 'Municipality of Prieto Diaz', '2026-08-09 09:24:00', '626898', 'Ace Hardware Sorsogon', 76058.57, 'Seventy six thousand fifty eight and 57/100 pesos', 'services', 'Issued', 'Seeder', NULL, '2026-08-09 09:24:00', '2026-08-09 09:24:00', 'pending'),
+(19, 1, 'Municipality of Prieto Diaz', '2026-08-12 09:31:00', '626899', 'Rural Health Unit Supplies', 19593.96, 'Nineteen thousand five hundred ninety three and 96/100 pesos', 'fuel', 'Cancelled', 'Seeder', NULL, '2026-08-12 09:31:00', '2026-08-12 09:31:00', 'pending'),
+(20, 1, 'Municipality of Prieto Diaz', '2026-08-15 09:38:00', '626900', 'Ferrer Catering Services', 30952.12, 'Thirty thousand nine hundred fifty two and 12/100 pesos', 'remittance', 'Issued', 'Seeder', NULL, '2026-08-15 09:38:00', '2026-08-15 09:38:00', 'pending'),
+(21, 1, 'Municipality of Prieto Diaz', '2026-08-18 09:45:00', '626901', 'CEE / Municipal Treasurer', 76864.77, 'Seventy six thousand eight hundred sixty four and 77/100 pesos', 'purchase', 'Issued', 'Seeder', NULL, '2026-08-18 09:45:00', '2026-08-18 09:45:00', 'pending'),
+(22, 1, 'Municipality of Prieto Diaz', '2026-08-21 09:52:00', '626902', 'DPWH Materials Supply', 24708.69, 'Twenty four thousand seven hundred eight and 69/100 pesos', 'withdrawal', 'Issued', 'Seeder', NULL, '2026-08-21 09:52:00', '2026-08-21 09:52:00', 'pending'),
+(23, 1, 'Municipality of Prieto Diaz', '2026-08-24 09:59:00', '626903', 'PhilHealth Remittance', 46157.49, 'Forty six thousand one hundred fifty seven and 49/100 pesos', 'salary', 'Issued', 'Seeder', NULL, '2026-08-24 09:59:00', '2026-08-24 09:59:00', 'pending'),
+(24, 1, 'Municipality of Prieto Diaz', '2026-08-27 09:06:00', '626904', 'GSIS Remittance', 50308.91, 'Fifty thousand three hundred eight and 91/100 pesos', 'supplies', 'Issued', 'Seeder', NULL, '2026-08-27 09:06:00', '2026-08-27 09:06:00', 'pending'),
+(25, 1, 'Municipality of Prieto Diaz', '2026-08-02 09:13:00', '626905', 'BIR - Withholding Tax', 58945.8, 'Fifty eight thousand nine hundred forty five and 80/100 pesos', 'services', 'Issued', 'Seeder', NULL, '2026-08-02 09:13:00', '2026-08-02 09:13:00', 'pending'),
+(26, 1, 'Municipality of Prieto Diaz', '2026-08-05 09:20:00', '626906', 'LGU Payroll - Casual', 89139.11, 'Eighty nine thousand one hundred thirty nine and 11/100 pesos', 'fuel', 'Issued', 'Seeder', NULL, '2026-08-05 09:20:00', '2026-08-05 09:20:00', 'pending'),
+(27, 1, 'Municipality of Prieto Diaz', '2026-08-08 09:27:00', '626907', 'JRE Agrivet Supply', 61769.13, 'Sixty one thousand seven hundred sixty nine and 13/100 pesos', 'remittance', 'Issued', 'Seeder', NULL, '2026-08-08 09:27:00', '2026-08-08 09:27:00', 'pending'),
+(28, 1, 'Municipality of Prieto Diaz', '2026-08-11 09:34:00', '626908', 'B. Esperida Trading', 25938.95, 'Twenty five thousand nine hundred thirty eight and 95/100 pesos', 'purchase', 'Issued', 'Seeder', NULL, '2026-08-11 09:34:00', '2026-08-11 09:34:00', 'pending'),
+(29, 1, 'Municipality of Prieto Diaz', '2026-08-14 09:41:00', '626909', 'Sirit Const. & Supply', 81445.83, 'Eighty one thousand four hundred forty five and 83/100 pesos', 'withdrawal', 'Issued', 'Seeder', NULL, '2026-08-14 09:41:00', '2026-08-14 09:41:00', 'pending'),
+(30, 1, 'Municipality of Prieto Diaz', '2026-08-17 09:48:00', '626910', 'Electroworld Inc.', 69084.5, 'Sixty nine thousand eighty four and 50/100 pesos', 'salary', 'Issued', 'Seeder', NULL, '2026-08-17 09:48:00', '2026-08-17 09:48:00', 'pending'),
+(31, 1, 'Municipality of Prieto Diaz', '2026-08-20 09:55:00', '626911', 'Sorsogon Electric Coop II', 71698.09, 'Seventy one thousand six hundred ninety eight and 09/100 pesos', 'supplies', 'Issued', 'Seeder', NULL, '2026-08-20 09:55:00', '2026-08-20 09:55:00', 'pending'),
+(32, 1, 'Municipality of Prieto Diaz', '2026-08-23 09:02:00', '626912', 'Prieto Diaz Waterworks', 34733.13, 'Thirty four thousand seven hundred thirty three and 13/100 pesos', 'services', 'Cancelled', 'Seeder', NULL, '2026-08-23 09:02:00', '2026-08-23 09:02:00', 'pending'),
+(33, 1, 'Municipality of Prieto Diaz', '2026-08-26 09:09:00', '626913', 'Grand Imperial Hardware', 91802.91, 'Ninety one thousand eight hundred two and 91/100 pesos', 'fuel', 'Issued', 'Seeder', NULL, '2026-08-26 09:09:00', '2026-08-26 09:09:00', 'pending'),
+(34, 1, 'Municipality of Prieto Diaz', '2026-08-01 09:16:00', '626914', 'Petron - Prieto Diaz', 49251.72, 'Forty nine thousand two hundred fifty one and 72/100 pesos', 'remittance', 'Issued', 'Seeder', NULL, '2026-08-01 09:16:00', '2026-08-01 09:16:00', 'pending'),
+(35, 1, 'Municipality of Prieto Diaz', '2026-08-04 09:23:00', '626915', 'MDF Office Supplies', 44104.68, 'Forty four thousand one hundred four and 68/100 pesos', 'purchase', 'Issued', 'Seeder', NULL, '2026-08-04 09:23:00', '2026-08-04 09:23:00', 'pending'),
+(36, 1, 'Municipality of Prieto Diaz', '2026-08-07 09:30:00', '626916', 'Bicol Medical Supplies', 42895.7, 'Forty two thousand eight hundred ninety five and 70/100 pesos', 'withdrawal', 'Issued', 'Seeder', NULL, '2026-08-07 09:30:00', '2026-08-07 09:30:00', 'pending'),
+(37, 1, 'Municipality of Prieto Diaz', '2026-08-10 09:37:00', '626917', 'Sorsogon Printing Press', 10007.65, 'Ten thousand seven and 65/100 pesos', 'salary', 'Issued', 'Seeder', NULL, '2026-08-10 09:37:00', '2026-08-10 09:37:00', 'pending'),
+(38, 1, 'Municipality of Prieto Diaz', '2026-08-13 09:44:00', '626918', 'Ace Hardware Sorsogon', 10222.6, 'Ten thousand two hundred twenty two and 60/100 pesos', 'supplies', 'Issued', 'Seeder', NULL, '2026-08-13 09:44:00', '2026-08-13 09:44:00', 'pending'),
+(39, 1, 'Municipality of Prieto Diaz', '2026-08-16 09:51:00', '626919', 'Rural Health Unit Supplies', 9656.5, 'Nine thousand six hundred fifty six and 50/100 pesos', 'services', 'Issued', 'Seeder', NULL, '2026-08-16 09:51:00', '2026-08-16 09:51:00', 'pending'),
+(40, 1, 'Municipality of Prieto Diaz', '2026-08-19 09:58:00', '626920', 'Ferrer Catering Services', 69862.55, 'Sixty nine thousand eight hundred sixty two and 55/100 pesos', 'fuel', 'Issued', 'Seeder', NULL, '2026-08-19 09:58:00', '2026-08-19 09:58:00', 'pending'),
+(41, 1, 'Municipality of Prieto Diaz', '2026-08-22 09:05:00', '626921', 'CEE / Municipal Treasurer', 86422.97, 'Eighty six thousand four hundred twenty two and 97/100 pesos', 'remittance', 'Issued', 'Seeder', NULL, '2026-08-22 09:05:00', '2026-08-22 09:05:00', 'pending'),
+(42, 1, 'Municipality of Prieto Diaz', '2026-08-25 09:12:00', '626922', 'DPWH Materials Supply', 4204.61, 'Four thousand two hundred four and 61/100 pesos', 'purchase', 'Issued', 'Seeder', NULL, '2026-08-25 09:12:00', '2026-08-25 09:12:00', 'pending'),
+(43, 1, 'Municipality of Prieto Diaz', '2026-08-28 09:19:00', '626923', 'PhilHealth Remittance', 11247.67, 'Eleven thousand two hundred forty seven and 67/100 pesos', 'withdrawal', 'Cancelled', 'Seeder', NULL, '2026-08-28 09:19:00', '2026-08-24 05:02:53', 'pending'),
+(44, 1, 'Municipality of Prieto Diaz', '2026-08-03 09:26:00', '626924', 'GSIS Remittance', 63451.45, 'Sixty three thousand four hundred fifty one and 45/100 pesos', 'salary', 'Issued', 'Seeder', NULL, '2026-08-03 09:26:00', '2026-08-03 09:26:00', 'pending'),
+(45, 1, 'Municipality of Prieto Diaz', '2026-08-06 09:33:00', '626925', 'BIR - Withholding Tax', 94853.17, 'Ninety four thousand eight hundred fifty three and 17/100 pesos', 'supplies', 'Cancelled', 'Seeder', NULL, '2026-08-06 09:33:00', '2026-08-06 09:33:00', 'pending'),
+(46, 1, 'Municipality of Prieto Diaz', '2026-08-09 09:40:00', '626926', 'LGU Payroll - Casual', 43313.86, 'Forty three thousand three hundred thirteen and 86/100 pesos', 'services', 'Issued', 'Seeder', NULL, '2026-08-09 09:40:00', '2026-08-09 09:40:00', 'pending'),
+(47, 1, 'Municipality of Prieto Diaz', '2026-08-12 09:47:00', '626927', 'JRE Agrivet Supply', 60962.31, 'Sixty thousand nine hundred sixty two and 31/100 pesos', 'fuel', 'Issued', 'Seeder', NULL, '2026-08-12 09:47:00', '2026-08-12 09:47:00', 'pending'),
+(48, 1, 'Municipality of Prieto Diaz', '2026-08-15 09:54:00', '626928', 'B. Esperida Trading', 5470.25, 'Five thousand four hundred seventy and 25/100 pesos', 'remittance', 'Issued', 'Seeder', NULL, '2026-08-15 09:54:00', '2026-08-15 09:54:00', 'pending'),
+(49, 1, 'Municipality of Prieto Diaz', '2026-08-18 09:01:00', '626929', 'Sirit Const. & Supply', 4823.61, 'Four thousand eight hundred twenty three and 61/100 pesos', 'purchase', 'Issued', 'Seeder', NULL, '2026-08-18 09:01:00', '2026-08-18 09:01:00', 'pending'),
+(50, 1, 'Municipality of Prieto Diaz', '2026-08-21 09:08:00', '626930', 'Electroworld Inc.', 80082.26, 'Eighty thousand eighty two and 26/100 pesos', 'withdrawal', 'Issued', 'Seeder', NULL, '2026-08-21 09:08:00', '2026-08-21 09:08:00', 'pending'),
+(51, 1, 'Municipality of Prieto Diaz', '2026-08-24 09:15:00', '626931', 'Sorsogon Electric Coop II', 22301.75, 'Twenty two thousand three hundred one and 75/100 pesos', 'salary', 'Issued', 'Seeder', NULL, '2026-08-24 09:15:00', '2026-08-24 09:15:00', 'pending'),
+(52, 1, 'Municipality of Prieto Diaz', '2026-08-27 09:22:00', '626932', 'Prieto Diaz Waterworks', 30679.57, 'Thirty thousand six hundred seventy nine and 57/100 pesos', 'supplies', 'Issued', 'Seeder', NULL, '2026-08-27 09:22:00', '2026-08-24 14:18:44', 'failed'),
+(53, 1, 'Municipality of Prieto Diaz', '2026-08-02 09:29:00', '626933', 'Grand Imperial Hardware', 14710.83, 'Fourteen thousand seven hundred ten and 83/100 pesos', 'services', 'Issued', 'Seeder', NULL, '2026-08-02 09:29:00', '2026-08-02 09:29:00', 'pending'),
+(54, 1, 'Municipality of Prieto Diaz', '2026-08-05 09:36:00', '626934', 'Petron - Prieto Diaz', 2847.11, 'Two thousand eight hundred forty seven and 11/100 pesos', 'fuel', 'Issued', 'Seeder', NULL, '2026-08-05 09:36:00', '2026-08-05 09:36:00', 'pending'),
+(55, 1, 'Municipality of Prieto Diaz', '2026-08-08 09:43:00', '626935', 'MDF Office Supplies', 2269.88, 'Two thousand two hundred sixty nine and 88/100 pesos', 'remittance', 'Issued', 'Seeder', NULL, '2026-08-08 09:43:00', '2026-08-08 09:43:00', 'pending'),
+(56, 1, 'Municipality of Prieto Diaz', '2026-08-11 09:50:00', '626936', 'Bicol Medical Supplies', 36263.56, 'Thirty six thousand two hundred sixty three and 56/100 pesos', 'purchase', 'Issued', 'Seeder', NULL, '2026-08-11 09:50:00', '2026-08-11 09:50:00', 'pending');
 
 DROP TABLE IF EXISTS `ctc_corporation_transactions`;
 CREATE TABLE `ctc_corporation_transactions` (
@@ -219,8 +256,9 @@ CREATE TABLE `ctc_corporation_transactions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `ctc_corporation_transactions` (`id`, `form_stock_id`, `certificate_number`, `year`, `place_of_issue`, `date_issued`, `company_name`, `tin`, `date_of_registration`, `address`, `kind_of_organization`, `nature_of_business`, `a_community_tax_due`, `item1_taxable_amount`, `item1_community_tax_due`, `item2_taxable_amount`, `item2_community_tax_due`, `total_community_tax_due`, `interest`, `amount_paid`, `amount_in_words`, `treasurer_name`, `created_at`, `updated_at`, `certificate_prefix`) VALUES
-(1, 2, '00259338', 2026, NULL, NULL, 'Acme Corporation', '', NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 500, 'Five hundred pesos only', 'Gemma D. Ferrer', '2026-06-13 13:08:37', '2026-06-13 13:08:37', NULL),
-(5, 2, '00123456', 2026, 'Prieto-Diaz, Sorsogon City, Sorsogon', NULL, 'SOLEM IT & Digital Solutions Corporation', '123456789011000', '2026-06-13 00:00:00', NULL, 'Corporation', NULL, 1, 1, 1, 0, 1, 3, 1, 4, 'Four Pesos Only', 'Gemma D. Ferrer', '2026-06-13 14:37:47', '2026-06-13 14:37:47', NULL);
+(6, 2, '202600001', 2026, 'Prieto-Diaz, Sorsogon City, Sorsogon', '2026-07-06 00:00:00', 'SOLEM IT & Digital Solutions Corporation', '123456789000101', '2026-07-06 00:00:00', 'Brgy. Bibincahan, Sorsogon City, Sorsogon', 'Corporation', 'Information Technology', 5, 10, 35, 10, 35, 75, 20, 95, 'Ninety-five pesos only', 'Gemma D. Ferrer', '2026-07-06 00:59:54', '2026-07-06 00:59:54', 'CCC'),
+(7, 2, '202600002', 2026, 'Sorsogon City', '2026-07-06 00:00:00', 'CodinGroundz Computer Shop & Services', '123456789001201', '2026-07-06 00:00:00', 'Bariis, Cabid-an', 'Partnership', 'Information Technology', 123, 0, 123, 0, 123, 369, 0, 369, 'Three hundred sixty-nine pesos only', 'Gemma D. Ferrer', '2026-07-06 02:56:01', '2026-07-06 02:56:01', 'CCC'),
+(8, 2, '202600003', 2026, 'Prieto-Diaz, Sorsogon City, Sorsogon', '2026-08-24 00:00:00', 'CodinGroundz Computer Shop & Services', '123456789001011', '2026-08-24 00:00:00', NULL, 'Corporation', NULL, 5, 0, 75, 25, 75, 155, 25, 180, 'One hundred eighty pesos only', 'Gemma D. Ferrer', '2026-08-24 00:55:19', '2026-08-24 00:55:19', 'CCC');
 
 DROP TABLE IF EXISTS `ctc_individual_transactions`;
 CREATE TABLE `ctc_individual_transactions` (
@@ -263,19 +301,22 @@ CREATE TABLE `ctc_individual_transactions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `ctc_individual_transactions` (`id`, `form_stock_id`, `certificate_number`, `year`, `place_of_issue`, `date_issued`, `date_issued_2`, `surname`, `first_name`, `middle_name`, `tin`, `sex`, `citizenship`, `icr_no`, `place_of_birth`, `height`, `civil_status`, `weight`, `date_of_birth`, `profession`, `a_community_tax_due`, `item1_taxable_amount`, `item1_community_tax_due`, `item2_taxable_amount`, `item2_community_tax_due`, `item3_taxable_amount`, `item3_community_tax_due`, `total_community_tax_due`, `interest`, `amount_paid`, `amount_in_words`, `treasurer_name`, `created_at`, `updated_at`, `certificate_prefix`) VALUES
-(1, 1, '13476955', 2026, NULL, NULL, NULL, 'Dela Cruz', 'Juan', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 500, 'Five hundred pesos only', 'Gemma D. Ferrer', '2026-06-13 11:49:36', '2026-06-13 11:49:36', NULL),
-(2, 1, '13476955', 2026, NULL, NULL, NULL, 'Dela Cruz', 'Juan', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 500, 'Five hundred pesos only', 'Gemma D. Ferrer', '2026-06-13 11:50:07', '2026-06-13 11:50:07', NULL),
-(3, 1, '13476955', 2026, NULL, NULL, NULL, 'Dela Cruz', 'Juan', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 500, 'Five hundred pesos only', 'Gemma D. Ferrer', '2026-06-13 11:51:22', '2026-06-13 11:51:22', NULL),
-(4, 1, '13476955', 2026, NULL, NULL, NULL, 'Bernal', 'Armbel', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 500, 'Five hundred pesos only', 'Gemma D. Ferrer', '2026-06-13 13:57:59', '2026-06-13 13:57:59', NULL),
-(6, 1, '13476955', 2026, 'Sorsogon City', '2026-06-13 00:00:00', '2026-06-13 00:00:00', 'Bernal', 'Armbel', 'Besalo', '123456789101000', 'on', 'Filipino', NULL, 'Tramo, Pasig', '141', 'on', '75', '2026-06-13 00:00:00', NULL, 5, 0, 1, 0, 1, 0, 10, 17, 0, 17, 'Seventeen Pesos Only', 'Gemma D. Ferrer', '2026-06-13 14:34:18', '2026-06-13 14:34:18', NULL),
-(7, 1, '13476955', 2026, 'Prieto-Diaz, Sorsogon City, Sorsogon', '2026-06-15 00:00:00', NULL, 'Bernal', 'Armbel', 'Besalo', '123456789011123', 'on', 'Filipino', NULL, 'Tramo, Pasig', '141', 'on', '75', NULL, NULL, 1, 1, 1, 1, 1, 1, 1, 4, 3, 7, 'Five hundred pesos only', 'Gemma D. Ferrer', '2026-06-14 17:25:11', '2026-06-14 17:25:11', NULL),
-(8, 1, '00001', 2026, 'Prieto-Diaz, Sorsogon City, Sorsogon', '2026-06-15 00:00:00', NULL, 'Bernal', 'Armbel', 'Besalo', '123451512412351', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 500, 'Five hundred pesos only', 'Gemma D. Ferrer', '2026-06-14 17:37:43', '2026-06-14 17:37:43', NULL),
-(9, 1, '00006', 2026, 'Prieto-Diaz, Sorsogon City, Sorsogon', NULL, NULL, 'Bernal', 'Armbel', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 500, 'Five hundred pesos only', 'Gemma D. Ferrer', '2026-06-15 02:09:13', '2026-06-15 02:09:13', NULL),
-(10, 1, '00007', 2026, NULL, NULL, NULL, 'Bernal', 'Armbel', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 500, 'Five hundred pesos only', 'Gemma D. Ferrer', '2026-06-15 02:10:09', '2026-06-15 02:10:09', NULL),
-(11, 1, '00002', 2026, NULL, NULL, NULL, 'Bernal', 'Armbel', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 500, 'Five hundred pesos only', 'Gemma D. Ferrer', '2026-06-15 02:11:53', '2026-06-15 02:11:53', NULL),
-(12, 1, '00009', 2026, NULL, NULL, NULL, 'Bernal', 'Armbel', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 500, 'Five hundred pesos only', 'Gemma D. Ferrer', '2026-06-15 02:21:41', '2026-06-15 02:21:41', NULL),
-(13, 1, '00001', 2026, NULL, NULL, NULL, 'TestSurname', 'TestFirst', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 100, 'Five hundred pesos only', 'Gemma D. Ferrer', '2026-06-15 02:39:26', '2026-06-15 02:39:26', 'CCI2026-'),
-(14, 1, '00003', 2026, NULL, NULL, NULL, 'Bernal', 'Armbel', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 500, 'Five hundred pesos only', 'Gemma D. Ferrer', '2026-06-15 03:20:21', '2026-06-15 03:20:21', 'CCI2026-');
+(15, 1, '202600001', 2026, 'Prieto-Diaz, Sorsogon City, Sorsogon', '2026-07-06 00:00:00', '2026-07-06 00:00:00', 'Bernal', 'Armbel', 'Besalo', '123456789000101', NULL, 'Filipino', NULL, 'Tramo, Pasig', '161', 'on', '75', '1991-05-12 00:00:00', NULL, 75, 1, 35, 1, 35, 2, 35, 180, 4, 184, 'One hundred eighty-four pesos only', 'Gemma D. Ferrer', '2026-07-06 02:54:26', '2026-07-06 02:54:26', 'CCI');
+
+DROP TABLE IF EXISTS `deposits`;
+CREATE TABLE `deposits` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `deposit_date` DATE NOT NULL,
+  `bank_account_id` BIGINT NOT NULL,
+  `slip_number` VARCHAR(255) NULL,
+  `prepared_by` VARCHAR(255) NULL,
+  `created_at` DATETIME NULL,
+  `updated_at` DATETIME NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO `deposits` (`id`, `deposit_date`, `bank_account_id`, `slip_number`, `prepared_by`, `created_at`, `updated_at`) VALUES
+(1, '2026-08-24 00:00:00', 2, NULL, 'Armbel Bernal', '2026-08-24 00:57:43', '2026-08-24 00:57:43');
 
 DROP TABLE IF EXISTS `failed_jobs`;
 CREATE TABLE `failed_jobs` (
@@ -309,21 +350,14 @@ CREATE TABLE `form_batches` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `form_batches` (`id`, `form_stock_id`, `registration_date`, `purchase_date`, `starting_serial_number`, `ending_serial_number`, `added_by`, `created_at`, `updated_at`, `assigned_to`) VALUES
-(7, 6, '2026-06-13 10:04:58', '2026-06-13 10:04:58', '2026-001', '025', 'System', '2026-06-13 10:04:58', '2026-06-19 23:06:04', NULL),
-(9, 8, '2026-06-14 16:41:48', '2026-06-14 16:41:48', 'AB001', 'AB010', 'System', '2026-06-14 16:41:48', '2026-06-14 16:41:48', NULL),
-(10, 1, '2026-06-14 17:21:52', '2026-06-14 17:21:52', '2026-00001', '005', 'System', '2026-06-14 17:21:52', '2026-06-14 17:21:52', NULL),
-(12, 1, '2026-06-15 02:49:31', '2026-06-15 02:49:31', '2026-00006', '007', 'System', '2026-06-15 02:49:31', '2026-06-15 02:49:31', NULL),
-(13, 1, '2026-06-15 03:25:46', '2026-06-15 03:25:46', '2026-00050', '052', 'System', '2026-06-15 03:25:46', '2026-06-15 03:25:46', NULL),
-(16, 5, '2026-06-16 08:46:57', '2026-06-16 08:46:57', '8104350', '8104351', 'Armbel Bernal', '2026-06-16 08:46:57', '2026-06-20 00:24:10', 'Jose Ramirez'),
-(17, 5, '2026-06-16 12:39:54', '2026-06-16 12:39:54', '2027021', '2027022', 'Marlaw Sol Emata', '2026-06-16 12:39:54', '2026-06-20 02:02:51', 'Jose Ramirez'),
-(18, 5, '2026-06-16 12:49:59', '2026-06-16 12:49:59', '2027021', '2027021', 'Marlaw Sol Emata', '2026-06-16 12:49:59', '2026-06-20 02:02:53', 'Jose Ramirez'),
-(19, 5, '2026-06-16 12:50:26', '2026-06-16 12:50:26', '2027021', '2027021', 'Marlaw Sol Emata', '2026-06-16 12:50:26', '2026-06-20 02:02:55', 'Jose Ramirez'),
-(20, 5, '2026-06-16 12:56:32', '2026-06-16 12:56:32', '2027023', '2027023', 'Marlaw Sol Emata', '2026-06-16 12:56:32', '2026-06-20 02:02:57', 'Jose Ramirez'),
-(21, 5, '2026-06-16 12:58:57', '2026-06-16 12:58:57', '2027024', '2027025', 'Marlaw Sol Emata', '2026-06-16 12:58:57', '2026-06-20 02:02:59', 'Jose Ramirez'),
-(22, 5, '2026-06-16 13:25:22', '2026-06-16 13:25:22', '2027026', '2027030', 'Marlaw Sol Emata', '2026-06-16 13:25:22', '2026-06-20 00:31:18', 'Barangay Cabid-an'),
-(23, 5, '2026-06-17 08:07:53', '2026-06-17 08:07:53', '2027023', '2027023', 'Cleofe Villanueva', '2026-06-17 08:07:53', '2026-06-20 00:25:41', 'Juan Dela Cruz'),
-(24, 7, '2026-06-17 17:01:56', '2026-06-17 17:01:56', 'ORRPT000', 'ORRPT001', 'Cleofe Villanueva', '2026-06-17 17:01:56', '2026-06-20 02:03:36', 'Juan Dela Cruz'),
-(25, 5, '2026-06-18 00:12:59', '2026-06-18 00:12:59', '2027030', '2027034', 'Cleofe Villanueva', '2026-06-18 00:12:59', '2026-06-20 02:03:01', 'Jose Ramirez');
+(28, 2, '2026-07-05 23:10:39', '2026-07-05 23:10:39', '202600001', '202600005', 'Armbel Bernal', '2026-07-05 23:10:39', '2026-07-05 23:10:39', NULL),
+(29, 1, '2026-07-05 23:30:01', '2026-07-05 23:30:01', '202600001', '202600005', 'Armbel Bernal', '2026-07-05 23:30:01', '2026-07-05 23:30:01', NULL),
+(30, 5, '2026-07-06 03:02:56', '2026-07-06 03:02:56', '8104351', '8104360', 'Armbel Bernal', '2026-07-06 03:02:56', '2026-07-06 03:02:56', NULL),
+(31, 7, '2026-07-06 04:39:14', '2026-07-06 04:39:14', '4218271', '4218280', 'Armbel Bernal', '2026-07-06 04:39:14', '2026-07-06 04:39:14', NULL),
+(32, 8, '2026-07-06 04:50:23', '2026-07-06 04:50:23', '6551381', '6551382', 'Armbel Bernal', '2026-07-06 04:50:23', '2026-08-24 04:59:59', 'Ramon Torres'),
+(33, 6, '2026-08-23 17:11:35', '2026-08-23 17:11:35', '2027021', '2027023', 'Armbel Bernal', '2026-08-23 17:11:35', '2026-08-23 17:11:56', 'Armbel Bernal'),
+(34, 8, '2026-08-24 04:59:42', '2026-08-24 04:59:42', '6551383', '6551384', 'Armbel Bernal', '2026-08-24 04:59:42', '2026-08-24 05:00:14', 'Armbel Bernal'),
+(35, 8, '2026-08-24 14:13:59', '2026-08-24 14:13:59', '6551385', '6551386', 'Armbel Bernal', '2026-08-24 14:13:59', '2026-08-24 14:16:38', 'Jose Ramirez');
 
 DROP TABLE IF EXISTS `form_stocks`;
 CREATE TABLE `form_stocks` (
@@ -340,14 +374,14 @@ CREATE TABLE `form_stocks` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `form_stocks` (`id`, `qty`, `form_name`, `form_code`, `added_date`, `added_by`, `created_at`, `updated_at`, `added_time`) VALUES
-(1, 4, 'Individual Cedula', 'BIR0016', '2026-06-15 03:25:46', 'Marlaw Sol Emata', '2026-06-13 07:27:13', '2026-06-15 03:25:46', '03:25:46'),
-(2, 0, 'Corporation Cedula', 'BIR0017', '2021-12-19 00:00:00', 'Marlaw Sol Emata', '2026-06-13 07:27:13', '2026-06-14 14:50:02', '10:45:00'),
+(1, 4, 'Individual Cedula', 'BIR0016', '2026-07-05 23:30:01', 'Marlaw Sol Emata', '2026-06-13 07:27:13', '2026-07-06 02:54:26', '23:30:01'),
+(2, 2, 'Corporation Cedula', 'BIR0017', '2026-07-05 23:10:39', 'Marlaw Sol Emata', '2026-06-13 07:27:13', '2026-08-24 00:55:19', '23:10:39'),
 (3, 0, 'Certificate of Ownership of Large Cattle', 'Form 53', '2022-03-01 00:00:00', 'Marlaw Sol Emata', '2026-06-13 07:27:13', '2026-06-14 14:50:02', '11:00:00'),
 (4, 0, 'Certificate of Transfer of Large Cattle', 'Form 28A', '2022-07-04 00:00:00', 'Marlaw Sol Emata', '2026-06-13 07:27:13', '2026-06-14 14:50:02', '12:30:00'),
-(5, 5, 'Marriage License', 'Form 10', '2026-06-18 00:12:59', 'Marlaw Sol Emata', '2026-06-13 07:27:13', '2026-06-18 00:40:27', '00:12:59'),
-(6, 0, 'Official Receipt', 'Form 5IC', '2026-06-13 10:04:58', 'Marlaw Sol Emata', '2026-06-13 07:27:13', '2026-06-14 14:50:02', '14:50:00'),
-(7, 1, 'OR RPT', 'Form 56', '2026-06-17 17:01:56', 'Marlaw Sol Emata', '2026-06-13 07:27:13', '2026-06-18 00:51:31', '17:01:56'),
-(8, 10, 'Burial', 'Form 58', '2026-06-14 16:41:48', 'Marlaw Sol Emata', '2026-06-13 07:27:13', '2026-06-14 16:41:48', '16:41:48');
+(5, 8, 'Marriage License', 'Form 10', '2026-07-06 03:02:56', 'Marlaw Sol Emata', '2026-06-13 07:27:13', '2026-08-23 18:19:46', '03:02:56'),
+(6, 2, 'Official Receipt', 'Form 5IC', '2026-08-23 17:11:35', 'Marlaw Sol Emata', '2026-06-13 07:27:13', '2026-08-23 19:48:23', '17:11:35'),
+(7, 9, 'OR RPT', 'Form 56', '2026-07-06 04:39:14', 'Marlaw Sol Emata', '2026-06-13 07:27:13', '2026-08-23 19:46:12', '04:39:14'),
+(8, 2, 'Burial', 'Form 58', '2026-08-24 14:13:59', 'Marlaw Sol Emata', '2026-06-13 07:27:13', '2026-08-24 14:13:59', '14:13:59');
 
 DROP TABLE IF EXISTS `job_batches`;
 CREATE TABLE `job_batches` (
@@ -406,29 +440,13 @@ CREATE TABLE `marriage_certificate_transactions` (
   `message` TEXT NULL,
   `created_at` DATETIME NULL,
   `updated_at` DATETIME NULL,
+  `fee_amount` DECIMAL(15,2) NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO `marriage_certificate_transactions` (`id`, `form_stock_id`, `certificate_number`, `husband_name`, `husband_age_years`, `husband_age_months`, `husband_address`, `wife_name`, `wife_age_years`, `wife_age_months`, `wife_address`, `witness_day`, `witness_month`, `witness_year`, `instructions_day`, `instructions_month`, `instructions_year`, `registry_number`, `local_civil_registrar_of`, `email`, `message`, `created_at`, `updated_at`) VALUES
-(1, 5, '0000001', 'Juan de la Cruz', 30, 0, 'Prieto Diaz', 'Maria Santos', 28, 0, 'Prieto Diaz', '16', 'June', '26', '16', 'June', '26', '12345', 'Prieto Diaz', NULL, NULL, '2026-06-16 07:45:07', '2026-06-16 07:45:07'),
-(2, 5, '0000354', 'Armbel Besalo Bernal', 35, 1, 'Winterwood Street, Greensborough Subdivision, Sabang, Dasmariñas, Cavite', 'Cleofe Dioneda Villanueva', 30, 1, 'Winterwood Street, Greensborough Subdivision, Sabang, Dasmariñas, Cavite', '16', 'June', '26', '16', 'June', '26', '123456-7123-11-2', 'Dasmariñas, Cavite, 4115', NULL, NULL, '2026-06-16 08:34:03', '2026-06-16 08:34:03'),
-(3, 5, '0000002', 'Armbel Besalo Bernal', 35, 1, 'Winterwood Street, Greensborough Subdivision, Sabang, Dasmariñas, Cavite', 'Cleofe Dioneda Villanueva', 30, 1, 'Winterwood Street, Greensborough Subdivision, Sabang, Dasmariñas, Cavite', '16', 'June', '26', '16', 'June', '26', '123456-7123-11-2', 'Dasmariñas, Cavite, 4115', NULL, NULL, '2026-06-16 08:43:02', '2026-06-16 08:43:02'),
-(4, 5, '8104352', 'Armbel Besalo Bernal', 35, 1, 'Winterwood Street, Greensborough Subdivision, Sabang, Dasmariñas, Cavite', 'Cleofe Dioneda Villanueva', 30, 1, 'Winterwood Street, Greensborough Subdivision, Sabang, Dasmariñas, Cavite', '16', 'June', '26', '16', 'June', '26', '123456-7123-11-2', 'Dasmariñas, Cavite, 4115', NULL, NULL, '2026-06-16 08:49:20', '2026-06-16 08:49:20'),
-(5, 5, '8104350', 'Armbel Besalo Bernal', 35, 1, 'Winterwood Street, Greensborough Subdivision, Sabang, Dasmariñas, Cavite', 'Cleofe Dioneda Villanueva', 31, 1, 'Winterwood Street, Greensborough Subdivision, Sabang, Dasmariñas, Cavite', '16', 'June', '26', '16', 'June', '26', '123456-7123-11-2', 'Dasmariñas, Cavite, 4115', NULL, NULL, '2026-06-16 09:06:25', '2026-06-16 09:06:25'),
-(6, 5, '8104351', 'Armbel Besalo Bernal', 35, 1, 'Winterwood Street, Greensborough Subdivision, Sabang, Dasmariñas, Cavite', 'Cleofe Dioneda Villanueva', 30, 1, 'Winterwood Street, Greensborough Subdivision, Sabang, Dasmariñas, Cavite', '16', 'June', '26', '16', 'June', '26', '123456-7123-11-2', 'Dasmariñas, Cavite, 4115', NULL, NULL, '2026-06-16 12:35:17', '2026-06-16 12:35:17'),
-(7, 5, '2027021', 'Armbel Besalo Bernal', 35, 1, 'Winterwood Street, Greensborough Subdivision, Sabang, Dasmariñas, Cavite', 'Cleofe Dioneda Villanueva', 35, 1, 'Winterwood Street, Greensborough Subdivision, Sabang, Dasmariñas, Cavite', '16', 'June', '26', '16', 'June', '26', '123456-7123-11-2', 'Dasmariñas, Cavite, 4115', NULL, NULL, '2026-06-16 12:41:25', '2026-06-16 12:41:25'),
-(8, 5, '2027022', 'Armbel Besalo Bernal', 35, 1, 'Winterwood Street, Greensborough Subdivision, Sabang, Dasmariñas, Cavite', 'Cleofe Dioneda Villanueva', 34, 1, 'Winterwood Street, Greensborough Subdivision, Sabang, Dasmariñas, Cavite', '16', 'June', '26', '16', 'June', '26', '123456-7123-11-2', 'Dasmariñas, Cavite, 4115', NULL, NULL, '2026-06-16 12:46:12', '2026-06-16 12:46:12'),
-(9, 5, '2027023', 'Armbel Besalo Bernal', 35, 1, 'Winterwood Street, Greensborough Subdivision, Sabang, Dasmariñas, Cavite', 'Cleofe Dioneda Villanueva', 35, 1, 'Winterwood Street, Greensborough Subdivision, Sabang, Dasmariñas, Cavite', '16', 'June', '26', '16', 'June', '26', '123456-7123-11-2', 'Dasmariñas, Cavite, 4115', NULL, NULL, '2026-06-16 12:57:05', '2026-06-16 12:57:05'),
-(10, 5, '2027024', 'Armbel Besalo Bernal', 35, 1, 'Winterwood Street, Greensborough Subdivision, Sabang, Dasmariñas, Cavite', 'Cleofe Dioneda Villanueva', 35, 1, 'Winterwood Street, Greensborough Subdivision, Sabang, Dasmariñas, Cavite', '16', 'June', '26', '16', 'June', '26', '123456-7123-11-2', 'Dasmariñas, Cavite, 4115', NULL, NULL, '2026-06-16 12:59:27', '2026-06-16 12:59:27'),
-(11, 5, '2027025', 'Armbel Besalo Bernal', 35, 1, 'Winterwood Street, Greensborough Subdivision, Sabang, Dasmariñas, Cavite', 'Cleofe Dioneda Villanueva', 30, 1, 'Winterwood Street, Greensborough Subdivision, Sabang, Dasmariñas, Cavite', '16', 'June', '26', '16', 'June', '26', '123456-7123-11-2', 'Dasmariñas, Cavite, 4115', NULL, NULL, '2026-06-16 13:16:21', '2026-06-16 13:16:21'),
-(12, 5, '2027026', 'Armbel Besalo Bernal', 35, 1, 'Winterwood Street, Greensborough Subdivision, Sabang, Dasmariñas, Cavite', 'Cleofe Dioneda Villanueva', 30, 1, 'Winterwood Street, Greensborough Subdivision, Sabang, Dasmariñas, Cavite', '16', 'June', '26', '16', 'June', '26', '123456-7123-11-2', 'Dasmariñas, Cavite, 4115', NULL, NULL, '2026-06-16 13:26:34', '2026-06-16 13:26:34'),
-(13, 5, '2027027', 'Armbel Besalo Bernal', 35, 1, 'Winterwood Street, Greensborough Subdivision, Sabang, Dasmariñas, Cavite', 'Cleofe Dioneda Villanueva', 30, 1, 'Winterwood Street, Greensborough Subdivision, Sabang, Dasmariñas, Cavite', '16', 'June', '26', '16', 'June', '26', '123456-7123-11-2', 'Dasmariñas, Cavite, 4115', NULL, NULL, '2026-06-16 13:42:54', '2026-06-16 13:42:54'),
-(14, 5, '2027028', 'Armbel Besalo Bernal', 35, 1, 'Winterwood Street, Greensborough Subdivision, Sabang, Dasmariñas, Cavite', 'Cleofe Dioneda Villanueva', 30, 1, 'Winterwood Street, Greensborough Subdivision, Sabang, Dasmariñas, Cavite', '16', 'June', '26', '16', 'June', '26', '123456-7123-11-2', 'Dasmariñas, Cavite, 4115', NULL, NULL, '2026-06-16 13:47:57', '2026-06-16 13:47:57'),
-(15, 5, '2027029', 'Armbel Besalo Bernal', 35, 1, 'Winterwood Street, Greensborough Subdivision, Sabang, Dasmariñas, Cavite', 'Cleofe Dioneda Villanueva', 30, 1, 'Winterwood Street, Greensborough Subdivision, Sabang, Dasmariñas, Cavite', '16', 'June', '26', '16', 'June', '26', '123456-7123-11-2', 'Dasmariñas, Cavite, 4115', NULL, NULL, '2026-06-17 23:43:28', '2026-06-17 23:43:28'),
-(16, 5, '2027030', 'Armbel Besalo Bernal', NULL, NULL, NULL, 'Cleofe Dioneda Villanueva', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-06-17 23:55:16', '2026-06-17 23:55:16'),
-(17, 5, '2027031', 'Armbel Besalo Bernal', NULL, NULL, 'Winterwood Street, Greensborough Subdivision, Sabang, Dasmariñas, Cavite', 'Cleofe Dioneda Villanueva', NULL, NULL, 'Winterwood Street, Greensborough Subdivision, Sabang, Dasmariñas, Cavite', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-06-18 00:15:33', '2026-06-18 00:15:33'),
-(18, 5, '2027032', 'Armbel Besalo Bernal', 35, 1, 'Winterwood Street, Greensborough Subdivision, Sabang, Dasmariñas, Cavite', 'Cleofe Dioneda Villanueva', 30, 1, 'Winterwood Street, Greensborough Subdivision, Sabang, Dasmariñas, Cavite', '16', 'June', '26', '16', 'June', '26', '123456-7123-11-2', 'Dasmariñas, Cavite, 4115', NULL, NULL, '2026-06-18 00:38:14', '2026-06-18 00:38:14'),
-(19, 5, '2027033', 'Armbel Besalo Bernal', 26, 1, 'Winterwood Street, Greensborough Subdivision, Sabang, Dasmariñas, Cavite', 'Cleofe Dioneda Villanueva', 20, 1, 'Winterwood Street, Greensborough Subdivision, Sabang, Dasmariñas, Cavite', '16', 'June', '26', '16', 'June', '26', '123456-7123-11-2', 'Dasmariñas, Cavite, 4115', NULL, NULL, '2026-06-18 00:40:27', '2026-06-18 00:40:27');
+INSERT INTO `marriage_certificate_transactions` (`id`, `form_stock_id`, `certificate_number`, `husband_name`, `husband_age_years`, `husband_age_months`, `husband_address`, `wife_name`, `wife_age_years`, `wife_age_months`, `wife_address`, `witness_day`, `witness_month`, `witness_year`, `instructions_day`, `instructions_month`, `instructions_year`, `registry_number`, `local_civil_registrar_of`, `email`, `message`, `created_at`, `updated_at`, `fee_amount`) VALUES
+(20, 5, '8104351', 'Armbel Besalo Bernal', 35, 1, 'Winterwood Street, Greensborough Subdivision, Sabang, Dasmariñas, Cavite', 'Cleofe Dioneda Villanueva', 30, 1, 'Winterwood Street, Greensborough Subdivision, Sabang, Dasmariñas, Cavite', '16', 'June', '26', '16', 'June', '26', '123456-7123-11-2', 'Dasmariñas, Cavite, 4115', NULL, NULL, '2026-07-06 03:04:59', '2026-07-06 03:04:59', NULL),
+(21, 5, '8104352', 'Armbel Besalo Bernal', NULL, NULL, NULL, 'Cleofe Dioneda Villanueva', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-08-23 18:19:46', '2026-08-23 18:19:46', 2);
 
 DROP TABLE IF EXISTS `migrations`;
 CREATE TABLE `migrations` (
@@ -460,7 +478,35 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (19, '2026_06_17_100000_add_polymorphic_and_archived_at_to_transaction_logs', 13),
 (20, '2026_06_17_110000_create_cancel_requests_table', 13),
 (21, '2026_06_19_015005_add_notified_at_to_cancel_requests_table', 14),
-(22, '2026_06_19_224250_add_assigned_to_to_form_batches_table', 15);
+(22, '2026_06_19_224250_add_assigned_to_to_form_batches_table', 15),
+(23, '2026_06_20_100000_create_rpt_properties_table', 16),
+(24, '2026_06_20_100100_create_or_rpt_transaction_entries_table', 16),
+(25, '2026_07_06_100000_create_burial_permit_transactions_table', 16),
+(26, '2026_07_06_120000_create_cheque_management_tables', 17),
+(27, '2026_07_07_100000_add_payment_fields_to_transaction_logs_table', 18),
+(28, '2026_07_07_100100_backfill_transaction_log_payments', 19),
+(29, '2026_07_08_100000_create_deposits_and_recon_columns', 20),
+(30, '2026_08_27_100000_add_opening_balance_to_bank_accounts', 21);
+
+DROP TABLE IF EXISTS `or_rpt_transaction_entries`;
+CREATE TABLE `or_rpt_transaction_entries` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `or_rpt_transaction_id` BIGINT NOT NULL,
+  `rpt_property_id` BIGINT NOT NULL,
+  `payment_scheme` VARCHAR(255) NOT NULL,
+  `installment_quarter` BIGINT NULL,
+  `tax_due` DECIMAL(15,2) NOT NULL DEFAULT '0',
+  `discount` DECIMAL(15,2) NOT NULL DEFAULT '0',
+  `penalty_percent` DECIMAL(15,2) NOT NULL DEFAULT '0',
+  `penalty_amount` DECIMAL(15,2) NOT NULL DEFAULT '0',
+  `amount` DECIMAL(15,2) NOT NULL DEFAULT '0',
+  `created_at` DATETIME NULL,
+  `updated_at` DATETIME NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO `or_rpt_transaction_entries` (`id`, `or_rpt_transaction_id`, `rpt_property_id`, `payment_scheme`, `installment_quarter`, `tax_due`, `discount`, `penalty_percent`, `penalty_amount`, `amount`, `created_at`, `updated_at`) VALUES
+(1, 9, 1, 'full', NULL, 300, 0, 0, 0, 300, '2026-08-23 19:46:12', '2026-08-23 19:46:12');
 
 DROP TABLE IF EXISTS `or_rpt_transactions`;
 CREATE TABLE `or_rpt_transactions` (
@@ -485,12 +531,7 @@ CREATE TABLE `or_rpt_transactions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `or_rpt_transactions` (`id`, `form_stock_id`, `certificate_number`, `previous_receipt_number`, `previous_receipt_date`, `previous_receipt_year`, `municipality_province`, `city`, `transaction_date`, `client_name`, `payment_in_words`, `amount_paid`, `treasurer_deputy`, `basic_tax`, `special_education_fund`, `created_at`, `updated_at`) VALUES
-(3, 7, '0000001', NULL, NULL, NULL, 'Prieto-Diaz, Sorsogon', 'Sorsogon', '2026-06-13 00:00:00', 'Armbel Bernal', NULL, 500, 'Gemma D. Ferrer', 0, 0, '2026-06-13 16:34:37', '2026-06-13 16:34:37'),
-(4, 7, '0000004', NULL, NULL, NULL, 'Prieto-Diaz, Sorsogon', 'Sorsogon', '2026-06-14 00:00:00', 'Armbel Bernal', NULL, 15000, 'Gemma D. Ferrer', 0, 0, '2026-06-14 07:29:41', '2026-06-14 07:29:41'),
-(5, 7, '0000005', NULL, NULL, NULL, 'Prieto-Diaz, Sorsogon', 'Sorsogon', '2026-06-14 00:00:00', 'Cleofe Villanue', NULL, 40000, 'Gemma D. Ferrer', 0, 0, '2026-06-14 07:41:01', '2026-06-14 07:41:01'),
-(6, 7, '0000006', NULL, NULL, NULL, 'Prieto-Diaz, Sorsogon', 'Sorsogon', '2026-06-14 00:00:00', 'Armbel Bernal', NULL, 10, 'Gemma D. Ferrer', 0, 0, '2026-06-14 08:21:43', '2026-06-14 08:21:43'),
-(7, 7, '0000007', '211133456-2026', 'June 14', '26', 'Prieto-Diaz, Sorsogon', 'Sorsogon', '2026-06-14 00:00:00', 'Armbel Bernal', 'Forty-Thousand Pesos', 40000, 'Gemma D. Ferrer', 1, 0, '2026-06-14 08:22:40', '2026-06-14 08:22:40'),
-(8, 7, '0000008', '211133456-2026', 'June 14', '26', 'Prieto-Diaz, Sorsogon', 'Sorsogon', '2026-06-18 00:00:00', 'Armbel Bernal', 'Forty-Thousand Pesos', 40000, 'Gemma D. Ferrer', 1, 0, '2026-06-18 00:51:31', '2026-06-18 00:51:31');
+(9, 7, '4218271', '211133456-2026', 'May 12', '2026', 'Prieto-Diaz, Sorsogon', 'Sorsogon', '2026-08-23 00:00:00', 'Armbel Bernal', 'Three hundred and 00/100 pesos', 300, 'Gemma D. Ferrer', 0, 0, '2026-08-23 19:46:12', '2026-08-23 19:46:12');
 
 DROP TABLE IF EXISTS `or_transactions`;
 CREATE TABLE `or_transactions` (
@@ -514,8 +555,7 @@ CREATE TABLE `or_transactions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `or_transactions` (`id`, `form_stock_id`, `certificate_number`, `date_issued`, `agency`, `fund`, `payor`, `items`, `total`, `amount_in_words`, `payment_method`, `drawee_bank`, `check_number`, `check_date`, `created_at`, `updated_at`) VALUES
-(3, 6, '0000001', '2026-06-17 00:00:00', 'SOLEM', NULL, 'Armbel Bernal', '[{"description":null,"account_code":null,"amount":0},{"description":null,"account_code":null,"amount":0},{"description":null,"account_code":null,"amount":0},{"description":null,"account_code":null,"amount":0},{"description":null,"account_code":null,"amount":0},{"description":null,"account_code":null,"amount":0},{"description":null,"account_code":null,"amount":0},{"description":null,"account_code":null,"amount":0}]', 0, NULL, 'cash', NULL, NULL, NULL, '2026-06-17 17:18:17', '2026-06-17 17:18:17'),
-(5, 6, '0000004', '2026-06-17 00:00:00', 'SOLEM IT & Digital Solutions', '75000', 'Armbel Bernal', '[{"description":"Business Permit","account_code":"BP01","amount":"25000"},{"description":null,"account_code":null,"amount":0},{"description":null,"account_code":null,"amount":0},{"description":null,"account_code":null,"amount":0},{"description":null,"account_code":null,"amount":0},{"description":null,"account_code":null,"amount":0},{"description":null,"account_code":null,"amount":0},{"description":null,"account_code":null,"amount":0}]', 25000, 'Twenty-Five Thousand Pesos', 'cash', NULL, NULL, '2026-06-17 00:00:00', '2026-06-17 21:00:20', '2026-06-17 21:00:20');
+(6, 6, '0000001', '2026-08-23 00:00:00', 'SOLEM IT & Digital Solutions', '75000', 'Marlaw Emata', '[{"description":"Business Permit","account_code":"BP01","amount":"75000"},{"description":null,"account_code":null,"amount":0},{"description":null,"account_code":null,"amount":0},{"description":null,"account_code":null,"amount":0},{"description":null,"account_code":null,"amount":0},{"description":null,"account_code":null,"amount":0},{"description":null,"account_code":null,"amount":0},{"description":null,"account_code":null,"amount":0}]', 75000, 'Seventy-five thousand pesos only', 'cash', NULL, NULL, NULL, '2026-08-23 19:48:23', '2026-08-23 19:48:23');
 
 DROP TABLE IF EXISTS `password_reset_tokens`;
 CREATE TABLE `password_reset_tokens` (
@@ -609,6 +649,28 @@ INSERT INTO `roles` (`id`, `name`, `slug`, `created_at`, `updated_at`) VALUES
 (2, 'Collector', 'collector', '2026-06-15 23:07:19', '2026-06-15 23:07:19'),
 (3, 'Abstract Reporting Officer', 'abstract-reporting-officer', '2026-06-15 23:07:19', '2026-06-15 23:07:19');
 
+DROP TABLE IF EXISTS `rpt_properties`;
+CREATE TABLE `rpt_properties` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `tax_declaration_number` VARCHAR(255) NOT NULL,
+  `declared_owner` VARCHAR(255) NULL,
+  `location` VARCHAR(255) NULL,
+  `lot_block_number` VARCHAR(255) NULL,
+  `municipality_province` VARCHAR(255) NULL,
+  `city` VARCHAR(255) NULL,
+  `assessed_value_land` DECIMAL(15,2) NOT NULL DEFAULT '0',
+  `assessed_value_improvement` DECIMAL(15,2) NOT NULL DEFAULT '0',
+  `assessed_value_total` DECIMAL(15,2) NOT NULL DEFAULT '0',
+  `annual_tax_due` DECIMAL(15,2) NOT NULL DEFAULT '0',
+  `created_at` DATETIME NULL,
+  `updated_at` DATETIME NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `rpt_properties_tax_declaration_number_unique` (`tax_declaration_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO `rpt_properties` (`id`, `tax_declaration_number`, `declared_owner`, `location`, `lot_block_number`, `municipality_province`, `city`, `assessed_value_land`, `assessed_value_improvement`, `assessed_value_total`, `annual_tax_due`, `created_at`, `updated_at`) VALUES
+(1, '1-234-56789-0', 'Armbel Bernal', 'Winterwood Street, Brgy. Sabang', NULL, 'Prieto-Diaz, Sorsogon', 'Sorsogon', 10000, 5000, 15000, 300, '2026-08-23 19:46:12', '2026-08-23 19:46:12');
+
 DROP TABLE IF EXISTS `sessions`;
 CREATE TABLE `sessions` (
   `id` VARCHAR(255) NOT NULL,
@@ -637,114 +699,34 @@ CREATE TABLE `transaction_logs` (
   `transaction_type` VARCHAR(255) NULL,
   `transaction_id` BIGINT NULL,
   `archived_at` DATETIME NULL,
+  `amount` DECIMAL(15,2) NULL,
+  `payment_method` VARCHAR(255) NOT NULL DEFAULT 'cash',
+  `payment_channel` VARCHAR(255) NULL,
+  `payer_bank_name` VARCHAR(255) NULL,
+  `payment_reference` VARCHAR(255) NULL,
+  `payment_reference_date` DATE NULL,
+  `recon_status` VARCHAR(255) NOT NULL DEFAULT 'pending',
+  `deposit_id` BIGINT NULL,
   PRIMARY KEY (`id`),
   KEY `transaction_logs_transaction_type_transaction_id_index` (`transaction_type`, `transaction_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO `transaction_logs` (`id`, `serial_number`, `payee`, `transacted_at`, `form_type`, `status`, `created_at`, `updated_at`, `transaction_type`, `transaction_id`, `archived_at`) VALUES
-(1, '324-5678-1234-02', 'Smith, John A', '2023-01-12 02:15:00', 'Form 58', 'Cancelled', '2026-06-13 05:54:20', '2026-06-19 01:15:42', NULL, NULL, '2026-06-19 01:15:42'),
-(2, '324-5678-1234-02', 'Johnson, Emily B', '2021-12-19 17:45:00', 'BIR0017', 'Cancelled', '2026-06-13 05:54:20', '2026-06-19 01:15:42', NULL, NULL, '2026-06-19 01:15:42'),
-(3, '324-5678-1234-02', 'Williams, Michael C', '2022-03-01 17:00:00', 'Form 53', 'Cancelled', '2026-06-13 05:54:20', '2026-06-19 01:15:42', NULL, NULL, '2026-06-19 01:15:42'),
-(4, '324-5678-1234-02', 'Brown, Sarah D', '2022-07-04 01:45:00', 'Form 28A', 'Cancelled', '2026-06-13 05:54:20', '2026-06-19 01:15:42', NULL, NULL, '2026-06-19 01:15:42'),
-(5, '324-5678-1234-02', 'Jones, David E', '2023-03-08 15:00:00', 'BIR0016', 'Cancelled', '2026-06-13 05:54:20', '2026-06-19 01:22:31', NULL, NULL, '2026-06-19 01:22:31'),
-(7, '324-5678-1234-02', 'Martinez, Carlos G', '2022-09-14 20:15:00', 'Form 5IC', 'Cancelled', '2026-06-13 05:54:20', '2026-06-19 01:15:42', NULL, NULL, '2026-06-19 01:15:42'),
-(8, '324-5678-1234-02', 'Davis, Jennifer H', '2022-10-11 07:00:00', 'Form 56', 'Cancelled', '2026-06-13 05:54:20', '2026-06-19 01:15:42', NULL, NULL, '2026-06-19 01:15:42'),
-(9, '324-5678-1234-02', 'Rodriguez, Daniel I', '2020-04-30 12:45:00', 'Form 58', 'Cancelled', '2026-06-13 05:54:20', '2026-06-19 01:15:42', NULL, NULL, '2026-06-19 01:15:42'),
-(10, '324-5678-1234-02', 'Wilson, Jessica J', '2023-05-15 21:30:00', 'BIR0017', 'Cancelled', '2026-06-13 05:54:20', '2026-06-19 01:22:31', NULL, NULL, '2026-06-19 01:22:31'),
-(11, '324-5678-1234-02', 'Anderson, Brian K', '2021-08-23 04:00:00', 'Form 53', 'Cancelled', '2026-06-13 05:54:20', '2026-06-19 01:15:42', NULL, NULL, '2026-06-19 01:15:42'),
-(12, '324-5678-1234-02', 'Thomas, Angela L', '2021-06-30 23:15:00', 'Form 28A', 'Cancelled', '2026-06-13 05:54:20', '2026-06-19 01:15:42', NULL, NULL, '2026-06-19 01:15:42'),
-(13, '324-5678-1234-02', 'Taylor, Kevin M', '2022-11-05 06:00:00', 'BIR0016', 'Cancelled', '2026-06-13 05:54:20', '2026-06-19 01:15:42', NULL, NULL, '2026-06-19 01:15:42'),
-(15, '324-5678-1234-04', 'Cassin, Phyllis z', '2025-06-23 16:42:38', 'Form 5IC', 'Completed', '2026-06-13 05:54:20', '2026-06-13 05:54:20', NULL, NULL, NULL),
-(16, '324-5678-1234-47', 'Lubowitz, Rosa j', '2024-07-18 17:51:57', 'Form 56', 'Cancelled', '2026-06-13 05:54:20', '2026-06-13 05:54:20', NULL, NULL, NULL),
-(17, '324-5678-1234-80', 'Kovacek, Samara l', '2025-01-20 10:30:02', 'BIR0016', 'Cancelled', '2026-06-13 05:54:20', '2026-06-13 05:54:20', NULL, NULL, NULL),
-(18, '324-5678-1234-37', 'Osinski, Halie u', '2024-08-19 05:43:25', 'BIR0016', 'Completed', '2026-06-13 05:54:20', '2026-06-13 05:54:20', NULL, NULL, NULL),
-(19, '324-5678-1234-42', 'Becker, Mathilde a', '2026-05-13 08:32:38', 'Form 28A', 'Completed', '2026-06-13 05:54:20', '2026-06-13 05:54:20', NULL, NULL, NULL),
-(20, '324-5678-1234-56', 'Kozey, Otho g', '2023-07-18 15:25:48', 'BIR0016', 'Completed', '2026-06-13 05:54:20', '2026-06-13 05:54:20', NULL, NULL, NULL),
-(21, '324-5678-1234-19', 'Shanahan, Maci m', '2023-11-28 19:11:51', 'Form 5IC', 'Cancelled', '2026-06-13 05:54:20', '2026-06-13 05:54:20', NULL, NULL, NULL),
-(22, '324-5678-1234-36', 'Kemmer, Corrine f', '2025-01-08 01:23:05', 'Form 58', 'Cancelled', '2026-06-13 05:54:20', '2026-06-13 05:54:20', NULL, NULL, NULL),
-(24, '324-5678-1234-48', 'Pfannerstill, Julien p', '2025-01-27 19:23:48', 'Form 53', 'Cancelled', '2026-06-13 05:54:20', '2026-06-13 05:54:20', NULL, NULL, NULL),
-(25, '324-5678-1234-71', 'Conn, Ernesto w', '2023-10-24 09:01:10', 'BIR0016', 'Completed', '2026-06-13 05:54:20', '2026-06-13 05:54:20', NULL, NULL, NULL),
-(26, '324-5678-1234-92', 'Torphy, Virgie g', '2025-11-23 06:22:48', 'Form 53', 'Cancelled', '2026-06-13 05:54:20', '2026-06-13 05:54:20', NULL, NULL, NULL),
-(27, '324-5678-1234-28', 'Pfannerstill, Maryse k', '2023-10-19 09:49:29', 'BIR0016', 'Cancelled', '2026-06-13 05:54:20', '2026-06-19 01:22:31', NULL, NULL, '2026-06-19 01:22:31'),
-(28, '324-5678-1234-17', 'Cassin, Zita q', '2023-07-18 11:06:50', 'BIR0017', 'Cancelled', '2026-06-13 05:54:20', '2026-06-19 01:22:31', NULL, NULL, '2026-06-19 01:22:31'),
-(29, '324-5678-1234-43', 'Stanton, Magdalena s', '2026-03-01 08:54:39', 'Form 56', 'Cancelled', '2026-06-13 05:54:20', '2026-06-19 00:55:37', NULL, NULL, NULL),
-(30, '324-5678-1234-18', 'Muller, Blanche o', '2025-04-08 08:27:09', 'Form 5IC', 'Cancelled', '2026-06-13 05:54:20', '2026-06-13 05:54:20', NULL, NULL, NULL),
-(31, '324-5678-1234-84', 'Fritsch, Dolly z', '2026-05-29 20:39:39', 'Form 28A', 'Completed', '2026-06-13 05:54:20', '2026-06-13 05:54:20', NULL, NULL, NULL),
-(32, '324-5678-1234-61', 'Lynch, Russ x', '2025-05-03 05:31:55', 'BIR0017', 'Completed', '2026-06-13 05:54:20', '2026-06-13 05:54:20', NULL, NULL, NULL),
-(33, '324-5678-1234-80', 'Kuhlman, Oceane a', '2024-11-21 00:41:53', 'Form 58', 'Cancelled', '2026-06-13 05:54:20', '2026-06-13 05:54:20', NULL, NULL, NULL),
-(34, '324-5678-1234-87', 'Blanda, Lea w', '2025-09-16 17:24:07', 'Form 58', 'Completed', '2026-06-13 05:54:20', '2026-06-13 05:54:20', NULL, NULL, NULL),
-(35, '324-5678-1234-56', 'O\'Connell, Ava x', '2024-11-02 03:29:45', 'Form 56', 'Completed', '2026-06-13 05:54:20', '2026-06-13 05:54:20', NULL, NULL, NULL),
-(36, '324-5678-1234-80', 'Beahan, Jamie z', '2025-02-27 11:46:07', 'BIR0016', 'Completed', '2026-06-13 05:54:20', '2026-06-13 05:54:20', NULL, NULL, NULL),
-(37, '324-5678-1234-25', 'Okuneva, Shanny p', '2025-07-25 01:38:36', 'BIR0017', 'Cancelled', '2026-06-13 05:54:20', '2026-06-13 05:54:20', NULL, NULL, NULL),
-(38, '324-5678-1234-84', 'Bailey, Archibald y', '2024-05-15 14:46:26', 'Form 53', 'Cancelled', '2026-06-13 05:54:20', '2026-06-13 05:54:20', NULL, NULL, NULL),
-(39, '324-5678-1234-54', 'Jerde, Willis a', '2024-06-23 15:16:00', 'Form 5IC', 'Cancelled', '2026-06-13 05:54:20', '2026-06-13 05:54:20', NULL, NULL, NULL),
-(41, '324-5678-1234-48', 'Stiedemann, Norene p', '2025-01-19 15:19:45', 'Form 58', 'Completed', '2026-06-13 05:54:20', '2026-06-13 05:54:20', NULL, NULL, NULL),
-(42, '324-5678-1234-61', 'Gutkowski, Jamal h', '2025-12-16 13:32:22', 'BIR0016', 'Completed', '2026-06-13 05:54:20', '2026-06-13 05:54:20', NULL, NULL, NULL),
-(43, '324-5678-1234-96', 'Durgan, Juanita p', '2024-11-25 04:04:05', 'BIR0016', 'Cancelled', '2026-06-13 05:54:20', '2026-06-13 05:54:20', NULL, NULL, NULL),
-(44, '324-5678-1234-85', 'Kirlin, Novella f', '2023-11-11 00:40:00', 'BIR0017', 'Cancelled', '2026-06-13 05:54:20', '2026-06-13 05:54:20', NULL, NULL, NULL),
-(45, '324-5678-1234-64', 'Anderson, Augustine u', '2024-10-21 17:09:03', 'Form 5IC', 'Completed', '2026-06-13 05:54:20', '2026-06-13 05:54:20', NULL, NULL, NULL),
-(46, '324-5678-1234-90', 'Kulas, Madie a', '2024-05-02 03:23:07', 'BIR0016', 'Cancelled', '2026-06-13 05:54:20', '2026-06-13 05:54:20', NULL, NULL, NULL),
-(47, '324-5678-1234-94', 'Roberts, Wanda v', '2025-03-05 08:07:01', 'Form 5IC', 'Completed', '2026-06-13 05:54:20', '2026-06-13 05:54:20', NULL, NULL, NULL),
-(49, '324-5678-1234-38', 'Berge, Norene p', '2026-05-17 18:19:22', 'Form 58', 'Cancelled', '2026-06-13 05:54:21', '2026-06-13 05:54:21', NULL, NULL, NULL),
-(50, '324-5678-1234-86', 'Cremin, Isadore w', '2024-12-21 14:10:17', 'Form 28A', 'Cancelled', '2026-06-13 05:54:21', '2026-06-13 05:54:21', NULL, NULL, NULL),
-(51, '324-5678-1234-57', 'Lockman, Maegan b', '2024-01-09 18:57:41', 'BIR0017', 'Completed', '2026-06-13 05:54:21', '2026-06-13 05:54:21', NULL, NULL, NULL),
-(52, '324-5678-1234-90', 'Zulauf, Autumn e', '2024-11-26 12:55:20', 'BIR0016', 'Completed', '2026-06-13 05:54:21', '2026-06-13 05:54:21', NULL, NULL, NULL),
-(53, '324-5678-1234-32', 'Miller, Bethany a', '2024-12-28 21:44:12', 'Form 58', 'Completed', '2026-06-13 05:54:21', '2026-06-13 05:54:21', NULL, NULL, NULL),
-(54, '324-5678-1234-97', 'Farrell, Johnnie j', '2023-08-12 16:52:34', 'Form 53', 'Cancelled', '2026-06-13 05:54:21', '2026-06-19 01:22:31', NULL, NULL, '2026-06-19 01:22:31'),
-(55, '324-5678-1234-28', 'Schowalter, Selina y', '2023-07-24 06:47:26', 'BIR0017', 'Completed', '2026-06-13 05:54:21', '2026-06-13 05:54:21', NULL, NULL, NULL),
-(56, '324-5678-1234-97', 'Conroy, Felicita g', '2025-03-18 21:32:11', 'Form 58', 'Completed', '2026-06-13 05:54:21', '2026-06-13 05:54:21', NULL, NULL, NULL),
-(57, '324-5678-1234-58', 'Becker, Roslyn l', '2026-02-22 12:16:30', 'BIR0016', 'Cancelled', '2026-06-13 05:54:21', '2026-06-13 05:54:21', NULL, NULL, NULL),
-(58, '324-5678-1234-63', 'Lowe, Gage j', '2023-10-12 05:52:25', 'Form 53', 'Cancelled', '2026-06-13 05:54:21', '2026-06-19 01:22:37', NULL, NULL, NULL),
-(60, '324-5678-1234-98', 'Miller, Tianna a', '2025-07-26 05:14:29', 'Form 58', 'Completed', '2026-06-13 05:54:21', '2026-06-13 05:54:21', NULL, NULL, NULL),
-(63, '324-5678-1234-38', 'King, Ellen s', '2024-02-02 09:29:43', 'BIR0017', 'Cancelled', '2026-06-13 05:54:21', '2026-06-13 05:54:21', NULL, NULL, NULL),
-(64, '324-5678-1234-10', 'Hill, Bernice h', '2025-09-26 09:01:01', 'Form 5IC', 'Cancelled', '2026-06-13 05:54:21', '2026-06-13 05:54:21', NULL, NULL, NULL),
-(65, '324-5678-1234-10', 'Berge, Markus c', '2025-09-28 01:47:48', 'Form 56', 'Completed', '2026-06-13 05:54:21', '2026-06-13 05:54:21', NULL, NULL, NULL),
-(66, '324-5678-1234-12', 'Rau, Vincenza v', '2026-05-08 12:57:18', 'Form 5IC', 'Cancelled', '2026-06-13 05:54:21', '2026-06-13 05:54:21', NULL, NULL, NULL),
-(67, '324-5678-1234-49', 'Hammes, Steve a', '2023-09-04 10:00:20', 'Form 58', 'Completed', '2026-06-13 05:54:21', '2026-06-13 05:54:21', NULL, NULL, NULL),
-(68, '324-5678-1234-78', 'Weimann, Orrin l', '2024-07-05 09:49:06', 'BIR0017', 'Cancelled', '2026-06-13 05:54:21', '2026-06-13 05:54:21', NULL, NULL, NULL),
-(69, '324-5678-1234-51', 'Anderson, Orlo u', '2025-11-06 00:34:56', 'Form 5IC', 'Cancelled', '2026-06-13 05:54:21', '2026-06-13 05:54:21', NULL, NULL, NULL),
-(70, '324-5678-1234-68', 'Stehr, Graham z', '2024-08-13 04:15:56', 'Form 5IC', 'Cancelled', '2026-06-13 05:54:21', '2026-06-13 05:54:21', NULL, NULL, NULL),
-(71, '324-5678-1234-67', 'Fahey, Lisette j', '2025-08-02 02:11:53', 'BIR0016', 'Cancelled', '2026-06-13 05:54:21', '2026-06-13 05:54:21', NULL, NULL, NULL),
-(72, '324-5678-1234-18', 'Swaniawski, Leslie i', '2023-07-15 16:16:21', 'BIR0016', 'Cancelled', '2026-06-13 05:54:21', '2026-06-19 01:22:31', NULL, NULL, '2026-06-19 01:22:31'),
-(73, '324-5678-1234-37', 'Mraz, Alexa q', '2026-01-19 17:19:47', 'Form 53', 'Cancelled', '2026-06-13 05:54:21', '2026-06-13 05:54:21', NULL, NULL, NULL),
-(74, '324-5678-1234-11', 'Cremin, Margarette z', '2025-08-02 18:51:37', 'BIR0017', 'Cancelled', '2026-06-13 05:54:21', '2026-06-13 05:54:21', NULL, NULL, NULL),
-(79, 'CCI2022 13476955', 'Bernal, Armbel Besalo', '2026-06-13 14:34:18', 'BIR0016', 'Completed', '2026-06-13 14:34:18', '2026-06-17 20:48:19', 'App\\Models\\CtcIndividualTransaction', 6, NULL),
-(80, 'CCC2021 00123456', 'SOLEM IT & Digital Solutions Corporation', '2026-06-13 14:37:47', 'BIR0017', 'Completed', '2026-06-13 14:37:47', '2026-06-17 20:48:20', 'App\\Models\\CtcCorporationTransaction', 5, NULL),
-(83, '0000001', 'Armbel Bernal', '2026-06-13 16:34:37', 'Form 56', 'Completed', '2026-06-13 16:34:37', '2026-06-17 20:48:20', 'App\\Models\\OrRptTransaction', 3, NULL),
-(84, '0000004', 'Armbel Bernal', '2026-06-14 07:29:41', 'Form 56', 'Completed', '2026-06-14 07:29:41', '2026-06-17 20:48:20', 'App\\Models\\OrRptTransaction', 4, NULL),
-(85, '0000005', 'Cleofe Villanue', '2026-06-14 07:41:01', 'Form 56', 'Completed', '2026-06-14 07:41:01', '2026-06-17 20:48:20', 'App\\Models\\OrRptTransaction', 5, NULL),
-(86, '0000006', 'Armbel Bernal', '2026-06-14 08:21:43', 'Form 56', 'Completed', '2026-06-14 08:21:43', '2026-06-17 20:48:20', 'App\\Models\\OrRptTransaction', 6, NULL),
-(87, '0000007', 'Armbel Bernal', '2026-06-14 08:22:40', 'Form 56', 'Completed', '2026-06-14 08:22:40', '2026-06-17 20:48:20', 'App\\Models\\OrRptTransaction', 7, NULL),
-(89, 'No. 0000001 U', 'Juan Dela Cruz', '2026-06-14 12:43:17', 'Form 5IC', 'Completed', '2026-06-14 12:43:18', '2026-06-14 12:43:18', NULL, NULL, NULL),
-(90, 'CCI2022 13476955', 'Bernal, Armbel Besalo', '2026-06-14 17:25:11', 'BIR0016', 'Completed', '2026-06-14 17:25:11', '2026-06-17 20:48:19', 'App\\Models\\CtcIndividualTransaction', 7, NULL),
-(91, '2026 00001', 'Bernal, Armbel Besalo', '2026-06-14 17:37:43', 'BIR0016', 'Completed', '2026-06-14 17:37:43', '2026-06-17 20:48:19', 'App\\Models\\CtcIndividualTransaction', 8, NULL),
-(92, 'CCI2026 00006', 'Bernal, Armbel', '2026-06-15 02:09:13', 'BIR0016', 'Completed', '2026-06-15 02:09:13', '2026-06-17 20:48:19', 'App\\Models\\CtcIndividualTransaction', 9, NULL),
-(93, 'CCI2026 00007', 'Bernal, Armbel', '2026-06-15 02:10:09', 'BIR0016', 'Completed', '2026-06-15 02:10:09', '2026-06-17 20:48:19', 'App\\Models\\CtcIndividualTransaction', 10, NULL),
-(94, 'CCI2022 00002', 'Bernal, Armbel', '2026-06-15 02:11:53', 'BIR0016', 'Completed', '2026-06-15 02:11:53', '2026-06-17 20:48:20', 'App\\Models\\CtcIndividualTransaction', 11, NULL),
-(95, 'CCI2026 00009', 'Bernal, Armbel', '2026-06-15 02:21:41', 'BIR0016', 'Cancelled', '2026-06-15 02:21:41', '2026-06-19 00:57:27', 'App\\Models\\CtcIndividualTransaction', 12, NULL),
-(96, 'CCI2026- 00001', 'TestSurname, TestFirst', '2026-06-15 02:39:26', 'BIR0016', 'Cancelled', '2026-06-15 02:39:26', '2026-06-19 00:57:17', 'App\\Models\\CtcIndividualTransaction', 13, NULL),
-(97, 'CCI2026- 00003', 'Bernal, Armbel', '2026-06-15 03:20:21', 'BIR0016', 'Completed', '2026-06-15 03:20:21', '2026-06-17 20:48:20', 'App\\Models\\CtcIndividualTransaction', 14, NULL),
-(99, 'No. 0000354', 'Armbel Besalo Bernal & Cleofe Dioneda Villanueva', '2026-06-16 08:34:03', 'Form 10', 'Completed', '2026-06-16 08:34:03', '2026-06-17 20:48:20', 'App\\Models\\MarriageCertificateTransaction', 2, NULL),
-(100, 'No. 0000002', 'Armbel Besalo Bernal & Cleofe Dioneda Villanueva', '2026-06-16 08:43:02', 'Form 10', 'Completed', '2026-06-16 08:43:02', '2026-06-17 20:48:20', 'App\\Models\\MarriageCertificateTransaction', 3, NULL),
-(101, 'No. 8104352', 'Armbel Besalo Bernal & Cleofe Dioneda Villanueva', '2026-06-16 08:49:20', 'Form 10', 'Completed', '2026-06-16 08:49:20', '2026-06-17 20:48:20', 'App\\Models\\MarriageCertificateTransaction', 4, NULL),
-(102, 'No. 8104350', 'Armbel Besalo Bernal & Cleofe Dioneda Villanueva', '2026-06-16 09:06:26', 'Form 10', 'Completed', '2026-06-16 09:06:26', '2026-06-16 09:06:26', NULL, NULL, NULL),
-(103, 'No. 8104351', 'Armbel Besalo Bernal & Cleofe Dioneda Villanueva', '2026-06-16 12:35:17', 'Form 10', 'Completed', '2026-06-16 12:35:17', '2026-06-17 20:48:20', 'App\\Models\\MarriageCertificateTransaction', 6, NULL),
-(104, 'No. 2027021', 'Armbel Besalo Bernal & Cleofe Dioneda Villanueva', '2026-06-16 12:41:25', 'Form 10', 'Completed', '2026-06-16 12:41:25', '2026-06-17 20:48:20', 'App\\Models\\MarriageCertificateTransaction', 7, NULL),
-(105, 'No. 2027022', 'Armbel Besalo Bernal & Cleofe Dioneda Villanueva', '2026-06-16 12:46:12', 'Form 10', 'Completed', '2026-06-16 12:46:12', '2026-06-17 20:48:20', 'App\\Models\\MarriageCertificateTransaction', 8, NULL),
-(106, 'No. 2027023', 'Armbel Besalo Bernal & Cleofe Dioneda Villanueva', '2026-06-16 12:57:05', 'Form 10', 'Completed', '2026-06-16 12:57:05', '2026-06-17 20:48:20', 'App\\Models\\MarriageCertificateTransaction', 9, NULL),
-(107, 'No. 2027024', 'Armbel Besalo Bernal & Cleofe Dioneda Villanueva', '2026-06-16 12:59:27', 'Form 10', 'Completed', '2026-06-16 12:59:27', '2026-06-17 20:48:20', 'App\\Models\\MarriageCertificateTransaction', 10, NULL),
-(108, 'No. 2027025', 'Armbel Besalo Bernal & Cleofe Dioneda Villanueva', '2026-06-16 13:16:21', 'Form 10', 'Completed', '2026-06-16 13:16:21', '2026-06-17 20:48:20', 'App\\Models\\MarriageCertificateTransaction', 11, NULL),
-(109, 'No. 2027026', 'Armbel Besalo Bernal & Cleofe Dioneda Villanueva', '2026-06-16 13:26:34', 'Form 10', 'Completed', '2026-06-16 13:26:34', '2026-06-17 20:48:20', 'App\\Models\\MarriageCertificateTransaction', 12, NULL),
-(110, 'No. 2027027', 'Armbel Besalo Bernal & Cleofe Dioneda Villanueva', '2026-06-16 13:42:54', 'Form 10', 'Completed', '2026-06-16 13:42:54', '2026-06-17 20:48:20', 'App\\Models\\MarriageCertificateTransaction', 13, NULL),
-(111, 'No. 2027028', 'Armbel Besalo Bernal & Cleofe Dioneda Villanueva', '2026-06-16 13:47:57', 'Form 10', 'Completed', '2026-06-16 13:47:57', '2026-06-17 20:48:20', 'App\\Models\\MarriageCertificateTransaction', 14, NULL),
-(112, 'No. 0000001 U', 'Armbel Bernal', '2026-06-17 17:18:17', 'Form 5IC', 'Completed', '2026-06-17 17:18:17', '2026-06-17 20:45:28', 'App\\Models\\OrTransaction', 3, NULL),
-(114, 'No. 0000004 U', 'Armbel Bernal', '2026-06-17 21:00:20', 'Form 5IC', 'Cancelled', '2026-06-17 21:00:20', '2026-06-19 01:11:41', 'App\\Models\\OrTransaction', 5, '2026-06-19 01:11:41'),
-(115, 'No. 2027029', 'Armbel Besalo Bernal & Cleofe Dioneda Villanueva', '2026-06-17 23:43:28', 'Form 10', 'Cancelled', '2026-06-17 23:43:28', '2026-06-19 01:07:07', 'App\\Models\\MarriageCertificateTransaction', 15, '2026-06-19 01:07:07'),
-(116, 'No. 2027030', 'Armbel Besalo Bernal & Cleofe Dioneda Villanueva', '2026-06-17 23:55:16', 'Form 10', 'Cancelled', '2026-06-17 23:55:16', '2026-06-19 01:07:07', 'App\\Models\\MarriageCertificateTransaction', 16, '2026-06-19 01:07:07'),
-(117, 'No. 2027031', 'Armbel Besalo Bernal & Cleofe Dioneda Villanueva', '2026-06-18 00:15:33', 'Form 10', 'Completed', '2026-06-18 00:15:33', '2026-06-18 00:15:33', 'App\\Models\\MarriageCertificateTransaction', 17, NULL),
-(118, 'No. 2027032', 'Armbel Besalo Bernal & Cleofe Dioneda Villanueva', '2026-06-18 00:38:14', 'Form 10', 'Completed', '2026-06-18 00:38:14', '2026-06-18 00:38:14', 'App\\Models\\MarriageCertificateTransaction', 18, NULL),
-(119, 'No. 2027033', 'Armbel Besalo Bernal & Cleofe Dioneda Villanueva', '2026-06-18 00:40:27', 'Form 10', 'Completed', '2026-06-18 00:40:27', '2026-06-18 00:40:27', 'App\\Models\\MarriageCertificateTransaction', 19, NULL),
-(120, '0000008', 'Armbel Bernal', '2026-06-18 00:51:31', 'Form 56', 'Completed', '2026-06-18 00:51:31', '2026-06-18 00:51:31', 'App\\Models\\OrRptTransaction', 8, NULL);
+INSERT INTO `transaction_logs` (`id`, `serial_number`, `payee`, `transacted_at`, `form_type`, `status`, `created_at`, `updated_at`, `transaction_type`, `transaction_id`, `archived_at`, `amount`, `payment_method`, `payment_channel`, `payer_bank_name`, `payment_reference`, `payment_reference_date`, `recon_status`, `deposit_id`) VALUES
+(121, 'CCC 202600001', 'SOLEM IT & Digital Solutions Corporation', '2026-07-06 00:59:54', 'BIR0017', 'Completed', '2026-07-06 00:59:54', '2026-08-23 17:07:23', 'App\\Models\\CtcCorporationTransaction', 6, NULL, 95, 'cash', NULL, NULL, NULL, NULL, 'pending', NULL),
+(122, 'CCI 202600001', 'Bernal, Armbel Besalo', '2026-07-06 02:54:26', 'BIR0016', 'Completed', '2026-07-06 02:54:26', '2026-08-23 17:07:23', 'App\\Models\\CtcIndividualTransaction', 15, NULL, 184, 'cash', NULL, NULL, NULL, NULL, 'pending', NULL),
+(123, 'CCC 202600002', 'CodinGroundz Computer Shop & Services', '2026-07-06 02:56:01', 'BIR0017', 'Completed', '2026-07-06 02:56:01', '2026-08-24 00:57:43', 'App\\Models\\CtcCorporationTransaction', 7, NULL, 369, 'cash', NULL, NULL, NULL, NULL, 'completed', 1),
+(124, 'No. 8104351', 'Armbel Besalo Bernal & Cleofe Dioneda Villanueva', '2026-07-06 03:04:59', 'Form 10', 'Cancelled', '2026-07-06 03:04:59', '2026-08-24 00:30:43', 'App\\Models\\MarriageCertificateTransaction', 20, NULL, 0, 'cash', NULL, NULL, NULL, NULL, 'pending', NULL),
+(125, 'No. 6551381 C', 'Armbel Bernal', '2026-07-06 15:38:18', 'Form 58', 'Cancelled', '2026-07-06 15:38:18', '2026-08-24 00:30:31', 'App\\Models\\BurialPermitTransaction', 1, NULL, 25000, 'cash', NULL, NULL, NULL, NULL, 'pending', NULL),
+(126, 'No. 6551381 C', 'Armbel Bernal', '2026-08-23 16:22:43', 'Form 58', 'Completed', '2026-08-23 16:22:43', '2026-08-24 00:57:43', 'App\\Models\\BurialPermitTransaction', 2, NULL, 500, 'cash', NULL, NULL, NULL, NULL, 'completed', 1),
+(127, 'No. 6551381 C', 'Armbel Bernal', '2026-08-23 17:24:09', 'Form 58', 'Completed', '2026-08-23 17:24:09', '2026-08-24 00:57:49', 'App\\Models\\BurialPermitTransaction', 3, NULL, 500, 'online', 'Maya', NULL, '123456123', '2026-08-23 00:00:00', 'completed', NULL),
+(128, 'No. 8104352', 'Armbel Besalo Bernal & Cleofe Dioneda Villanueva', '2026-08-23 18:19:46', 'Form 10', 'Completed', '2026-08-23 18:19:46', '2026-08-24 00:57:43', 'App\\Models\\MarriageCertificateTransaction', 21, NULL, 2, 'cash', NULL, NULL, NULL, NULL, 'completed', 1),
+(129, '4218271', 'Armbel Bernal', '2026-08-23 19:46:12', 'Form 56', 'Completed', '2026-08-23 19:46:12', '2026-08-24 00:57:48', 'App\\Models\\OrRptTransaction', 9, NULL, 300, 'online', 'Maya', NULL, '1234566123', '2026-08-23 00:00:00', 'completed', NULL),
+(130, 'No. 0000001 U', 'Marlaw Emata', '2026-08-23 19:48:23', 'Form 5IC', 'Cancelled', '2026-08-23 19:48:23', '2026-08-24 14:19:03', 'App\\Models\\OrTransaction', 6, NULL, 75000, 'cash', NULL, NULL, NULL, NULL, 'completed', 1),
+(131, 'No. 6551381 C', 'Armbel Bernal', '2026-08-24 00:43:42', 'Form 58', 'Completed', '2026-08-24 00:43:42', '2026-08-24 00:57:47', 'App\\Models\\BurialPermitTransaction', 4, NULL, 5000, 'online', 'Maya', NULL, '1234561235', '2026-08-24 00:00:00', 'completed', NULL),
+(132, 'CCC 202600003', 'CodinGroundz Computer Shop & Services', '2026-08-24 00:55:19', 'BIR0017', 'Completed', '2026-08-24 00:55:19', '2026-08-24 00:57:46', 'App\\Models\\CtcCorporationTransaction', 8, NULL, 180, 'online', 'GCash', NULL, '123412516', '2026-08-24 00:00:00', 'completed', NULL),
+(133, 'No. 6551382 C', 'Armbel Bernal', '2026-08-24 04:59:12', 'Form 58', 'Completed', '2026-08-24 04:59:12', '2026-08-24 14:18:25', 'App\\Models\\BurialPermitTransaction', 5, NULL, 5000, 'online', 'Maya', NULL, '12345125616', '2026-08-24 00:00:00', 'completed', NULL),
+(134, 'No. 6551383 C', 'Armbel Bernal', '2026-08-24 13:03:06', 'Form 58', 'Completed', '2026-08-24 13:03:06', '2026-08-24 13:03:06', 'App\\Models\\BurialPermitTransaction', 6, NULL, 500, 'cash', NULL, NULL, NULL, NULL, 'pending', NULL),
+(135, 'No. 6551384 C', 'Armbel Bernal', '2026-08-24 13:03:25', 'Form 58', 'Completed', '2026-08-24 13:03:26', '2026-08-24 13:03:26', 'App\\Models\\BurialPermitTransaction', 7, NULL, 500, 'cash', NULL, NULL, NULL, NULL, 'pending', NULL);
 
 DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (
@@ -767,31 +749,37 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `users` (`id`, `name`, `email`, `email_verified_at`, `password`, `remember_token`, `created_at`, `updated_at`, `mobile`, `status`, `added_by`, `username`, `archived_at`) VALUES
-(1, 'Marlaw Sol Emata', 'memata@solemitsolutions.com', '2026-06-13 05:54:19', '$2y$12$xj5ikJ8l45EG4adfWFEx5.mz68RdJbgiPx/4aV1/6pyv22WKVTrWC', 'RURqWdHVZ4c2NF8JBB1Zyi6ZHY4fHuabfdOJhYY988Js6nn4jzIjVRN7Jx7e', '2023-01-14 09:00:00', '2026-06-16 12:28:14', '+63 912 345 6780', 'activated', 'System', 'memata', NULL),
+(1, 'Marlaw Sol Emata', 'memata@solemitsolutions.com', '2026-06-13 05:54:19', '$2y$12$6c4yaGdXcN5LAFOgvwFW8uZGZoB.9bsMjDKbcYvN.wfCAsH3BKUL2', 'RURqWdHVZ4c2NF8JBB1Zyi6ZHY4fHuabfdOJhYY988Js6nn4jzIjVRN7Jx7e', '2023-01-14 09:00:00', '2026-08-24 02:09:03', '+63 912 345 6780', 'activated', 'System', 'memata', NULL),
 (2, 'Juan Dela Cruz', 'jdelacruz@solemitsolutions.com', NULL, '$2y$12$EI66X0mmtIia6zkdEWPyWeCeCkCQcXSc2H9F9ie4F9ZPckz2tnesK', NULL, '2023-03-02 10:30:00', '2026-06-16 06:59:36', '+63 912 345 6781', 'disabled', 'Marlaw Sol Emata', 'jdelacruz', NULL),
 (3, 'Maria Santos', 'msantos@solemitsolutions.com', NULL, '$2y$12$syll0tLjS57QF4QeqPeyc.YZBz4N1PZ1WHt14bdr5/LlzloKdpzTi', NULL, '2023-08-19 11:15:00', '2026-06-16 06:59:36', '+63 912 345 6782', 'disabled', 'Marlaw Sol Emata', 'msantos', NULL),
 (4, 'Pedro Reyes', 'preyes@solemitsolutions.com', NULL, '$2y$12$rjihwkOx1cTixyvaF.XrG.wyqFwoKH7/9xDxHuB.rlWAqMxV5ZdRe', NULL, '2024-02-05 14:20:00', '2026-06-16 06:59:36', '+63 912 345 6783', 'disabled', 'Marlaw Sol Emata', 'preyes', NULL),
-(5, 'Ana Garcia', 'agarcia@solemitsolutions.com', NULL, '$2y$12$ApB0kehBodH8YGF6qNLG9OVwz4d5uFIXdayct1EddSisZhn4SL7xS', NULL, '2024-06-17 09:45:00', '2026-06-16 07:05:28', '+63 912 345 6784', 'disabled', 'Marlaw Sol Emata', 'agarcia', NULL),
-(6, 'Jose Ramirez', 'jramirez@solemitsolutions.com', NULL, '$2y$12$S0Rjk25V.wXkjzMVVIzN0.jXchDcZUS3ZQqj4Ff6cZvYCw8Z.A//C', NULL, '2024-11-30 13:10:00', '2026-06-16 06:59:36', '+63 912 345 6785', 'disabled', 'Marlaw Sol Emata', 'jramirez', NULL),
-(7, 'Carmen Lopez', 'clopez@solemitsolutions.com', NULL, '$2y$12$YWHBZNdWW7kTWORIVQSFiOhn37A/zpnuwj.YkP7vkuzgTQERmK6nu', NULL, '2025-04-12 08:30:00', '2026-06-19 22:32:04', '+63 912 345 6786', 'activated', 'Marlaw Sol Emata', 'clopez', NULL),
-(8, 'Ramon Torres', 'rtorres@solemitsolutions.com', NULL, '$2y$12$rrXMH16ZqP6fMX4Vf//fPuTskNmTe0lSd2qC0OcT4tXZTfUabgX4S', 'ZvEv9j1GmPmhuZrAhYSUf0vMk9TEKaRRLLcVIAlwOhvcDU5e6dwUc3sXDopl', '2025-09-25 16:00:00', '2026-06-19 01:28:19', '+63 912 345 6787', 'activated', 'Marlaw Sol Emata', 'rtorres', NULL),
+(5, 'Ana Garcia', 'agarcia@solemitsolutions.com', NULL, '$2y$12$LCRLRvrbsip.JnvkPVMQWuuDpTPA37Sr/gNB/lAVeYQLdZxNRUyre', NULL, '2024-06-17 09:45:00', '2026-06-20 19:01:42', '+63 912 345 6784', 'disabled', 'Marlaw Sol Emata', 'agarcia', NULL),
+(6, 'Jose Ramirez', 'jramirez@solemitsolutions.com', NULL, '$2y$12$/lDdmXPM4xeOjf4LrdNPTO3lNIA3hFSkMrcKH4X1OYV9OBSq0xPb.', NULL, '2024-11-30 13:10:00', '2026-06-20 18:59:06', '+63 912 345 6785', 'disabled', 'Marlaw Sol Emata', 'jramirez', NULL),
+(7, 'Carmen Lopez', 'clopez@solemitsolutions.com', NULL, '$2y$12$S3MxAIH70FdEfSpPCBwQpeOAkbrDzyWup0C1hvq/iYB7J8f5efhri', NULL, '2025-04-12 08:30:00', '2026-06-20 19:07:07', '+63 912 345 6786', 'activated', 'Marlaw Sol Emata', 'clopez', NULL),
+(8, 'Ramon Torres', 'rtorres@solemitsolutions.com', NULL, '$2y$12$iYAmGpU0TU6d9GD6.jC3EOu.tPKpau1flQzUDKXQUoM19fnwNMMVm', 'ZvEv9j1GmPmhuZrAhYSUf0vMk9TEKaRRLLcVIAlwOhvcDU5e6dwUc3sXDopl', '2025-09-25 16:00:00', '2026-08-24 12:41:06', '+63 912 345 6787', 'activated', 'Marlaw Sol Emata', 'rtorres', NULL),
 (9, 'Test User One', 'testuser1@example.com', NULL, '$2y$12$Ld4OMRII523iOEfL.OZxpOhYxLgzcjNmh44cN1MzY1ccORnU3p782', NULL, '2026-06-15 23:48:29', '2026-06-16 00:06:39', '09179998888', 'archived', 'Marlaw Sol Emata', 'testuser1', '2026-06-16 00:06:39'),
-(10, 'Armbel Bernal', 'bernalarmbelb@outlook.com', NULL, '$2y$12$xF1ZorbG3CvCB1g7qfPpxO8sHC6hyrEpELgPg9MLf3np.umiY8cha', NULL, '2026-06-16 00:46:58', '2026-06-19 02:32:38', '639475113910', 'archived', 'Marlaw Sol Emata', 'rootAdmin', '2026-06-19 02:32:38'),
-(12, 'Cleofe Villanueva', 'cvillanueva@gmail.com', NULL, '$2y$12$GCfVXiF65NqEN0sHHn3wXe0j7L6KvhOazyUxGsQArApLXAbKbTiYG', NULL, '2026-06-16 12:32:24', '2026-06-16 12:32:24', '639475113910', 'activated', 'Marlaw Sol Emata', 'admin', NULL);
+(10, 'Armbel Bernal', 'bernalarmbelb@outlook.com', NULL, '$2y$12$KTvGK/3WuwY/UJF4kBSt5OUo7IyHrKbD34vDHimel/CNEWxEZZHb6', 'SRZYL1rusCrI86HXwfZZsmG15Euvho26PwZmjAslUyp7Poykhn8UwDOHFg7s', '2026-06-16 00:46:58', '2026-07-05 22:33:12', '639475113910', 'activated', 'Marlaw Sol Emata', 'rootAdmin', NULL),
+(12, 'Cleofe Villanueva', 'cvillanueva@gmail.com', NULL, '$2y$12$bmCXUdypciomaPJbmIwr8eHVcXEdX6eC4n8uGx25yQ5YBDm62TV9C', NULL, '2026-06-16 12:32:24', '2026-08-23 17:29:06', '639475113910', 'activated', 'Marlaw Sol Emata', 'admin', NULL);
 
 -- Foreign keys
 ALTER TABLE `activity_logs` ADD CONSTRAINT `activity_logs_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
+ALTER TABLE `burial_permit_transactions` ADD CONSTRAINT `burial_permit_transactions_form_stock_id_foreign` FOREIGN KEY (`form_stock_id`) REFERENCES `form_stocks` (`id`) ON DELETE NO ACTION;
 ALTER TABLE `cancel_requests` ADD CONSTRAINT `cancel_requests_reviewed_by_foreign` FOREIGN KEY (`reviewed_by`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 ALTER TABLE `cancel_requests` ADD CONSTRAINT `cancel_requests_requested_by_foreign` FOREIGN KEY (`requested_by`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 ALTER TABLE `cancel_requests` ADD CONSTRAINT `cancel_requests_transaction_log_id_foreign` FOREIGN KEY (`transaction_log_id`) REFERENCES `transaction_logs` (`id`) ON DELETE CASCADE;
+ALTER TABLE `cheques` ADD CONSTRAINT `cheques_bank_account_id_foreign` FOREIGN KEY (`bank_account_id`) REFERENCES `bank_accounts` (`id`) ON DELETE CASCADE;
 ALTER TABLE `ctc_corporation_transactions` ADD CONSTRAINT `ctc_corporation_transactions_form_stock_id_foreign` FOREIGN KEY (`form_stock_id`) REFERENCES `form_stocks` (`id`) ON DELETE CASCADE;
 ALTER TABLE `ctc_individual_transactions` ADD CONSTRAINT `ctc_individual_transactions_form_stock_id_foreign` FOREIGN KEY (`form_stock_id`) REFERENCES `form_stocks` (`id`) ON DELETE CASCADE;
+ALTER TABLE `deposits` ADD CONSTRAINT `deposits_bank_account_id_foreign` FOREIGN KEY (`bank_account_id`) REFERENCES `bank_accounts` (`id`) ON DELETE CASCADE;
 ALTER TABLE `form_batches` ADD CONSTRAINT `form_batches_form_stock_id_foreign` FOREIGN KEY (`form_stock_id`) REFERENCES `form_stocks` (`id`) ON DELETE CASCADE;
 ALTER TABLE `marriage_certificate_transactions` ADD CONSTRAINT `marriage_certificate_transactions_form_stock_id_foreign` FOREIGN KEY (`form_stock_id`) REFERENCES `form_stocks` (`id`) ON DELETE NO ACTION;
+ALTER TABLE `or_rpt_transaction_entries` ADD CONSTRAINT `or_rpt_transaction_entries_rpt_property_id_foreign` FOREIGN KEY (`rpt_property_id`) REFERENCES `rpt_properties` (`id`) ON DELETE CASCADE;
+ALTER TABLE `or_rpt_transaction_entries` ADD CONSTRAINT `or_rpt_transaction_entries_or_rpt_transaction_id_foreign` FOREIGN KEY (`or_rpt_transaction_id`) REFERENCES `or_rpt_transactions` (`id`) ON DELETE CASCADE;
 ALTER TABLE `or_rpt_transactions` ADD CONSTRAINT `or_rpt_transactions_form_stock_id_foreign` FOREIGN KEY (`form_stock_id`) REFERENCES `form_stocks` (`id`) ON DELETE CASCADE;
 ALTER TABLE `or_transactions` ADD CONSTRAINT `or_transactions_form_stock_id_foreign` FOREIGN KEY (`form_stock_id`) REFERENCES `form_stocks` (`id`) ON DELETE CASCADE;
 ALTER TABLE `role_module_permissions` ADD CONSTRAINT `role_module_permissions_role_id_foreign` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE;
 ALTER TABLE `role_user` ADD CONSTRAINT `role_user_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 ALTER TABLE `role_user` ADD CONSTRAINT `role_user_role_id_foreign` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE;
+ALTER TABLE `transaction_logs` ADD CONSTRAINT `transaction_logs_deposit_id_foreign` FOREIGN KEY (`deposit_id`) REFERENCES `deposits` (`id`) ON DELETE SET NULL;
 
 SET FOREIGN_KEY_CHECKS = 1;

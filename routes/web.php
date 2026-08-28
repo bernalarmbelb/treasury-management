@@ -1657,21 +1657,29 @@ Route::post('/cheque-management', function (\Illuminate\Http\Request $request) {
 
 Route::post('/cheque-management/bank-accounts', function (\Illuminate\Http\Request $request) {
     $validated = $request->validate([
-        'bank_name'      => ['required', 'string', 'max:255'],
-        'account_number' => ['required', 'string', 'max:100', 'unique:bank_accounts,account_number'],
-        'account_name'   => ['required', 'string', 'max:255'],
+        'bank_name'       => ['required', 'string', 'max:255'],
+        'account_number'  => ['required', 'string', 'max:100', 'unique:bank_accounts,account_number'],
+        'account_name'    => ['required', 'string', 'max:255'],
+        'opening_balance' => ['nullable', 'numeric', 'min:0'],
     ]);
+
+    // An omitted or blank opening_balance should fall through to the column's
+    // DB default (0) rather than an explicit NULL, which the schema forbids.
+    if (! array_key_exists('opening_balance', $validated) || $validated['opening_balance'] === null) {
+        unset($validated['opening_balance']);
+    }
 
     $account = \App\Models\BankAccount::create($validated + ['is_active' => true]);
 
     \App\Models\ActivityLog::record('Cheque Management - Add Bank Account - ' . $account->bank_name . ' · ' . $account->account_number);
 
     return response()->json([
-        'id'             => $account->id,
-        'bank_name'      => $account->bank_name,
-        'account_number' => $account->account_number,
-        'account_name'   => $account->account_name,
-        'label'          => $account->bank_name . ' · ' . $account->account_number,
+        'id'              => $account->id,
+        'bank_name'       => $account->bank_name,
+        'account_number'  => $account->account_number,
+        'account_name'    => $account->account_name,
+        'opening_balance' => $account->opening_balance,
+        'label'           => $account->bank_name . ' · ' . $account->account_number,
     ]);
 })->name('cheque-management.bank-accounts.store');
 
