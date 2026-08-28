@@ -84,13 +84,17 @@ class DashboardMetrics
     {
         $cheques = Cheque::where('recon_status', 'failed')
             ->orderByDesc('updated_at')->limit(6)->get()
-            ->map(fn ($c) => ['type' => 'bounced-cheque', 'label' => 'Cheque #' . $c->check_number . ' · ' . $c->pay_to_order_of, 'amount' => (float) $c->amount]);
+            ->map(fn ($c) => ['type' => 'bounced-cheque', 'label' => 'Cheque #' . $c->check_number . ' · ' . $c->pay_to_order_of, 'amount' => (float) $c->amount, 'at' => $c->updated_at]);
 
         $logs = TransactionLog::where('recon_status', 'failed')
             ->orderByDesc('updated_at')->limit(6)->get()
-            ->map(fn ($l) => ['type' => 'failed-payment', 'label' => $l->serial_number . ' · ' . $l->payee, 'amount' => (float) $l->amount]);
+            ->map(fn ($l) => ['type' => 'failed-payment', 'label' => $l->serial_number . ' · ' . $l->payee, 'amount' => (float) $l->amount, 'at' => $l->updated_at]);
 
-        $items = $cheques->concat($logs)->take(6)->values()->all();
+        $items = $cheques->concat($logs)
+            ->sortByDesc('at')
+            ->take(6)
+            ->map(fn ($item) => ['type' => $item['type'], 'label' => $item['label'], 'amount' => $item['amount']])
+            ->values()->all();
         $count = Cheque::where('recon_status', 'failed')->count() + TransactionLog::where('recon_status', 'failed')->count();
 
         return ['count' => $count, 'items' => $items];

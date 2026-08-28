@@ -82,3 +82,17 @@ it('computes reconciliation matched percentages', function () {
     expect($m->reconciliation()['depositsMatchedPct'])->toBe(50);
     expect($m->reconciliation()['chequesMatchedPct'])->toBe(100);
 });
+
+it('orders exceptions items newest-first across cheques and logs', function () {
+    $acc = App\Models\BankAccount::create(['bank_name' => 'LBP', 'account_number' => '8', 'account_name' => 'M', 'is_active' => true]);
+    $cheque = App\Models\Cheque::create(['bank_account_id' => $acc->id, 'account_name' => 'M', 'cheque_date' => now(), 'check_number' => 'D1', 'pay_to_order_of' => 'A', 'amount' => 500, 'amount_in_words' => 'x', 'status' => 'Issued', 'recon_status' => 'failed']);
+    $cheque->forceFill(['updated_at' => now()->subDay()])->save();
+
+    $log = seedCollection('online', 700);
+    $log->update(['recon_status' => 'failed']);
+    $log->forceFill(['updated_at' => now()])->save();
+
+    $m = new App\Services\DashboardMetrics(now()->startOfMonth(), now()->endOfMonth());
+
+    expect($m->exceptions()['items'][0]['type'])->toBe('failed-payment');
+});
