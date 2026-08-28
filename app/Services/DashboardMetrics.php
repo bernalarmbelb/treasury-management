@@ -100,6 +100,25 @@ class DashboardMetrics
         return ['count' => $count, 'items' => $items];
     }
 
+    public function trend(): array
+    {
+        $rows = TransactionLog::whereBetween('transacted_at', [$this->from, $this->to])
+            ->where('status', '!=', 'Cancelled')
+            ->selectRaw('date(transacted_at) as d, sum(amount) as amt, count(*) as cnt')
+            ->groupBy('d')->orderBy('d')->get();
+
+        $points = $rows->map(fn ($r) => ['date' => $r->d, 'amount' => (float) $r->amt, 'txns' => (int) $r->cnt])->all();
+        $total = array_sum(array_column($points, 'amount'));
+        $avg = count($points) ? $total / count($points) : 0.0;
+
+        $peak = ['date' => '', 'amount' => 0.0];
+        foreach ($points as $p) {
+            if ($p['amount'] >= $peak['amount']) $peak = ['date' => $p['date'], 'amount' => $p['amount']];
+        }
+
+        return ['points' => $points, 'total' => (float) $total, 'avg' => (float) $avg, 'peak' => $peak];
+    }
+
     public function reconciliation(): array
     {
         $liveLogs = TransactionLog::where('status', '!=', 'Cancelled');

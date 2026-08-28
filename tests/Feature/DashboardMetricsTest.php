@@ -96,3 +96,16 @@ it('orders exceptions items newest-first across cheques and logs', function () {
 
     expect($m->exceptions()['items'][0]['type'])->toBe('failed-payment');
 });
+
+it('builds a daily collections trend with summary', function () {
+    seedCollection('cash', 100, 'Completed', now()->startOfMonth()->toDateString());
+    seedCollection('cash', 300, 'Completed', now()->startOfMonth()->toDateString());   // same day => 400
+    seedCollection('cash', 900, 'Completed', now()->startOfMonth()->addDay()->toDateString());
+
+    $m = new App\Services\DashboardMetrics(now()->startOfMonth(), now()->endOfMonth());
+    $t = $m->trend();
+
+    expect($t['points'])->toHaveCount(2);
+    expect($t['total'])->toEqual(1300.0);
+    expect($t['peak']['amount'])->toEqual(900.0);
+});
