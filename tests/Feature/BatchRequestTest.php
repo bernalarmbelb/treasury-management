@@ -64,3 +64,42 @@ it('returns the created batch from applyBatch', function () {
     expect($batch)->toBeInstanceOf(\App\Models\FormBatch::class);
     expect($batch->starting_serial_number)->toBe('2026-00001');
 });
+
+it('lets a collector submit a batch request', function () {
+    $collector = makeCollector();
+    $stock = makeFormStock();
+
+    $this->actingAs($collector)
+        ->postJson("/official-receipts-accountable-forms/{$stock->id}/batch-requests", [
+            'quantity' => 5,
+            'note' => 'Running low on stock',
+        ])
+        ->assertOk()
+        ->assertJsonPath('message', 'Batch request submitted successfully.');
+
+    expect(BatchRequest::where('form_stock_id', $stock->id)->where('status', 'pending')->count())->toBe(1);
+    expect(BatchRequest::first()->note)->toBe('Running low on stock');
+});
+
+it('blocks a duplicate pending batch request from the same collector', function () {
+    $collector = makeCollector();
+    $stock = makeFormStock();
+
+    $stock->batchRequests()->create(['requested_by' => $collector->id, 'quantity' => 3, 'status' => 'pending']);
+
+    $this->actingAs($collector)
+        ->postJson("/official-receipts-accountable-forms/{$stock->id}/batch-requests", ['quantity' => 5])
+        ->assertStatus(422)
+        ->assertJsonPath('message', fn ($m) => str_contains($m, 'already have a pending'));
+
+    expect(BatchRequest::where('form_stock_id', $stock->id)->count())->toBe(1);
+});
+
+it('rejects a batch request with an invalid quantity', function () {
+    $collector = makeCollector();
+    $stock = makeFormStock();
+
+    $this->actingAs($collector)
+        ->postJson("/official-receipts-accountable-forms/{$stock->id}/batch-requests", ['quantity' => 0])
+        ->assertStatus(422);
+});

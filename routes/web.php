@@ -1079,6 +1079,30 @@ Route::post('/official-receipts-accountable-forms/{formStock}/batches', function
     ]);
 })->name('official-receipts-accountable-forms.batches.store');
 
+Route::post('/official-receipts-accountable-forms/{formStock}/batch-requests', function (\Illuminate\Http\Request $request, \App\Models\FormStock $formStock) {
+    $validated = $request->validate([
+        'quantity' => ['required', 'integer', 'min:1', 'max:100000'],
+        'note' => ['nullable', 'string', 'max:500'],
+    ]);
+
+    $user = $request->user();
+
+    if ($formStock->batchRequests()->where('requested_by', $user->id)->where('status', 'pending')->exists()) {
+        return response()->json(['message' => 'You already have a pending batch request for this form.'], 422);
+    }
+
+    $formStock->batchRequests()->create([
+        'requested_by' => $user->id,
+        'quantity' => $validated['quantity'],
+        'note' => $validated['note'] ?? null,
+        'status' => 'pending',
+    ]);
+
+    \App\Models\ActivityLog::record('Official Receipts & Accountable Forms - Request New Batch - ' . $formStock->form_name . ' - Qty ' . $validated['quantity']);
+
+    return response()->json(['message' => 'Batch request submitted successfully.']);
+})->name('official-receipts-accountable-forms.batch-requests.store');
+
 Route::get('/official-receipts-accountable-forms/{formStock}/report-logs', function (\Illuminate\Http\Request $request, \App\Models\FormStock $formStock) {
     $perPageOptions = [10, 25, 50, 100];
     $perPage = in_array((int) $request->input('per_page'), $perPageOptions) ? (int) $request->input('per_page') : 10;
