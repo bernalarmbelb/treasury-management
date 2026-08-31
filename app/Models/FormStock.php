@@ -25,7 +25,7 @@ class FormStock extends Model
      * computed quantity to qty, and updates added_date/added_time to the
      * purchase date.
      */
-    public function applyBatch(array $validated, ?string $addedBy = null): void
+    public function applyBatch(array $validated, ?string $addedBy = null): FormBatch
     {
         $registrationDate = \Illuminate\Support\Carbon::createFromDate(
             $validated['registration_year'],
@@ -55,11 +55,18 @@ class FormStock extends Model
             'added_date' => $purchaseDate,
             'added_time' => now()->format('H:i:s'),
         ]);
+
+        return $batch;
     }
 
     public function batches(): HasMany
     {
         return $this->hasMany(FormBatch::class);
+    }
+
+    public function batchRequests(): HasMany
+    {
+        return $this->hasMany(BatchRequest::class);
     }
 
     /**
