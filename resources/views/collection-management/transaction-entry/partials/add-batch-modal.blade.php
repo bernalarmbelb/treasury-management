@@ -10,6 +10,7 @@
 
         <form id="formBatchForm" method="POST" action="">
             @csrf
+            <input type="hidden" name="batch_request_id" value="">
 
             <div class="form-batch-field-group">
                 <div class="form-batch-field-header">

@@ -21,14 +21,23 @@
                 <input type="search" name="search" class="search-input" id="report-log-search-input" placeholder="Search Batch Number" value="{{ request('search') }}" autocomplete="off">
             </form>
 
-            <button type="button" class="report-log-add-batch-btn" id="reportLogAddBatchBtn">Add New Batch</button>
+            @if (auth()->user()?->hasRole('collector'))
+                <button type="button" class="report-log-add-batch-btn" id="reportLogRequestBatchBtn">Request New Batch</button>
+            @else
+                <button type="button" class="report-log-add-batch-btn" id="reportLogAddBatchBtn">Add New Batch</button>
+            @endif
         </div>
 
         <div id="report-logs-table-container">
             @include('official-receipt-accountable-forms.partials.report-logs-table')
         </div>
 
-        @include('collection-management.transaction-entry.partials.add-batch-modal')
+        @unless (auth()->user()?->hasRole('collector'))
+            @include('collection-management.transaction-entry.partials.add-batch-modal')
+        @endunless
+        @if (auth()->user()?->hasRole('collector'))
+            @include('official-receipt-accountable-forms.partials.batch-request-modal')
+        @endif
     </div>
 
     @push('scripts')
@@ -243,75 +252,135 @@
                 });
 
                 // ── Add batch modal ──────────────────────────────────────────────
-                const modalOverlay = document.getElementById('formBatchModalOverlay');
-                const modalTitle = document.getElementById('formBatchModalTitle');
-                const modalForm = document.getElementById('formBatchForm');
-                const successAlert = document.getElementById('formBatchSuccessAlert');
-                const successAlertSubtitle = document.getElementById('formBatchSuccessAlertSubtitle');
-                let successAlertTimer;
+                if (document.getElementById('formBatchModalOverlay')) {
+                    const modalOverlay = document.getElementById('formBatchModalOverlay');
+                    const modalTitle = document.getElementById('formBatchModalTitle');
+                    const modalForm = document.getElementById('formBatchForm');
+                    const successAlert = document.getElementById('formBatchSuccessAlert');
+                    const successAlertSubtitle = document.getElementById('formBatchSuccessAlertSubtitle');
+                    let successAlertTimer;
 
-                const formStockId = {{ $formStock->id }};
-                const formCode = @json($formStock->form_code);
+                    const formStockId = {{ $formStock->id }};
+                    const formCode = @json($formStock->form_code);
 
-                function showSuccessAlert() {
-                    successAlertSubtitle.textContent = formCode;
-                    successAlert.classList.add('show');
+                    var showSuccessAlert = function () {
+                        successAlertSubtitle.textContent = formCode;
+                        successAlert.classList.add('show');
 
-                    clearTimeout(successAlertTimer);
-                    successAlertTimer = setTimeout(() => {
-                        successAlert.classList.remove('show');
-                    }, 3000);
+                        clearTimeout(successAlertTimer);
+                        successAlertTimer = setTimeout(() => {
+                            successAlert.classList.remove('show');
+                        }, 3000);
+                    };
+
+                    var openBatchModal = function () {
+                        modalTitle.textContent = `Add new batch of ${formCode}`;
+                        modalForm.action = `/official-receipts-accountable-forms/${formStockId}/batches`;
+
+                        const nextEl = document.getElementById('reportLogNextSerial');
+                        const ssnInput = modalForm.querySelector('[name="starting_serial_number"]');
+                        if (ssnInput) {
+                            ssnInput.value = (nextEl && nextEl.dataset.nextSerial) ? nextEl.dataset.nextSerial : '';
+                        }
+
+                        modalOverlay.classList.add('open');
+                    };
+
+                    var closeBatchModal = function () {
+                        modalOverlay.classList.remove('open');
+                        modalForm.reset();
+                    };
+
+                    document.getElementById('reportLogAddBatchBtn').addEventListener('click', function (event) {
+                        event.preventDefault();
+                        openBatchModal();
+                    });
+
+                    document.getElementById('formBatchCloseBtn').addEventListener('click', closeBatchModal);
+
+                    modalForm.addEventListener('submit', function (event) {
+                        event.preventDefault();
+
+                        fetch(modalForm.action, {
+                            method: 'POST',
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                            body: new FormData(modalForm),
+                        })
+                            .then((response) => {
+                                if (!response.ok) {
+                                    return response.json().then((data) => {
+                                        showToast('Action could not be completed', data.message, 'error');
+                                        throw new Error(data.message);
+                                    });
+                                }
+
+                                closeBatchModal();
+                                showSuccessAlert();
+                                reloadTable();
+                            })
+                            .catch(() => {});
+                    });
                 }
 
-                function openBatchModal() {
-                    modalTitle.textContent = `Add new batch of ${formCode}`;
-                    modalForm.action = `/official-receipts-accountable-forms/${formStockId}/batches`;
+                // ── Request New Batch modal (Collector) ──────────────────────────
+                if (document.getElementById('batchRequestModalOverlay')) {
+                    const requestModalOverlay = document.getElementById('batchRequestModalOverlay');
+                    const requestModalTitle = document.getElementById('batchRequestModalTitle');
+                    const requestForm = document.getElementById('batchRequestForm');
+                    const requestSuccessAlert = document.getElementById('batchRequestSuccessAlert');
+                    const requestSuccessAlertSubtitle = document.getElementById('batchRequestSuccessAlertSubtitle');
+                    let requestSuccessAlertTimer;
+                    const formStockId = {{ $formStock->id }};
+                    const formCode = @json($formStock->form_code);
 
-                    // Pre-fill Starting Serial with the next serial after the
-                    // form's latest batch (blank when there are no batches yet).
-                    const nextEl = document.getElementById('reportLogNextSerial');
-                    const ssnInput = modalForm.querySelector('[name="starting_serial_number"]');
-                    if (ssnInput) {
-                        ssnInput.value = (nextEl && nextEl.dataset.nextSerial) ? nextEl.dataset.nextSerial : '';
+                    function showRequestSuccessAlert() {
+                        requestSuccessAlertSubtitle.textContent = formCode;
+                        requestSuccessAlert.classList.add('show');
+
+                        clearTimeout(requestSuccessAlertTimer);
+                        requestSuccessAlertTimer = setTimeout(() => {
+                            requestSuccessAlert.classList.remove('show');
+                        }, 3000);
                     }
 
-                    modalOverlay.classList.add('open');
-                }
+                    function openRequestModal() {
+                        requestModalTitle.textContent = `Request new batch of ${formCode}`;
+                        requestForm.action = `/official-receipts-accountable-forms/${formStockId}/batch-requests`;
+                        requestModalOverlay.classList.add('open');
+                    }
 
-                function closeBatchModal() {
-                    modalOverlay.classList.remove('open');
-                    modalForm.reset();
-                }
+                    function closeRequestModal() {
+                        requestModalOverlay.classList.remove('open');
+                        requestForm.reset();
+                    }
 
-                document.getElementById('reportLogAddBatchBtn').addEventListener('click', function (event) {
-                    event.preventDefault();
-                    openBatchModal();
-                });
+                    document.getElementById('reportLogRequestBatchBtn').addEventListener('click', function (event) {
+                        event.preventDefault();
+                        openRequestModal();
+                    });
 
-                document.getElementById('formBatchCloseBtn').addEventListener('click', closeBatchModal);
+                    document.getElementById('batchRequestCloseBtn').addEventListener('click', closeRequestModal);
 
-                modalForm.addEventListener('submit', function (event) {
-                    event.preventDefault();
+                    requestForm.addEventListener('submit', function (event) {
+                        event.preventDefault();
 
-                    fetch(modalForm.action, {
-                        method: 'POST',
-                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                        body: new FormData(modalForm),
-                    })
-                        .then((response) => {
-                            if (!response.ok) {
-                                return response.json().then((data) => {
-                                    showToast('Action could not be completed', data.message, 'error');
-                                    throw new Error(data.message);
-                                });
-                            }
-
-                            closeBatchModal();
-                            showSuccessAlert();
-                            reloadTable();
+                        fetch(requestForm.action, {
+                            method: 'POST',
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                            body: new FormData(requestForm),
                         })
-                        .catch(() => {});
-                });
+                            .then((response) => response.json().then((data) => ({ ok: response.ok, data })))
+                            .then(({ ok, data }) => {
+                                if (!ok) {
+                                    showToast('Action could not be completed', data.message, 'error');
+                                    return;
+                                }
+                                closeRequestModal();
+                                showRequestSuccessAlert();
+                            })
+                            .catch(() => showToast('Action could not be completed', 'Something went wrong. Please try again.', 'error'));
+                    });
+                }
             })();
         </script>
     @endpush
