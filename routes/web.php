@@ -1179,6 +1179,9 @@ Route::get('/official-receipts-accountable-forms/{formStock}/report-logs', funct
         'sort' => $sort,
         'direction' => $direction,
         'collectors' => \App\Models\User::whereHas('roles', fn ($q) => $q->where('slug', 'collector'))->orderBy('name')->pluck('name'),
+        'pendingBatchRequests' => $request->user()?->hasRole('admin')
+            ? $formStock->batchRequests()->with('requestedByUser')->where('status', 'pending')->latest()->get()
+            : collect(),
     ];
 
     if ($request->ajax()) {

@@ -17,6 +17,28 @@
 {{-- Server-computed default Starting Serial for the next batch (re-rendered on each AJAX reload so it stays current). --}}
 <span id="reportLogNextSerial" data-next-serial="{{ $formStock->nextBatchStartingSerial() }}" hidden></span>
 
+@if (($pendingBatchRequests ?? collect())->isNotEmpty())
+    <div class="batch-request-panel">
+        <p class="batch-request-panel-title">Pending Batch Requests</p>
+        @foreach ($pendingBatchRequests as $batchRequest)
+            <div class="batch-request-row">
+                <div class="batch-request-info">
+                    <span class="batch-request-requester">{{ $batchRequest->requestedByUser?->name ?? 'Unknown' }}</span>
+                    <span class="batch-request-qty">Qty: {{ $batchRequest->quantity }}</span>
+                    @if ($batchRequest->note)
+                        <span class="batch-request-note">{{ $batchRequest->note }}</span>
+                    @endif
+                    <span class="batch-request-date">{{ $batchRequest->created_at->format('M j, Y') }}</span>
+                </div>
+                <div class="table-actions">
+                    <button type="button" class="action-btn action-view js-fulfill-batch-request" data-request-id="{{ $batchRequest->id }}">Fulfill</button>
+                    <button type="button" class="action-btn action-export js-reject-batch-request" data-request-id="{{ $batchRequest->id }}">Reject</button>
+                </div>
+            </div>
+        @endforeach
+    </div>
+@endif
+
 <div class="table-scroll-area">
 <div class="table-wrapper">
     <table class="data-table">

@@ -273,7 +273,7 @@
                         }, 3000);
                     };
 
-                    var openBatchModal = function () {
+                    var openBatchModal = function (batchRequestId) {
                         modalTitle.textContent = `Add new batch of ${formCode}`;
                         modalForm.action = `/official-receipts-accountable-forms/${formStockId}/batches`;
 
@@ -282,6 +282,9 @@
                         if (ssnInput) {
                             ssnInput.value = (nextEl && nextEl.dataset.nextSerial) ? nextEl.dataset.nextSerial : '';
                         }
+
+                        const requestIdInput = modalForm.querySelector('[name="batch_request_id"]');
+                        if (requestIdInput) requestIdInput.value = batchRequestId || '';
 
                         modalOverlay.classList.add('open');
                     };
@@ -293,7 +296,7 @@
 
                     document.getElementById('reportLogAddBatchBtn').addEventListener('click', function (event) {
                         event.preventDefault();
-                        openBatchModal();
+                        openBatchModal(null);
                     });
 
                     document.getElementById('formBatchCloseBtn').addEventListener('click', closeBatchModal);
@@ -381,6 +384,40 @@
                             .catch(() => showToast('Action could not be completed', 'Something went wrong. Please try again.', 'error'));
                     });
                 }
+
+                // ── Pending batch requests: fulfill / reject (Admin) ─────────────
+                container.addEventListener('click', function (event) {
+                    const fulfillBtn = event.target.closest('.js-fulfill-batch-request');
+                    if (fulfillBtn) {
+                        event.preventDefault();
+                        const overlay = document.getElementById('formBatchModalOverlay');
+                        if (overlay && typeof openBatchModal === 'function') {
+                            openBatchModal(fulfillBtn.dataset.requestId);
+                        }
+                        return;
+                    }
+
+                    const rejectBtn = event.target.closest('.js-reject-batch-request');
+                    if (rejectBtn) {
+                        event.preventDefault();
+                        if (!confirm('Reject this batch request?')) return;
+
+                        fetch(`/official-receipts-accountable-forms/batch-requests/${rejectBtn.dataset.requestId}/reject`, {
+                            method: 'POST',
+                            headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrfToken },
+                        })
+                            .then((response) => response.json().then((data) => ({ ok: response.ok, data })))
+                            .then(({ ok, data }) => {
+                                if (!ok) {
+                                    showToast('Action could not be completed', data.message, 'error');
+                                    return;
+                                }
+                                showToast(data.message);
+                                reloadTable();
+                            })
+                            .catch(() => showToast('Action could not be completed', 'Something went wrong. Please try again.', 'error'));
+                    }
+                });
             })();
         </script>
     @endpush

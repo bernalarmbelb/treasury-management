@@ -182,3 +182,27 @@ it('blocks a non-admin from rejecting a batch request', function () {
 
     expect($batchRequest->fresh()->status)->toBe('pending');
 });
+
+it('only includes pending batch requests for an admin viewing report logs', function () {
+    $admin = makeAdminUser();
+    $collector = makeCollector();
+    $stock = makeFormStock();
+    $stock->batchRequests()->create(['requested_by' => $collector->id, 'quantity' => 10, 'status' => 'pending']);
+
+    $this->actingAs($admin)
+        ->get("/official-receipts-accountable-forms/{$stock->id}/report-logs")
+        ->assertOk()
+        ->assertSee('Pending Batch Requests')
+        ->assertSee($collector->name);
+});
+
+it('does not show the pending batch requests panel to a collector', function () {
+    $collector = makeCollector();
+    $stock = makeFormStock();
+    $stock->batchRequests()->create(['requested_by' => $collector->id, 'quantity' => 10, 'status' => 'pending']);
+
+    $this->actingAs($collector)
+        ->get("/official-receipts-accountable-forms/{$stock->id}/report-logs")
+        ->assertOk()
+        ->assertDontSee('Pending Batch Requests');
+});

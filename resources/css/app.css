@@ -8787,3 +8787,58 @@ select.form-batch-input {
         grid-template-columns: 1fr;
     }
 }
+
+/* Pending Batch Requests panel (ORAF report-logs, Admin only) */
+.batch-request-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: #fff8e6;
+    border: 1px solid #f0d999;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+}
+
+.batch-request-panel-title {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: #8a6d1a;
+}
+
+.batch-request-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    background: #fff;
+    border: 1px solid #f0e6c8;
+    border-radius: 8px;
+    padding: 10px 12px;
+}
+
+.batch-request-info {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    font-size: 13.5px;
+}
+
+.batch-request-requester {
+    font-weight: 700;
+}
+
+.batch-request-note {
+    color: #6b7685;
+    font-style: italic;
+}
+
+.batch-request-date {
+    color: #8893a3;
+    font-size: 12px;
+}
