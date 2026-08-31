@@ -103,3 +103,82 @@ it('rejects a batch request with an invalid quantity', function () {
         ->postJson("/official-receipts-accountable-forms/{$stock->id}/batch-requests", ['quantity' => 0])
         ->assertStatus(422);
 });
+
+it('lets an admin fulfill a batch request via the existing add-batch route, linking and assigning it', function () {
+    $admin = makeAdminUser();
+    $collector = makeCollector('Maria Santos');
+    $stock = makeFormStock();
+    $batchRequest = $stock->batchRequests()->create(['requested_by' => $collector->id, 'quantity' => 10, 'status' => 'pending']);
+
+    $this->actingAs($admin)
+        ->postJson("/official-receipts-accountable-forms/{$stock->id}/batches", [
+            'registration_month' => 1, 'registration_day' => 1, 'registration_year' => 2026,
+            'purchase_month' => 1, 'purchase_day' => 1, 'purchase_year' => 2026,
+            'starting_serial_number' => '2026-00001',
+            'ending_serial_number' => '2026-00010',
+            'batch_request_id' => $batchRequest->id,
+        ])
+        ->assertOk();
+
+    $batchRequest->refresh();
+    expect($batchRequest->status)->toBe('approved');
+    expect($batchRequest->resultingBatch->assigned_to)->toBe('Maria Santos');
+});
+
+it('rejects fulfilling with a batch_request_id that is not pending', function () {
+    $admin = makeAdminUser();
+    $collector = makeCollector();
+    $stock = makeFormStock();
+    $batchRequest = $stock->batchRequests()->create(['requested_by' => $collector->id, 'quantity' => 10, 'status' => 'rejected']);
+
+    $this->actingAs($admin)
+        ->postJson("/official-receipts-accountable-forms/{$stock->id}/batches", [
+            'registration_month' => 1, 'registration_day' => 1, 'registration_year' => 2026,
+            'purchase_month' => 1, 'purchase_day' => 1, 'purchase_year' => 2026,
+            'starting_serial_number' => '2026-00001',
+            'ending_serial_number' => '2026-00010',
+            'batch_request_id' => $batchRequest->id,
+        ])
+        ->assertStatus(422)
+        ->assertJsonPath('message', 'This batch request is no longer pending.');
+});
+
+it('blocks a collector from hitting the add-batch route directly', function () {
+    $collector = makeCollector();
+    $stock = makeFormStock();
+
+    $this->actingAs($collector)
+        ->postJson("/official-receipts-accountable-forms/{$stock->id}/batches", [
+            'registration_month' => 1, 'registration_day' => 1, 'registration_year' => 2026,
+            'purchase_month' => 1, 'purchase_day' => 1, 'purchase_year' => 2026,
+            'starting_serial_number' => '2026-00001',
+            'ending_serial_number' => '2026-00010',
+        ])
+        ->assertStatus(403);
+});
+
+it('lets an admin reject a pending batch request', function () {
+    $admin = makeAdminUser();
+    $collector = makeCollector();
+    $stock = makeFormStock();
+    $batchRequest = $stock->batchRequests()->create(['requested_by' => $collector->id, 'quantity' => 10, 'status' => 'pending']);
+
+    $this->actingAs($admin)
+        ->postJson("/official-receipts-accountable-forms/batch-requests/{$batchRequest->id}/reject")
+        ->assertOk()
+        ->assertJsonPath('message', 'Batch request rejected.');
+
+    expect($batchRequest->fresh()->status)->toBe('rejected');
+});
+
+it('blocks a non-admin from rejecting a batch request', function () {
+    $collector = makeCollector();
+    $stock = makeFormStock();
+    $batchRequest = $stock->batchRequests()->create(['requested_by' => $collector->id, 'quantity' => 10, 'status' => 'pending']);
+
+    $this->actingAs($collector)
+        ->postJson("/official-receipts-accountable-forms/batch-requests/{$batchRequest->id}/reject")
+        ->assertStatus(403);
+
+    expect($batchRequest->fresh()->status)->toBe('pending');
+});

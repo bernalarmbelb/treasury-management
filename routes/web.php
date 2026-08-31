@@ -1036,6 +1036,10 @@ Route::get('/official-receipts-accountable-forms', function (\Illuminate\Http\Re
 })->name('official-receipts-accountable-forms');
 
 Route::post('/official-receipts-accountable-forms/{formStock}/batches', function (\Illuminate\Http\Request $request, \App\Models\FormStock $formStock) {
+    if ($request->user()?->hasRole('collector')) {
+        abort(403);
+    }
+
     $validated = $request->validate([
         'registration_month' => ['required', 'integer', 'min:1', 'max:12'],
         'registration_day' => ['required', 'integer', 'min:1', 'max:31'],
@@ -1045,6 +1049,7 @@ Route::post('/official-receipts-accountable-forms/{formStock}/batches', function
         'purchase_year' => ['required', 'integer', 'min:1900', 'max:2100'],
         'starting_serial_number' => ['required', 'string'],
         'ending_serial_number' => ['required', 'string'],
+        'batch_request_id' => ['nullable', 'integer', 'exists:batch_requests,id'],
     ]);
 
     if ($message = $formStock->batchConflictMessage($validated['starting_serial_number'], $validated['ending_serial_number'])) {
@@ -1053,7 +1058,31 @@ Route::post('/official-receipts-accountable-forms/{formStock}/batches', function
         ], 422);
     }
 
-    $formStock->applyBatch($validated, $request->user()?->name);
+    $batchRequest = null;
+    if (! empty($validated['batch_request_id'])) {
+        $batchRequest = \App\Models\BatchRequest::where('id', $validated['batch_request_id'])
+            ->where('form_stock_id', $formStock->id)
+            ->where('status', 'pending')
+            ->first();
+
+        if (! $batchRequest) {
+            return response()->json(['message' => 'This batch request is no longer pending.'], 422);
+        }
+    }
+
+    $batch = $formStock->applyBatch($validated, $request->user()?->name);
+
+    if ($batchRequest) {
+        $batch->update(['assigned_to' => $batchRequest->requestedByUser?->name]);
+        $batchRequest->update([
+            'status' => 'approved',
+            'reviewed_by' => $request->user()?->id,
+            'reviewed_at' => now(),
+            'resulting_batch_id' => $batch->id,
+        ]);
+
+        \App\Models\ActivityLog::record('Official Receipts & Accountable Forms - Fulfill Batch Request - ' . $formStock->form_name . ' - assigned to ' . $batch->assigned_to);
+    }
 
     $perPageOptions = [10, 25, 50, 100];
     $perPage = in_array((int) $request->input('per_page'), $perPageOptions) ? (int) $request->input('per_page') : 10;
@@ -1102,6 +1131,26 @@ Route::post('/official-receipts-accountable-forms/{formStock}/batch-requests', f
 
     return response()->json(['message' => 'Batch request submitted successfully.']);
 })->name('official-receipts-accountable-forms.batch-requests.store');
+
+Route::post('/official-receipts-accountable-forms/batch-requests/{batchRequest}/reject', function (\Illuminate\Http\Request $request, \App\Models\BatchRequest $batchRequest) {
+    if (! $request->user()?->hasRole('admin')) {
+        return response()->json(['message' => 'Unauthorized.'], 403);
+    }
+
+    if ($batchRequest->status !== 'pending') {
+        return response()->json(['message' => 'This batch request has already been reviewed.'], 422);
+    }
+
+    $batchRequest->update([
+        'status' => 'rejected',
+        'reviewed_by' => $request->user()->id,
+        'reviewed_at' => now(),
+    ]);
+
+    \App\Models\ActivityLog::record('Official Receipts & Accountable Forms - Reject Batch Request - ' . $batchRequest->formStock?->form_name . ' - requested by ' . ($batchRequest->requestedByUser?->name ?? 'Unknown'));
+
+    return response()->json(['message' => 'Batch request rejected.']);
+})->name('official-receipts-accountable-forms.batch-requests.reject');
 
 Route::get('/official-receipts-accountable-forms/{formStock}/report-logs', function (\Illuminate\Http\Request $request, \App\Models\FormStock $formStock) {
     $perPageOptions = [10, 25, 50, 100];
