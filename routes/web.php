@@ -1218,6 +1218,9 @@ Route::get('/official-receipts-accountable-forms/{formStock}/report-logs', funct
     $direction = $request->input('direction') === 'desc' ? 'desc' : 'asc';
 
     $batches = $formStock->batches()
+        ->when($request->user()?->hasRole('collector'), function ($query) use ($request) {
+            $query->where('assigned_to', $request->user()->name);
+        })
         ->when($request->input('search'), function ($query, $search) {
             $query->where(function ($q) use ($search) {
                 $q->where('starting_serial_number', 'like', "%{$search}%")

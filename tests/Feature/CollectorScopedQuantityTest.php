@@ -128,3 +128,25 @@ it('shows the global Quick Entry quantity for an admin', function () {
     $response->assertOk();
     $response->assertSee('25 left');
 });
+
+it('scopes the report-logs batch list to only the collectors own assigned batches', function () {
+    $collector = qtyCollector();
+    $stock = qtyFormStock();
+
+    $response = $this->actingAs($collector)->get("/official-receipts-accountable-forms/{$stock->id}/report-logs");
+
+    $response->assertOk();
+    $response->assertSee('0000001');
+    $response->assertDontSee('0001000');
+});
+
+it('shows every batch in the report-logs list for an admin', function () {
+    $admin = qtyAdmin();
+    $stock = qtyFormStock();
+
+    $response = $this->actingAs($admin)->get("/official-receipts-accountable-forms/{$stock->id}/report-logs");
+
+    $response->assertOk();
+    $response->assertSee('0000001');
+    $response->assertSee('0001000');
+});
