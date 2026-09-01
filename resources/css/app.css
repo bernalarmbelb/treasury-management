@@ -1774,7 +1774,8 @@ body {
     width: 100%;
 }
 
-#formBatchForm {
+#formBatchForm,
+#batchRequestForm {
     display: flex;
     flex-direction: column;
     gap: 12px;
