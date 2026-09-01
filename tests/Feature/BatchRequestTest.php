@@ -234,3 +234,66 @@ it('includes rejected batch requests in the collectors notification list until m
     expect($batchRequest->fresh()->notified_at)->not->toBeNull();
     $this->actingAs($collector)->getJson('/notifications/count')->assertJsonPath('count', 0);
 });
+
+function makePendingCancelRequest(\App\Models\User $collector, \Illuminate\Support\Carbon $createdAt, string $payee = 'Cancel Payee'): \App\Models\CancelRequest
+{
+    $log = \App\Models\TransactionLog::create([
+        'serial_number' => 'No. ' . random_int(100000, 999999),
+        'payee'         => $payee,
+        'transacted_at' => now(),
+        'form_type'     => 'BIR0016',
+        'status'        => 'Completed',
+    ]);
+
+    $cancelRequest = $log->cancelRequests()->create([
+        'requested_by' => $collector->id,
+        'status'       => 'pending',
+    ]);
+    $cancelRequest->created_at = $createdAt;
+    $cancelRequest->save();
+
+    return $cancelRequest;
+}
+
+it('interleaves cancel and batch requests by recency in the admin notification list', function () {
+    $admin = makeAdminUser();
+    $collector = makeCollector();
+    $stock = makeFormStock();
+
+    // Older item: a pending CancelRequest.
+    makePendingCancelRequest($collector, now()->subMinutes(5));
+
+    // Newer item: a pending BatchRequest.
+    $batchRequest = $stock->batchRequests()->create(['requested_by' => $collector->id, 'quantity' => 4, 'status' => 'pending']);
+    $batchRequest->created_at = now();
+    $batchRequest->save();
+
+    $this->actingAs($admin)->getJson('/notifications/count')->assertJsonPath('count', 2);
+
+    $response = $this->actingAs($admin)->getJson('/notifications')->assertOk();
+    $items = $response->json('items');
+
+    expect($items)->toHaveCount(2);
+    expect($items[0]['type'])->toBe('batch_request');
+    expect($items[1]['type'])->toBe('cancel_request');
+});
+
+it('caps the combined admin notification list at 20 items across cancel and batch requests', function () {
+    $admin = makeAdminUser();
+    $collector = makeCollector();
+    $stock = makeFormStock();
+
+    for ($i = 0; $i < 12; $i++) {
+        $stock->batchRequests()->create(['requested_by' => $collector->id, 'quantity' => $i + 1, 'status' => 'pending']);
+    }
+
+    for ($i = 0; $i < 12; $i++) {
+        makePendingCancelRequest($collector, now(), "Cancel Payee {$i}");
+    }
+
+    $this->actingAs($admin)->getJson('/notifications/count')->assertJsonPath('count', 24);
+
+    $response = $this->actingAs($admin)->getJson('/notifications')->assertOk();
+
+    expect($response->json('items'))->toHaveCount(20);
+});
