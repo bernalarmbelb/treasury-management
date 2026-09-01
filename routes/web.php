@@ -1383,16 +1383,24 @@ Route::get('/reporting-abstract', function (\Illuminate\Http\Request $request) {
     $perPageOptions = [10, 25, 50, 100];
     $perPage = in_array((int) $request->input('per_page'), $perPageOptions) ? (int) $request->input('per_page') : 10;
 
-    $reports = collect([
-        ['label' => "Treasurer's Monthly Report of Accountability for Accountable Forms", 'slug' => 'treasurers-monthly'],
-        ['label' => 'Consolidated Report of Accountability for Accountable Forms (CRAAF)', 'slug' => 'craaf'],
-        ['label' => 'Summary of Community Tax Certificate', 'slug' => 'summary-ctc'],
-        ['label' => 'Reports of Checks Issued', 'slug' => null, 'url' => route('cheque-management.report', [], false)],
-        ['label' => 'Report of Collection and Deposit', 'slug' => 'collections-deposits'],
-        ['label' => 'Report of Accountability for Accountable Forms (RAAF)', 'slug' => 'raaf'],
-        ['label' => 'Abstract of Community Tax Certificate', 'slug' => 'abstract-ctc'],
-    ])
-        ->reject(fn ($r) => $request->user()?->hasRole('collector') && $r['slug'] === null)
+    // Collectors get a single, scoped report — everything else in this list
+    // is municipality-wide (CRAAF, Treasurer's report, Cheque reports) or
+    // depends on Bank Deposit/Cheque Management, both off-limits to them.
+    $reports = $request->user()?->hasRole('collector')
+        ? collect([
+            ['label' => 'My Batch Accountability Report', 'slug' => null, 'url' => route('reporting-abstract.my-batch-report', [], false)],
+        ])
+        : collect([
+            ['label' => "Treasurer's Monthly Report of Accountability for Accountable Forms", 'slug' => 'treasurers-monthly'],
+            ['label' => 'Consolidated Report of Accountability for Accountable Forms (CRAAF)', 'slug' => 'craaf'],
+            ['label' => 'Summary of Community Tax Certificate', 'slug' => 'summary-ctc'],
+            ['label' => 'Reports of Checks Issued', 'slug' => null, 'url' => route('cheque-management.report', [], false)],
+            ['label' => 'Report of Collection and Deposit', 'slug' => 'collections-deposits'],
+            ['label' => 'Report of Accountability for Accountable Forms (RAAF)', 'slug' => 'raaf'],
+            ['label' => 'Abstract of Community Tax Certificate', 'slug' => 'abstract-ctc'],
+        ]);
+
+    $reports = $reports
         ->when($request->input('search'), function ($collection, $search) {
             return $collection->filter(fn ($report) => str_contains(strtolower($report['label']), strtolower($search)));
         })
@@ -1420,6 +1428,37 @@ Route::get('/reporting-abstract', function (\Illuminate\Http\Request $request) {
 
     return view('reporting-abstract.index', $data);
 })->name('reporting-abstract');
+
+/**
+ * A Collector's own batch accountability report — the same per-batch shape
+ * ram_per_collector_rows() builds for the Treasurer's Monthly Report/CRAAF,
+ * filtered to only the signed-in user's assigned batches. Standalone
+ * printable page (not <x-layout>), styled after the Cheque Management
+ * report. Reachable by any authenticated user, but always scoped to their
+ * own name — only linked to from the Collector's Reporting & Abstract entry.
+ */
+Route::get('/reporting-abstract/my-batch-report', function (\Illuminate\Http\Request $request) {
+    $month = (int) ($request->input('month') ?: now()->month);
+    $month = ($month >= 1 && $month <= 12) ? $month : now()->month;
+
+    $year = (int) ($request->input('year') ?: now()->year);
+    $year = ($year >= 1900 && $year <= now()->year) ? $year : now()->year;
+
+    $from = \Illuminate\Support\Carbon::create($year, $month, 1)->startOfMonth();
+    $to = (clone $from)->endOfMonth();
+
+    $collectorName = $request->user()?->name ?? '';
+
+    [$rows, $totals] = ram_per_collector_rows($from, $to, 'Total', $collectorName);
+
+    return view('reporting-abstract.my-batch-report', [
+        'rows' => $rows,
+        'totals' => $totals,
+        'month' => $month,
+        'year' => $year,
+        'collectorName' => $collectorName,
+    ]);
+})->name('reporting-abstract.my-batch-report');
 
 Route::get('/reporting-abstract/{report}/preview', function (\Illuminate\Http\Request $request, string $report) {
     if (! in_array($report, ram_report_slugs(), true)) {
@@ -2250,7 +2289,7 @@ function ram_serial_range_label(string $start, string $end): string
  * collector). Returns [$rows, $totals] with $totals summing the 4 Quantity
  * columns; the caller supplies the totals label ("Total" vs "B-TOTAL").
  */
-function ram_per_collector_rows(\Illuminate\Support\Carbon $from, \Illuminate\Support\Carbon $to, string $totalLabel): array
+function ram_per_collector_rows(\Illuminate\Support\Carbon $from, \Illuminate\Support\Carbon $to, string $totalLabel, ?string $onlyAssignedTo = null): array
 {
     $rows = [];
     $totalOnHand = 0;
@@ -2269,6 +2308,7 @@ function ram_per_collector_rows(\Illuminate\Support\Carbon $from, \Illuminate\Su
             ->oldest('purchase_date')
             ->get()
             ->filter(fn ($b) => ! $b->purchase_date || $b->purchase_date->lte($to))
+            ->when($onlyAssignedTo !== null, fn ($c) => $c->filter(fn ($b) => $b->assigned_to === $onlyAssignedTo))
             ->values();
         if ($batches->isEmpty()) {
             continue;
