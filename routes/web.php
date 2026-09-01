@@ -942,12 +942,17 @@ Route::get('/notifications/count', function (\Illuminate\Http\Request $request) 
     if (! $user) return response()->json(['count' => 0]);
 
     if ($user->hasRole('admin')) {
-        $count = \App\Models\CancelRequest::where('status', 'pending')->count();
+        $count = \App\Models\CancelRequest::where('status', 'pending')->count()
+            + \App\Models\BatchRequest::where('status', 'pending')->count();
     } else {
         $count = \App\Models\CancelRequest::where('requested_by', $user->id)
             ->where('status', 'rejected')
             ->whereNull('notified_at')
-            ->count();
+            ->count()
+            + \App\Models\BatchRequest::where('requested_by', $user->id)
+                ->where('status', 'rejected')
+                ->whereNull('notified_at')
+                ->count();
     }
 
     return response()->json(['count' => $count]);
@@ -958,10 +963,8 @@ Route::get('/notifications', function (\Illuminate\Http\Request $request) {
     if (! $user) return response()->json(['items' => []]);
 
     if ($user->hasRole('admin')) {
-        $items = \App\Models\CancelRequest::with(['transactionLog', 'requestedByUser'])
+        $cancelItems = \App\Models\CancelRequest::with(['transactionLog', 'requestedByUser'])
             ->where('status', 'pending')
-            ->orderBy('created_at', 'desc')
-            ->limit(20)
             ->get()
             ->map(fn ($r) => [
                 'id'           => $r->id,
@@ -969,25 +972,66 @@ Route::get('/notifications', function (\Illuminate\Http\Request $request) {
                 'serial'       => $r->transactionLog?->serial_number,
                 'payee'        => $r->transactionLog?->payee,
                 'requested_by' => $r->requestedByUser?->name,
+                'created_at_raw' => $r->created_at,
                 'created_at'   => $r->created_at->diffForHumans(),
                 'url'          => route('collections.view', $r->transaction_log_id),
             ]);
+
+        $batchItems = \App\Models\BatchRequest::with(['formStock', 'requestedByUser'])
+            ->where('status', 'pending')
+            ->get()
+            ->map(fn ($r) => [
+                'id'           => $r->id,
+                'type'         => 'batch_request',
+                'serial'       => $r->formStock?->form_name,
+                'payee'        => 'Qty ' . $r->quantity . ' · ' . ($r->requestedByUser?->name ?? 'Unknown'),
+                'requested_by' => $r->requestedByUser?->name,
+                'created_at_raw' => $r->created_at,
+                'created_at'   => $r->created_at->diffForHumans(),
+                'url'          => route('official-receipts-accountable-forms.report-logs', $r->form_stock_id),
+            ]);
+
+        $items = $cancelItems->concat($batchItems)
+            ->sortByDesc('created_at_raw')
+            ->take(20)
+            ->map(fn ($item) => \Illuminate\Support\Arr::except($item, ['created_at_raw']))
+            ->values();
     } else {
-        $items = \App\Models\CancelRequest::with(['transactionLog'])
+        $cancelItems = \App\Models\CancelRequest::with(['transactionLog'])
             ->where('requested_by', $user->id)
             ->where('status', 'rejected')
-            ->orderBy('reviewed_at', 'desc')
-            ->limit(20)
             ->get()
             ->map(fn ($r) => [
                 'id'         => $r->id,
                 'type'       => 'request_rejected',
                 'serial'     => $r->transactionLog?->serial_number,
                 'payee'      => $r->transactionLog?->payee,
+                'created_at_raw' => $r->reviewed_at ?? $r->created_at,
                 'created_at' => $r->reviewed_at?->diffForHumans() ?? $r->created_at->diffForHumans(),
                 'url'        => route('collections.view', $r->transaction_log_id),
                 'seen'       => (bool) $r->notified_at,
             ]);
+
+        $batchItems = \App\Models\BatchRequest::with(['formStock'])
+            ->where('requested_by', $user->id)
+            ->where('status', 'rejected')
+            ->get()
+            ->map(fn ($r) => [
+                'id'         => $r->id,
+                'type'       => 'batch_request_rejected',
+                'serial'     => $r->formStock?->form_name,
+                'payee'      => 'Qty ' . $r->quantity,
+                'created_at_raw' => $r->reviewed_at ?? $r->created_at,
+                'created_at' => $r->reviewed_at?->diffForHumans() ?? $r->created_at->diffForHumans(),
+                'url'        => route('official-receipts-accountable-forms.report-logs', $r->form_stock_id),
+                'seen'       => (bool) $r->notified_at,
+            ]);
+
+        $items = $cancelItems->concat($batchItems)
+            ->sortByDesc('created_at_raw')
+            ->take(20)
+            ->map(fn ($item) => \Illuminate\Support\Arr::except($item, ['created_at_raw']))
+            ->values();
     }
 
     return response()->json(['items' => $items]);
@@ -997,6 +1041,11 @@ Route::post('/notifications/mark-seen', function (\Illuminate\Http\Request $requ
     $user = $request->user();
     if ($user && ! $user->hasRole('admin')) {
         \App\Models\CancelRequest::where('requested_by', $user->id)
+            ->where('status', 'rejected')
+            ->whereNull('notified_at')
+            ->update(['notified_at' => now()]);
+
+        \App\Models\BatchRequest::where('requested_by', $user->id)
             ->where('status', 'rejected')
             ->whereNull('notified_at')
             ->update(['notified_at' => now()]);

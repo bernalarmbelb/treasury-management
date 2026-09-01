@@ -206,3 +206,31 @@ it('does not show the pending batch requests panel to a collector', function () 
         ->assertOk()
         ->assertDontSee('Pending Batch Requests');
 });
+
+it('includes pending batch requests in the admin notification count and list', function () {
+    $admin = makeAdminUser();
+    $collector = makeCollector('Pedro Reyes');
+    $stock = makeFormStock();
+    $stock->batchRequests()->create(['requested_by' => $collector->id, 'quantity' => 7, 'status' => 'pending']);
+
+    $this->actingAs($admin)->getJson('/notifications/count')->assertJsonPath('count', 1);
+
+    $response = $this->actingAs($admin)->getJson('/notifications')->assertOk();
+    $items = $response->json('items');
+    expect(collect($items)->firstWhere('type', 'batch_request'))->not->toBeNull();
+    expect(collect($items)->firstWhere('type', 'batch_request')['payee'])->toContain('Pedro Reyes');
+});
+
+it('includes rejected batch requests in the collectors notification list until marked seen', function () {
+    $admin = makeAdminUser();
+    $collector = makeCollector();
+    $stock = makeFormStock();
+    $batchRequest = $stock->batchRequests()->create(['requested_by' => $collector->id, 'quantity' => 7, 'status' => 'rejected', 'reviewed_by' => $admin->id, 'reviewed_at' => now()]);
+
+    $this->actingAs($collector)->getJson('/notifications/count')->assertJsonPath('count', 1);
+
+    $this->actingAs($collector)->postJson('/notifications/mark-seen')->assertOk();
+
+    expect($batchRequest->fresh()->notified_at)->not->toBeNull();
+    $this->actingAs($collector)->getJson('/notifications/count')->assertJsonPath('count', 0);
+});

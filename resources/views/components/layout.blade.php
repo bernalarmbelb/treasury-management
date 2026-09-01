@@ -191,14 +191,17 @@
 		}
 
 		function tagFor(type) {
-			if (type === 'request_rejected') {
+			if (type === 'request_rejected' || type === 'batch_request_rejected') {
 				return '<span class="notif-type-tag notif-type-tag--rejected">Request Rejected</span>';
+			}
+			if (type === 'batch_request') {
+				return '<span class="notif-type-tag">Batch Request</span>';
 			}
 			return '<span class="notif-type-tag">Cancel Request</span>';
 		}
 
 		function actionFor(type) {
-			if (type === 'request_rejected') return '<span class="notif-review-btn">View →</span>';
+			if (type === 'request_rejected' || type === 'batch_request_rejected') return '<span class="notif-review-btn">View →</span>';
 			return '<span class="notif-review-btn">Review →</span>';
 		}
 
