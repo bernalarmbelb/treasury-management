@@ -30,10 +30,10 @@ class RoleModulePermissionSeeder extends Seeder
             ],
             'collector' => [
                 'collections' => $full,
-                'official-receipts-accountable-forms' => $full,
+                'official-receipts-accountable-forms' => array_merge($full, ['add' => false]),
                 'reporting-abstract' => $full,
-                'bank-deposit-reconciliation' => $full,
-                'cheque-management' => $full,
+                'bank-deposit-reconciliation' => $none,
+                'cheque-management' => $none,
                 'user-management' => $none,
                 'archives' => $full,
                 'records' => $full,

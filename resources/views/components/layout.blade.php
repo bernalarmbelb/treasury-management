@@ -70,11 +70,13 @@
 
 				<p><a href="{{ route('reporting-abstract') }}" class=" {{ request()->routeIs('reporting-abstract') ? 'active' : '' }} ">Reporting & Abstract</a></p>
 
-				<p><a href="{{ route('bank-deposit-reconciliation') }}" class=" {{ request()->routeIs('bank-deposit-reconciliation') ? 'active' : '' }} ">Banks Deposit & Reconciliation</a></p>
-				
-				<p><a href="{{ route('cheque-management') }}" class=" {{ request()->routeIs('cheque-management') ? 'active' : '' }} ">Cheque Management</a></p>
+				@unless (auth()->user()?->hasRole('collector'))
+					<p><a href="{{ route('bank-deposit-reconciliation') }}" class=" {{ request()->routeIs('bank-deposit-reconciliation') ? 'active' : '' }} ">Banks Deposit & Reconciliation</a></p>
 
-				<p><a href="{{ route('user-management') }}" class=" {{ request()->routeIs('user-management*') ? 'active' : '' }} ">User Management</a></p>
+					<p><a href="{{ route('cheque-management') }}" class=" {{ request()->routeIs('cheque-management') ? 'active' : '' }} ">Cheque Management</a></p>
+
+					<p><a href="{{ route('user-management') }}" class=" {{ request()->routeIs('user-management*') ? 'active' : '' }} ">User Management</a></p>
+				@endunless
 
 				<p><a href="{{ route('records') }}" class=" {{ request()->routeIs('records') ? 'active' : '' }} ">Records</a></p>
 
