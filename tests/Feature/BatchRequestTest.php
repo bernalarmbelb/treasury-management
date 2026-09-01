@@ -27,6 +27,15 @@ function makeAdminUser(string $name = 'Admin User'): User
     return makeUserWithRole('admin', $name);
 }
 
+function makeAbstractReportingOfficer(string $name = 'ARO User'): User
+{
+    $role = Role::firstOrCreate(['slug' => 'abstract-reporting-officer'], ['name' => 'Abstract Reporting Officer']);
+    $user = User::factory()->create(['name' => $name, 'status' => User::STATUS_ACTIVATED]);
+    $user->roles()->sync([$role->id]);
+
+    return $user;
+}
+
 function makeFormStock(string $code = 'BIR0016'): FormStock
 {
     return FormStock::firstOrCreate(
@@ -155,6 +164,40 @@ it('blocks a collector from hitting the add-batch route directly', function () {
             'ending_serial_number' => '2026-00010',
         ])
         ->assertStatus(403);
+});
+
+it('blocks a non-admin abstract-reporting-officer from fulfilling a batch request', function () {
+    $officer = makeAbstractReportingOfficer();
+    $collector = makeCollector();
+    $stock = makeFormStock();
+    $batchRequest = $stock->batchRequests()->create(['requested_by' => $collector->id, 'quantity' => 10, 'status' => 'pending']);
+
+    $this->actingAs($officer)
+        ->postJson("/official-receipts-accountable-forms/{$stock->id}/batches", [
+            'registration_month' => 1, 'registration_day' => 1, 'registration_year' => 2026,
+            'purchase_month' => 1, 'purchase_day' => 1, 'purchase_year' => 2026,
+            'starting_serial_number' => '2026-00001',
+            'ending_serial_number' => '2026-00010',
+            'batch_request_id' => $batchRequest->id,
+        ])
+        ->assertStatus(403)
+        ->assertJsonPath('message', 'Unauthorized.');
+
+    expect($batchRequest->fresh()->status)->toBe('pending');
+});
+
+it('still lets a non-admin abstract-reporting-officer add a plain batch without a batch_request_id', function () {
+    $officer = makeAbstractReportingOfficer();
+    $stock = makeFormStock();
+
+    $this->actingAs($officer)
+        ->postJson("/official-receipts-accountable-forms/{$stock->id}/batches", [
+            'registration_month' => 1, 'registration_day' => 1, 'registration_year' => 2026,
+            'purchase_month' => 1, 'purchase_day' => 1, 'purchase_year' => 2026,
+            'starting_serial_number' => '2026-00001',
+            'ending_serial_number' => '2026-00010',
+        ])
+        ->assertOk();
 });
 
 it('lets an admin reject a pending batch request', function () {

@@ -167,7 +167,9 @@
                         <div class="dash-exc">
                             <div class="cap">
                                 <span>Needs Review &middot; {{ $exceptions['count'] }}</span>
+                                @unless (auth()->user()?->hasRole('collector'))
                                 <a href="{{ route('bank-deposit-reconciliation') }}">View all &rarr;</a>
+                                @endunless
                             </div>
                             @forelse ($exceptions['items'] as $item)
                                 @php
@@ -194,7 +196,9 @@
                     <h3>Quick Actions</h3>
                     <a href="{{ route('reporting-abstract') }}" class="dash-qbtn primary"><span class="ic">&#128202;</span>Reporting &amp; Abstract</a>
                     <a href="{{ route('transaction-entry') }}" class="dash-qbtn"><span class="ic">&#129534;</span>New Collection Entry</a>
+                    @unless (auth()->user()?->hasRole('collector'))
                     <a href="{{ route('cheque-management.create') }}" class="dash-qbtn"><span class="ic">&#127974;</span>New Cheque</a>
+                    @endunless
                 </div>
 
                 <div class="dash-card" style="flex:1; display:flex; flex-direction:column;">

@@ -126,6 +126,10 @@ Route::get('/collections/transaction-entry', function (\Illuminate\Http\Request 
 })->name('transaction-entry');
 
 Route::post('/collections/transaction-entry/{formStock}/batches', function (\Illuminate\Http\Request $request, \App\Models\FormStock $formStock) {
+    if ($request->user()?->hasRole('collector')) {
+        abort(403);
+    }
+
     $validated = $request->validate([
         'registration_month' => ['required', 'integer', 'min:1', 'max:12'],
         'registration_day' => ['required', 'integer', 'min:1', 'max:31'],
@@ -1101,6 +1105,10 @@ Route::post('/official-receipts-accountable-forms/{formStock}/batches', function
         'batch_request_id' => ['nullable', 'integer', 'exists:batch_requests,id'],
     ]);
 
+    if (! empty($validated['batch_request_id']) && ! $request->user()?->hasRole('admin')) {
+        return response()->json(['message' => 'Unauthorized.'], 403);
+    }
+
     if ($message = $formStock->batchConflictMessage($validated['starting_serial_number'], $validated['ending_serial_number'])) {
         return response()->json([
             'message' => $message,
@@ -1165,12 +1173,12 @@ Route::post('/official-receipts-accountable-forms/{formStock}/batch-requests', f
 
     $user = $request->user();
 
-    if ($formStock->batchRequests()->where('requested_by', $user->id)->where('status', 'pending')->exists()) {
+    if ($formStock->batchRequests()->where('requested_by', $user?->id)->where('status', 'pending')->exists()) {
         return response()->json(['message' => 'You already have a pending batch request for this form.'], 422);
     }
 
     $formStock->batchRequests()->create([
-        'requested_by' => $user->id,
+        'requested_by' => $user?->id,
         'quantity' => $validated['quantity'],
         'note' => $validated['note'] ?? null,
         'status' => 'pending',
@@ -1241,6 +1249,10 @@ Route::get('/official-receipts-accountable-forms/{formStock}/report-logs', funct
 })->name('official-receipts-accountable-forms.report-logs');
 
 Route::patch('/official-receipts-accountable-forms/batches/{batch}/assign', function (\Illuminate\Http\Request $request, \App\Models\FormBatch $batch) {
+    if ($request->user()?->hasRole('collector')) {
+        return response()->json(['message' => 'Unauthorized.'], 403);
+    }
+
     $validated = $request->validate([
         'assigned_to' => ['nullable', 'string', 'max:150'],
     ]);
@@ -1376,9 +1388,12 @@ Route::get('/reporting-abstract', function (\Illuminate\Http\Request $request) {
         ['label' => 'Report of Collection and Deposit', 'slug' => 'collections-deposits'],
         ['label' => 'Report of Accountability for Accountable Forms (RAAF)', 'slug' => 'raaf'],
         ['label' => 'Abstract of Community Tax Certificate', 'slug' => 'abstract-ctc'],
-    ])->when($request->input('search'), function ($collection, $search) {
-        return $collection->filter(fn ($report) => str_contains(strtolower($report['label']), strtolower($search)));
-    })->values();
+    ])
+        ->reject(fn ($r) => $request->user()?->hasRole('collector') && $r['slug'] === null)
+        ->when($request->input('search'), function ($collection, $search) {
+            return $collection->filter(fn ($report) => str_contains(strtolower($report['label']), strtolower($search)));
+        })
+        ->values();
 
     $page = (int) ($request->input('page') ?: 1);
 
@@ -3318,7 +3333,11 @@ Route::get('/records/export', function (\Illuminate\Http\Request $request) {
     return export_activity_log_xlsx($records, 'records.xlsx');
 })->name('records.export');
 
-Route::get('/archive-records/users/{user}', function (\App\Models\User $user) {
+Route::get('/archive-records/users/{user}', function (\Illuminate\Http\Request $request, \App\Models\User $user) {
+    if ($request->user()?->hasRole('collector')) {
+        abort(403);
+    }
+
     $user->load('roles');
     return view('archive-records.user-view', compact('user'));
 })->name('archives.users.view');
@@ -3335,7 +3354,11 @@ Route::post('/archive-records/transactions/{log}/unarchive', function (\App\Mode
     return response()->json(['message' => 'Transaction unarchived successfully.']);
 })->name('archives.transactions.unarchive');
 
-Route::post('/archive-records/users/{user}/unarchive', function (\App\Models\User $user) {
+Route::post('/archive-records/users/{user}/unarchive', function (\Illuminate\Http\Request $request, \App\Models\User $user) {
+    if ($request->user()?->hasRole('collector')) {
+        return response()->json(['message' => 'Unauthorized.'], 403);
+    }
+
     if ($user->status !== \App\Models\User::STATUS_ARCHIVED) {
         return response()->json(['message' => 'This user is not archived.'], 422);
     }
@@ -3351,6 +3374,10 @@ Route::get('/archive-records', function (\Illuminate\Http\Request $request) {
     $tab = in_array($request->input('tab'), ['collection-management', 'user-management'])
         ? $request->input('tab')
         : 'collection-management';
+
+    if ($tab === 'user-management' && $request->user()?->hasRole('collector')) {
+        $tab = 'collection-management';
+    }
 
     $perPageOptions = [10, 25, 50, 100];
     $perPage = in_array((int) $request->input('per_page'), $perPageOptions)

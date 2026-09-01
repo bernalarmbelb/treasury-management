@@ -93,6 +93,7 @@
                         $isOtherAssignee = $batch->assigned_to && ! in_array($batch->assigned_to, $collectorNames, true);
                     @endphp
                     <td class="assigned-to-cell">
+                        @if (! auth()->user()?->hasRole('collector'))
                         <div class="assigned-to-control" data-batch-id="{{ $batch->id }}">
                             <button type="button" class="assigned-to-trigger {{ $isOtherAssignee ? 'is-hidden' : '' }}" data-batch-id="{{ $batch->id }}">
                                 <span class="assigned-to-trigger-label">{{ $batch->assigned_to ?: 'Unassigned' }}</span>
@@ -118,6 +119,9 @@
                                 </button>
                             </div>
                         </div>
+                        @else
+                        <span>{{ $batch->assigned_to ?: 'Unassigned' }}</span>
+                        @endif
                     </td>
                     <td>{{ $batch->usedQty() }}</td>
                     <td>{{ $batch->remainingQty() }}</td>

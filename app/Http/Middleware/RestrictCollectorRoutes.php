@@ -18,11 +18,11 @@ class RestrictCollectorRoutes
     {
         $user = $request->user();
 
-        if ($user && $user->hasRole('collector') && $request->routeIs(
+        if ($user && $request->routeIs(
             'bank-deposit-reconciliation*',
             'cheque-management*',
             'user-management*',
-        )) {
+        ) && $user->hasRole('collector')) {
             abort(403, 'This module is not available to Collector accounts.');
         }
 

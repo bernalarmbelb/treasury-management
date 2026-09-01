@@ -49,9 +49,11 @@
                     <td class="col-actions">
                         <div class="table-actions-entry">
                             @if ($availableQty == 0)
+                                @unless (auth()->user()?->hasRole('collector'))
                                 <button type="button" class="action-btn action-batch js-add-receipt" aria-label="Add new receipt" data-form-stock-id="{{ $form->id }}" data-form-code="{{ $form->form_code }}" data-next-serial="{{ $form->nextBatchStartingSerial() }}">
                                     Add new receipt
                                 </button>
+                                @endunless
                             @endif
                             @if ($availableQty > 0)
                             @php

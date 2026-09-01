@@ -32,10 +32,12 @@
                       class="{{ $tab === 'collection-management' ? 'active' : '' }}">
                     Collection Management
                 </a></p>
+                @unless (auth()->user()?->hasRole('collector'))
                 <p><a href="{{ route('archives', ['tab' => 'user-management']) }}"
                       class="{{ $tab === 'user-management' ? 'active' : '' }}">
                     User Management
                 </a></p>
+                @endunless
             </nav>
             <button class="nav-scroll-btn nav-scroll-right" id="scrollRight">&#8250;</button>
         </div>
