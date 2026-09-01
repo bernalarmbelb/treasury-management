@@ -340,3 +340,106 @@ it('caps the combined admin notification list at 20 items across cancel and batc
 
     expect($response->json('items'))->toHaveCount(20);
 });
+
+it('lets a collector cancel their own pending batch request', function () {
+    $collector = makeCollector();
+    $stock = makeFormStock();
+    $batchRequest = $stock->batchRequests()->create(['requested_by' => $collector->id, 'quantity' => 5, 'status' => 'pending']);
+
+    $this->actingAs($collector)
+        ->postJson("/official-receipts-accountable-forms/batch-requests/{$batchRequest->id}/cancel")
+        ->assertOk()
+        ->assertJsonPath('message', 'Batch request cancelled.');
+
+    expect($batchRequest->fresh()->status)->toBe('cancelled');
+});
+
+it('lets a collector submit a new request immediately after cancelling the pending one', function () {
+    $collector = makeCollector();
+    $stock = makeFormStock();
+    $batchRequest = $stock->batchRequests()->create(['requested_by' => $collector->id, 'quantity' => 5, 'status' => 'pending']);
+
+    $this->actingAs($collector)->postJson("/official-receipts-accountable-forms/batch-requests/{$batchRequest->id}/cancel")->assertOk();
+
+    $this->actingAs($collector)
+        ->postJson("/official-receipts-accountable-forms/{$stock->id}/batch-requests", ['quantity' => 10])
+        ->assertOk();
+
+    expect(BatchRequest::where('form_stock_id', $stock->id)->where('status', 'pending')->count())->toBe(1);
+    expect(BatchRequest::where('form_stock_id', $stock->id)->where('status', 'cancelled')->count())->toBe(1);
+});
+
+it('blocks a collector from cancelling another collectors batch request', function () {
+    $owner = makeCollector('Owner Collector');
+    $other = makeCollector('Other Collector');
+    $stock = makeFormStock();
+    $batchRequest = $stock->batchRequests()->create(['requested_by' => $owner->id, 'quantity' => 5, 'status' => 'pending']);
+
+    $this->actingAs($other)
+        ->postJson("/official-receipts-accountable-forms/batch-requests/{$batchRequest->id}/cancel")
+        ->assertStatus(403);
+
+    expect($batchRequest->fresh()->status)->toBe('pending');
+});
+
+it('blocks cancelling a batch request that has already been reviewed', function () {
+    $collector = makeCollector();
+    $admin = makeAdminUser();
+    $stock = makeFormStock();
+    $batchRequest = $stock->batchRequests()->create(['requested_by' => $collector->id, 'quantity' => 5, 'status' => 'rejected', 'reviewed_by' => $admin->id, 'reviewed_at' => now()]);
+
+    $this->actingAs($collector)
+        ->postJson("/official-receipts-accountable-forms/batch-requests/{$batchRequest->id}/cancel")
+        ->assertStatus(422);
+
+    expect($batchRequest->fresh()->status)->toBe('rejected');
+});
+
+it('does not surface a cancelled request as a pending admin notification or a rejected collector notification', function () {
+    $collector = makeCollector();
+    $admin = makeAdminUser();
+    $stock = makeFormStock();
+    $batchRequest = $stock->batchRequests()->create(['requested_by' => $collector->id, 'quantity' => 5, 'status' => 'pending']);
+
+    $this->actingAs($collector)->postJson("/official-receipts-accountable-forms/batch-requests/{$batchRequest->id}/cancel")->assertOk();
+
+    $this->actingAs($admin)->getJson('/notifications/count')->assertJsonPath('count', 0);
+    $this->actingAs($collector)->getJson('/notifications/count')->assertJsonPath('count', 0);
+});
+
+it('shows Cancel Pending Request on the ORAF list when the collector has a pending request for that form', function () {
+    $collector = makeCollector();
+    $stock = makeFormStock();
+    $stock->batchRequests()->create(['requested_by' => $collector->id, 'quantity' => 7, 'status' => 'pending']);
+
+    $response = $this->actingAs($collector)->get('/official-receipts-accountable-forms');
+
+    $response->assertOk();
+    $response->assertSee('Cancel Pending Request (Qty 7)');
+    // Not a bare assertDontSee('Request New Batch') — index.blade.php's JS
+    // has an unrelated "// Request New Batch modal (Collector)" comment
+    // that always renders regardless of this button's state.
+    $response->assertDontSee('aria-label="Request New Batch"', false);
+});
+
+it('shows Request New Batch on the ORAF list when the collector has no pending request', function () {
+    $collector = makeCollector();
+    makeFormStock();
+
+    $response = $this->actingAs($collector)->get('/official-receipts-accountable-forms');
+
+    $response->assertOk();
+    $response->assertSee('Request New Batch');
+    $response->assertDontSee('Cancel Pending Request');
+});
+
+it('shows Cancel Pending Request in the report-logs header when the collector has a pending request for that form', function () {
+    $collector = makeCollector();
+    $stock = makeFormStock();
+    $stock->batchRequests()->create(['requested_by' => $collector->id, 'quantity' => 3, 'status' => 'pending']);
+
+    $response = $this->actingAs($collector)->get("/official-receipts-accountable-forms/{$stock->id}/report-logs");
+
+    $response->assertOk();
+    $response->assertSee('Cancel Pending Request (Qty 3)');
+});

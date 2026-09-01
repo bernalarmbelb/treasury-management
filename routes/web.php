@@ -1079,6 +1079,12 @@ Route::get('/official-receipts-accountable-forms', function (\Illuminate\Http\Re
         'perPage' => $perPage,
         'sort' => $sort,
         'direction' => $direction,
+        // The signed-in collector's own pending requests, keyed by form_stock_id,
+        // so the "Request New Batch" button can flip to "Cancel Pending Request"
+        // instead of erroring on a second click.
+        'myPendingBatchRequests' => $request->user()?->hasRole('collector')
+            ? \App\Models\BatchRequest::where('requested_by', $request->user()->id)->where('status', 'pending')->get()->keyBy('form_stock_id')
+            : collect(),
     ];
 
     if ($request->ajax()) {
@@ -1172,22 +1178,56 @@ Route::post('/official-receipts-accountable-forms/{formStock}/batch-requests', f
     ]);
 
     $user = $request->user();
+    $duplicate = false;
 
-    if ($formStock->batchRequests()->where('requested_by', $user?->id)->where('status', 'pending')->exists()) {
+    \Illuminate\Support\Facades\DB::transaction(function () use ($formStock, $user, $validated, &$duplicate) {
+        // Lock the FormStock row for the duration of the check-then-create so
+        // two near-simultaneous submissions from the same collector for the
+        // same form serialize instead of both passing the "already pending"
+        // check before either has committed (a race the plain exists()+create()
+        // pair below used to be exposed to).
+        \App\Models\FormStock::whereKey($formStock->id)->lockForUpdate()->first();
+
+        if ($formStock->batchRequests()->where('requested_by', $user?->id)->where('status', 'pending')->exists()) {
+            $duplicate = true;
+
+            return;
+        }
+
+        $formStock->batchRequests()->create([
+            'requested_by' => $user?->id,
+            'quantity' => $validated['quantity'],
+            'note' => $validated['note'] ?? null,
+            'status' => 'pending',
+        ]);
+    });
+
+    if ($duplicate) {
         return response()->json(['message' => 'You already have a pending batch request for this form.'], 422);
     }
-
-    $formStock->batchRequests()->create([
-        'requested_by' => $user?->id,
-        'quantity' => $validated['quantity'],
-        'note' => $validated['note'] ?? null,
-        'status' => 'pending',
-    ]);
 
     \App\Models\ActivityLog::record('Official Receipts & Accountable Forms - Request New Batch - ' . $formStock->form_name . ' - Qty ' . $validated['quantity']);
 
     return response()->json(['message' => 'Batch request submitted successfully.']);
 })->name('official-receipts-accountable-forms.batch-requests.store');
+
+Route::post('/official-receipts-accountable-forms/batch-requests/{batchRequest}/cancel', function (\Illuminate\Http\Request $request, \App\Models\BatchRequest $batchRequest) {
+    $user = $request->user();
+
+    if (! $user || $batchRequest->requested_by !== $user->id) {
+        return response()->json(['message' => 'Unauthorized.'], 403);
+    }
+
+    if ($batchRequest->status !== 'pending') {
+        return response()->json(['message' => 'This batch request has already been reviewed.'], 422);
+    }
+
+    $batchRequest->update(['status' => 'cancelled']);
+
+    \App\Models\ActivityLog::record('Official Receipts & Accountable Forms - Cancel Batch Request - ' . $batchRequest->formStock?->form_name . ' - Qty ' . $batchRequest->quantity);
+
+    return response()->json(['message' => 'Batch request cancelled.']);
+})->name('official-receipts-accountable-forms.batch-requests.cancel');
 
 Route::post('/official-receipts-accountable-forms/batch-requests/{batchRequest}/reject', function (\Illuminate\Http\Request $request, \App\Models\BatchRequest $batchRequest) {
     if (! $request->user()?->hasRole('admin')) {
@@ -1242,6 +1282,9 @@ Route::get('/official-receipts-accountable-forms/{formStock}/report-logs', funct
         'pendingBatchRequests' => $request->user()?->hasRole('admin')
             ? $formStock->batchRequests()->with('requestedByUser')->where('status', 'pending')->latest()->get()
             : collect(),
+        'myPendingBatchRequest' => $request->user()?->hasRole('collector')
+            ? $formStock->batchRequests()->where('requested_by', $request->user()->id)->where('status', 'pending')->first()
+            : null,
     ];
 
     if ($request->ajax()) {

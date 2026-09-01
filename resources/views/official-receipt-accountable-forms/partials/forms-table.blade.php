@@ -64,7 +64,12 @@
                         <div class="table-actions">
                             <a href="{{ route('official-receipts-accountable-forms.report-logs', $form->id) }}" class="action-btn action-view" aria-label="View">View</a>
                             @if (auth()->user()?->hasRole('collector'))
-                                <button type="button" class="action-btn action-batch js-request-batch" data-form-stock-id="{{ $form->id }}" data-form-code="{{ $form->form_code }}" aria-label="Request New Batch">Request New Batch</button>
+                                @php $myPendingRequest = ($myPendingBatchRequests ?? collect())->get($form->id); @endphp
+                                @if ($myPendingRequest)
+                                    <button type="button" class="action-btn action-export js-cancel-batch-request" data-request-id="{{ $myPendingRequest->id }}" aria-label="Cancel Pending Request">Cancel Pending Request (Qty {{ $myPendingRequest->quantity }})</button>
+                                @else
+                                    <button type="button" class="action-btn action-batch js-request-batch" data-form-stock-id="{{ $form->id }}" data-form-code="{{ $form->form_code }}" aria-label="Request New Batch">Request New Batch</button>
+                                @endif
                             @else
                                 <button type="button" class="action-btn action-batch js-add-batch" data-form-stock-id="{{ $form->id }}" data-form-code="{{ $form->form_code }}" data-next-serial="{{ $form->nextBatchStartingSerial() }}" aria-label="Add New Batch">Add New Batch</button>
                             @endif

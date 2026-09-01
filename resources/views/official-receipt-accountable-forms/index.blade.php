@@ -380,6 +380,32 @@
                 document.getElementById('reportPreviewPrintBtn').addEventListener('click', function () {
                     window.print();
                 });
+
+                // ── Cancel a pending batch request (Collector) ───────────────────
+                container.addEventListener('click', function (event) {
+                    const cancelBtn = event.target.closest('.js-cancel-batch-request');
+                    if (!cancelBtn) return;
+
+                    event.preventDefault();
+                    if (!confirm('Cancel this pending batch request?')) return;
+
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
+
+                    fetch(`/official-receipts-accountable-forms/batch-requests/${cancelBtn.dataset.requestId}/cancel`, {
+                        method: 'POST',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrfToken },
+                    })
+                        .then((response) => response.json().then((data) => ({ ok: response.ok, data })))
+                        .then(({ ok, data }) => {
+                            if (!ok) {
+                                showToast('Action could not be completed', data.message, 'error');
+                                return;
+                            }
+                            showToast(data.message);
+                            reloadTable();
+                        })
+                        .catch(() => showToast('Action could not be completed', 'Something went wrong. Please try again.', 'error'));
+                });
             })();
         </script>
     @endpush

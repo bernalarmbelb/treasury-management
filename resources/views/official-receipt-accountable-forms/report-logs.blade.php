@@ -22,7 +22,11 @@
             </form>
 
             @if (auth()->user()?->hasRole('collector'))
-                <button type="button" class="report-log-add-batch-btn" id="reportLogRequestBatchBtn">Request New Batch</button>
+                @if ($myPendingBatchRequest ?? null)
+                    <button type="button" class="report-log-add-batch-btn" id="reportLogCancelRequestBtn" data-request-id="{{ $myPendingBatchRequest->id }}">Cancel Pending Request (Qty {{ $myPendingBatchRequest->quantity }})</button>
+                @else
+                    <button type="button" class="report-log-add-batch-btn" id="reportLogRequestBatchBtn">Request New Batch</button>
+                @endif
             @else
                 <button type="button" class="report-log-add-batch-btn" id="reportLogAddBatchBtn">Add New Batch</button>
             @endif
@@ -386,10 +390,13 @@
                         requestForm.reset();
                     }
 
-                    document.getElementById('reportLogRequestBatchBtn').addEventListener('click', function (event) {
-                        event.preventDefault();
-                        openRequestModal();
-                    });
+                    const requestBatchBtn = document.getElementById('reportLogRequestBatchBtn');
+                    if (requestBatchBtn) {
+                        requestBatchBtn.addEventListener('click', function (event) {
+                            event.preventDefault();
+                            openRequestModal();
+                        });
+                    }
 
                     document.getElementById('batchRequestCloseBtn').addEventListener('click', closeRequestModal);
 
@@ -409,6 +416,32 @@
                                 }
                                 closeRequestModal();
                                 showRequestSuccessAlert();
+                            })
+                            .catch(() => showToast('Action could not be completed', 'Something went wrong. Please try again.', 'error'));
+                    });
+                }
+
+                // ── Cancel a pending batch request (Collector) ───────────────────
+                const cancelRequestBtn = document.getElementById('reportLogCancelRequestBtn');
+                if (cancelRequestBtn) {
+                    cancelRequestBtn.addEventListener('click', function (event) {
+                        event.preventDefault();
+                        if (!confirm('Cancel this pending batch request?')) return;
+
+                        fetch(`/official-receipts-accountable-forms/batch-requests/${cancelRequestBtn.dataset.requestId}/cancel`, {
+                            method: 'POST',
+                            headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrfToken },
+                        })
+                            .then((response) => response.json().then((data) => ({ ok: response.ok, data })))
+                            .then(({ ok, data }) => {
+                                if (!ok) {
+                                    showToast('Action could not be completed', data.message, 'error');
+                                    return;
+                                }
+                                // The header button (outside the AJAX-reloaded
+                                // table container) needs a full reload to flip
+                                // back to "Request New Batch".
+                                window.location.reload();
                             })
                             .catch(() => showToast('Action could not be completed', 'Something went wrong. Please try again.', 'error'));
                     });
