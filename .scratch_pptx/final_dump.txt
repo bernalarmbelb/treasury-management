@@ -1,0 +1,272 @@
+<!-- Slide number: 1 -->
+
+![](GoogleShape98p17.jpg)
+
+![](GoogleShape678p48.jpg)
+
+![](GoogleShape96p17.jpg)
+
+![](GoogleShape97p17.jpg)
+SOLEM IT &
+Digital Solutions Co.
+# Empowering businesses with comprehensive IT solutions and creative digital services that enhance operational performance and foster sustainable growth
+2024
+www.solemitsolutions.com
+
+### Notes:
+
+<!-- Slide number: 2 -->
+About the Company
+www.solemitsolutions.com
+We’re a creative startup agency built for bold thinks and early visionaries
+Solem IT and Digital Solutions Co. is a software development firm that offers custom digital services—including web/mobile apps, IT consulting, and digital transformation—tailored to clients from startups to government agencies. Their team combines technical expertise with creative problem-solving to build scalable, user-friendly systems (e.g., a Document Tracking System, Treasury Management System for LGUs). They prioritize collaboration, transparency, and long-term partnerships, with the goal of helping businesses succeed through reliable, human-centered technology.
+2
+
+### Notes:
+
+<!-- Slide number: 3 -->
+Agenda
+www.solemitsolutions.com
+Presentation Overview
+What is the Treasury Management System?
+Project Objectives
+Project Scope and Delimitations
+System Modules and Features
+Implementation Methodology
+System Security and Risk Management
+Training Plan
+Maintenance and Support
+Project Acceptance and Completion Criteria
+Next Steps / Q&A
+3
+
+### Notes:
+
+<!-- Slide number: 4 -->
+What is the Treasury Management System
+www.solemitsolutions.com
+A Digital Solution for Modern LGU Treasury Operations
+A web-based platform designed specifically for Municipal and City Treasurer’s Offices to manage collections, disbursements, and accountable forms.
+Enables secure multi-user collaboration with defined roles for Treasurers, Collectors, and Administrators.
+Provides complete transparency and accountability through automated activity logs and audit trails.
+Streamlines the entire revenue cycle—from collection and receipt issuance to bank deposit, reconciliation, and reporting.
+Key capabilities include:
+Payment capture across cash, cheque, online, and money order
+Serial-number and batch validation for accountable forms
+Bank deposit and cheque reconciliation
+Real-time reporting and abstract generation
+4
+
+### Notes:
+
+<!-- Slide number: 5 -->
+Project Objectives
+www.solemitsolutions.com
+What We Aim to Achieve
+Streamline revenue collection – Simplify the recording of Official Receipts, Real Property Tax, Cedulas, Marriage Certificates, and Burial Permits.
+Enhance collaboration – Enable multiple collectors and treasury staff to work simultaneously with role-based access.
+Ensure accountability – Implement complete activity logs, cancel-request workflows, and serial-number controls.
+Boost efficiency – Automate payment capture, reconciliation, and report generation to reduce manual tallying.
+Maintain accurate records – Track every transaction, deposit, and cheque status from issuance to clearing.
+Enable quick retrieval – Provide search and filtering across collection logs, report logs, and activity records.
+5
+
+### Notes:
+
+<!-- Slide number: 6 -->
+Project Scope and Delimitations
+www.solemitsolutions.com
+What’s included and What’s Not (Initial Phase)
+Included in the Initial Phase:
+Fully functional web-based Collection Management system across 6 accountable-form types
+Role-based access control (Treasurer/Admin, Collector, Staff)
+Official Receipts & Accountable Forms tracking with batch and serial-number validation
+Audit trails and activity logging
+Banks Deposit & Reconciliation (deposits, cheque clearing/bouncing, online payment confirmation)
+Cheque Management (issuance, cancellation, disbursement reporting)
+Reporting & Abstract generation (Treasurer’s Monthly Report, CRAAF, Summary of Collections)
+Excluded (but may be considered for future upgrades):
+Mobile application (iOS/Android)
+Real-time chat or instant messaging features
+Integration with external systems (e.g., national government e-payment portals, cloud storage services like Google Drive or OneDrive)
+6
+
+### Notes:
+
+<!-- Slide number: 7 -->
+System Modules and Features
+www.solemitsolutions.com
+Core System Modules
+Built for Efficiency and Ease of Use
+| Module | Key Features |
+| --- | --- |
+| Dashboard | Centralized overview with collection statistics, pending cancel requests, recent activity, and notification summaries. |
+| Collection Management | Record transactions across 6 form types–Official Receipt, OR/RPT, Individual & Corporation Cedula, Marriage Certificate, and Burial Permit–capturing payment method and amount per transaction. |
+| Official Receipts & Accountable Forms | Add serial-numbered form batches, validate against duplicate or already-used serials, and track issued vs. remaining stock per form. |
+| User Management | Role-based access control—assign permissions per user role (Admin, Treasurer, Collector, Staff). |
+| Banks Deposit & Reconciliation | Record bank deposits from pending cash, cheque, and money-order collections; confirm online payments; mark cheques cleared or bounced. |
+| Cheque Management | Issue and track disbursement cheques, cancel or reissue, and generate the Report of Checks Issued. |
+| Reporting & Abstract | Generate the Treasurer’s Monthly Report of Accountability, CRAAF, and Summary of Collections in styled, exportable formats. |
+| Records | System-wide activity log searchable and filterable by module, with a separate Archive for completed or cancelled records. |
+7
+
+### Notes:
+
+<!-- Slide number: 8 -->
+Implementation Methodology (Phase 1-3)
+www.solemitsolutions.com
+Phase 1 – Requirements Gathering, Phase 2 – System Design, Phase 3 – Development
+Phase 1: Requirements Gathering
+Conduct stakeholder interviews and workshops with Treasurer’s Office personnel.
+Document current workflows and identify pain points.
+Finalize functional and technical requirements.
+Phase 2: System Design
+Design system architecture and database structure.
+Create UI/UX mockups matching official accountable-form layouts.
+Present designs for LGU review and approval before development begins.
+Phase 3: System Development
+Develop the dashboard, Collection Management, and User Management modules.
+Implement Official Receipts & Accountable Forms, Bank Deposit & Reconciliation, and Cheque Management.
+Follow agile development with regular progress updates.
+8
+
+### Notes:
+
+<!-- Slide number: 9 -->
+Implementation Methodology (Phase 4-6)
+www.solemitsolutions.com
+Phase 4 – Testing, Phase 5 – Deployment, Phase 6 – Training and Turnover
+Phase 4: Testing and Quality Assurance
+Functional Testing – Verify all features work as intended.
+User Acceptance Testing (UAT) – LGU representatives test the system in a staging environment.
+Performance Testing – Ensure system stability under load.
+Bug fixing and system optimization based on test results.
+Phase 5: Deployment
+System installation on the LGU's preferred server/environment.
+Database configuration and initial data migration (if applicable).
+System configuration and go-live preparation.
+Phase 6: Training and Turnover
+Conduct hands-on training sessions for all user roles.
+Provide system documentation and user manuals.
+Officially turn over the system to the LGU.
+9
+
+### Notes:
+
+<!-- Slide number: 10 -->
+System Security and Risk Management
+www.solemitsolutions.com
+Protecting Your Data and Ensuring Compliance
+To maintain data integrity, confidentiality, and availability, the system will implement:
+Role-Based Access Control (RBAC) – Users only access features and data relevant to their role.
+Secure User Authentication – Strong password policies and optional multi-factor authentication.
+Activity Logging and Audit Trails – Every action is logged with user ID, timestamp, and IP address.
+Encrypted Database Connections – All data transmitted between the server and users is encrypted using SSL/TLS.
+Regular System Backups – Automated daily/weekly backups to prevent data loss.
+Restricted Administrator Access – Only authorized personnel have administrative privileges.
+Risk Mitigation:
+Regular security assessments and vulnerability scanning.
+Incident response plan in case of system issues.
+10
+
+### Notes:
+
+<!-- Slide number: 11 -->
+Training Plan
+www.solemitsolutions.com
+Empowering Your Team for Success
+Training Coverage:
+System Overview and Navigation
+Recording Collections (Official Receipt, OR/RPT, Cedula, Marriage, Burial)
+Managing Official Receipts & Accountable Forms (Batches and Serials)
+Bank Deposit & Reconciliation and Cheque Management
+Generating and Exporting Reports
+User Management (for Administrators)
+Target Participants:
+Municipal/City Treasurer
+Collectors and Treasury Staff
+System Administrators
+Accounting/Bookkeeping Staff
+
+Training Duration: 1 to 2 days (on-site or remote, depending on preference)
+
+Deliverables:
+User manuals and quick-reference guides
+Video tutorials (optional, if requested)
+
+11
+
+### Notes:
+
+<!-- Slide number: 12 -->
+Maintenance and Support
+www.solemitsolutions.com
+Keeping Your System Reliable and Up-to-Date
+After project turnover, we offer a monthly maintenance and support agreement (with a corresponding fee) that includes:
+Bug Fixes – Prompt resolution of any system errors or issues.
+Minor Feature Updates – Small enhancements based on user feedback.
+Technical Support – Phone/email support during business hours.
+System Monitoring – Proactive health checks and performance monitoring.
+Database Maintenance – Regular optimization and cleanup.
+Benefits:
+Ensures system stability and security.
+Provides peace of mind with dedicated support.
+Allows the system to evolve with changing LGU needs.
+12
+
+### Notes:
+
+<!-- Slide number: 13 -->
+Project Acceptance and Completion Criteria
+www.solemitsolutions.com
+Defining Project Completion
+The project will be considered officially complete once all the following conditions are met:
+All agreed system modules are fully developed and functional.
+The system is successfully deployed and operational in the LGU environment.
+Training has been conducted for all authorized users.
+The LGU has reviewed and formally approved the system.
+Final Step:
+Both parties will sign a Project Acceptance Certificate.
+This officially marks the end of the development phase and the start of the maintenance period (if applicable).
+13
+
+### Notes:
+
+<!-- Slide number: 14 -->
+Next Steps / Call to Action
+www.solemitsolutions.com
+Let's Move Forward Together
+Review and sign the project proposal.
+Schedule a kickoff meeting to finalize requirements.
+Assign LGU point persons for coordination.
+Set target go-live date.
+Contact Information:
+SOLEM IT and Digital Solutions Co.
+Email: info@solemitsolutions.com
+Phone: +63 947 511 3910
+Website: www.solemitsolutions.com
+
+14
+
+### Notes:
+
+<!-- Slide number: 15 -->
+Thank You!
+www.solemitsolutions.com
+We Look Forward to Partnering with Your LGU
+
+“The Secret in getting ahead is getting started”
+- Mark Twain
+15
+
+### Notes:
+
+<!-- Slide number: 16 -->
+Thank You!
+www.solemitsolutions.com
+"We are excited to help you modernize your treasury and collections management processes."
+
+Open floor for questions and Discussion.
+16
+
+### Notes:

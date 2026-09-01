@@ -1,0 +1,677 @@
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="csrf-token" content="">
+	<title>Treasury Management System</title>
+	<link rel="icon" type="image/png" href="http://treasury-management.test/favicon.png">
+	 <link rel="preload" as="style" href="http://treasury-management.test/build/assets/app-Bgp22XOr.css" /><link rel="modulepreload" as="script" href="http://treasury-management.test/build/assets/app-Bl0lTTNI.js" /><link rel="stylesheet" href="http://treasury-management.test/build/assets/app-Bgp22XOr.css" /><script type="module" src="http://treasury-management.test/build/assets/app-Bl0lTTNI.js"></script></head>
+<body>
+	<nav class="navigation-header">
+		<a href="http://treasury-management.test" class="nav-branding">
+			<img src="http://treasury-management.test/images/logo.webp" alt="Logo" class="logo-image">
+			<div class="nav-branding-text">
+				<span class="nav-branding-sub">Republic of the Philippines</span>
+				<span class="nav-branding-name">MUNICIPALITY OF PRIETO DIAZ</span>
+			</div>
+		</a>
+
+		<div class="nav-profile">
+			<div class="nav-datetime">
+				<span id="live-date" class="nav-date"></span>
+				<span id="live-time" class="nav-time"></span>
+			</div>
+
+			<div class="nav-bell-wrapper" id="notifBellWrapper">
+				<button type="button" class="nav-bell-btn" id="notifBellBtn" aria-label="Notifications" aria-expanded="false">
+					<svg class="nav-bell-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+						<path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+					</svg>
+					<span class="nav-bell-badge" id="notifBadge" style="display:none;">0</span>
+				</button>
+				<div class="notif-dropdown" id="notifDropdown" aria-hidden="true">
+					<div class="notif-dropdown-header">
+						<span class="notif-dropdown-title">Notifications</span>
+						<span class="notif-dropdown-count" id="notifDropdownCount"></span>
+					</div>
+					<div class="notif-list" id="notifList">
+						<div class="notif-loading">Loading…</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="nav-user">
+				<div class="nav-user-avatar">
+					<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+						<path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+					</svg>
+				</div>
+				<div class="nav-user-info">
+					<span class="nav-user-name"></span>
+					<div class="nav-user-meta">
+						<span class="nav-user-role">User</span>
+						<form method="POST" action="http://treasury-management.test/logout" style="display:inline;">
+							<input type="hidden" name="_token" value="" autocomplete="off">							<button type="submit" class="nav-logout-btn">Logout</button>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</nav>
+	<div class="nav-sticky-wrapper">
+		<div class="" style="display:flex; width: 100%">
+			<button class="nav-scroll-btn nav-scroll-left" id="scrollLeft">&#8249;</button>
+			<nav class="navigation-bar" id="navigationBar">
+				<p><a href="http://treasury-management.test/collections" class="  "> Collections Management </a></p>
+
+				<p><a href="http://treasury-management.test/official-receipts-accountable-forms" class="  ">Official Receipts & Accountable Forms</a></p>
+
+				<p><a href="http://treasury-management.test/reporting-abstract" class="  ">Reporting & Abstract</a></p>
+
+				<p><a href="http://treasury-management.test/bank-deposit-reconciliation" class="  ">Banks Deposit & Reconciliation</a></p>
+				
+				<p><a href="http://treasury-management.test/cheque-management" class="  ">Cheque Management</a></p>
+
+				<p><a href="http://treasury-management.test/user-management" class="  ">User Management</a></p>
+
+				<p><a href="http://treasury-management.test/records" class="  ">Records</a></p>
+
+				<p><a href="http://treasury-management.test/archive-records" class="  ">Archive</a></p>
+			</nav>
+			<button class="nav-scroll-btn nav-scroll-right" id="scrollRight">&#8250;</button>
+		</div>
+	</div>
+
+	<main class="main-container">
+		<div class="x-header-container sub-nav-sticky">
+        <div class="container-title">
+            <div style="display: flex; flex-direction: column;">
+                <span class="page-title">Collection Management</span>
+                <p class="page-links">
+                    <a href="http://treasury-management.test">Home</a> |
+                    <a href="http://treasury-management.test/collections">Collections Management</a> |
+                    <a href="http://treasury-management.test/collections/transaction-entry">Transactions Entry</a> |
+                    <span class="page-links-accent">Burial Permit</span>
+                </p>
+            </div>
+        </div>
+        <div class="ctc-tabs-row">
+            <a href="http://treasury-management.test/collections/transaction-entry" class="ctc-tab">Transactions Log</a>
+            <div class="ctc-tab active">New Entry</div>
+        </div>
+    </div>
+
+    <div class="collection-content">
+        <form class="burial-page" id="burialForm" method="POST" action="/collections/transaction-entry/8/burial">
+            <input type="hidden" name="_token" value="" autocomplete="off">
+            
+            <div class="burial-meta">
+                <span>Accountable Form No. 51 &nbsp;·&nbsp; Revised 1993</span>
+                <span>ORIGINAL</span>
+            </div>
+            <div class="burial-masthead">
+                <p class="burial-or-title">OFFICIAL RECEIPT</p>
+                <p class="burial-or-sub">of the Republic of the Philippines</p>
+                <div class="burial-no-row">
+                    <span class="burial-seal"><svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="currentColor" stroke="none" viewBox="0 0 24 24"><path d="M20.995 6.903a.997.997 0 0 0-.547-.797l-7.973-4a.997.997 0 0 0-.895-.002l-8.027 4c-.297.15-.502.437-.544.767-.013.097-1.145 9.741 8.541 15.008a.995.995 0 0 0 .969-.009c9.307-5.259 8.514-14.573 8.476-14.967zm-8.977 12.944c-6.86-4.01-7.14-10.352-7.063-12.205l7.071-3.523 6.998 3.511c.005 1.87-.481 8.243-7.006 12.217z"/></svg></span>
+                    <span class="burial-no-label">No.</span>
+                    <div class="burial-no-box">
+                        <input type="text" id="burial-certificate-number" name="certificate_number" value="6551387" autocomplete="off">
+                    </div>
+                    <input type="text" id="burial-series-letter" name="series_letter" class="burial-series" value="C" maxlength="5" aria-label="Series letter">
+                </div>
+                <p class="burial-serial-hint">Serial pulled from the Form 58 booklet · editable</p>
+            </div>
+            <div class="burial-title-bar">City / Municipal Burial Permit and Fee Receipt</div>
+
+            
+            <div class="ctc-or2-bar"><p>Applicant &amp; Issuing LGU</p></div>
+            <div class="ctc-or2-row">
+                <div class="ctc-or2-cell ctc-or2-cell--captioned">
+                    <input type="text" id="burial-applicant-name" name="applicant_name" placeholder=" ">
+                    <label class="ctc-or2-caption" for="burial-applicant-name">Mr. (Applicant)</label>
+                </div>
+                <div class="ctc-or2-cell ctc-or2-cell--captioned">
+                    <input type="text" id="burial-city-municipality" name="city_municipality" placeholder=" ">
+                    <label class="ctc-or2-caption" for="burial-city-municipality">To the City / Municipality of</label>
+                </div>
+            </div>
+            <div class="ctc-or2-cell ctc-or2-cell--captioned">
+                <input type="text" id="burial-province" name="province" placeholder=" ">
+                <label class="ctc-or2-caption" for="burial-province">Province of</label>
+            </div>
+
+            
+            <div class="burial-permission">
+                <span class="burial-permission-label">Permission is hereby granted to</span>
+                <div class="burial-permission-opts">
+                                            <label class="burial-radio">
+                            <input type="radio" name="permission_type" value="Inter" checked>
+                            <span class="burial-radio-dot"></span>Inter
+                        </label>
+                                            <label class="burial-radio">
+                            <input type="radio" name="permission_type" value="Disinter" >
+                            <span class="burial-radio-dot"></span>Disinter
+                        </label>
+                                            <label class="burial-radio">
+                            <input type="radio" name="permission_type" value="Remove" >
+                            <span class="burial-radio-dot"></span>Remove
+                        </label>
+                                    </div>
+                <span class="burial-permission-tail">the remains of —</span>
+            </div>
+
+            
+            <div class="ctc-or2-bar"><p>Deceased Details</p></div>
+            <div class="ctc-or2-cell ctc-or2-cell--captioned" id="burial-deceased-name-cell">
+                <input type="text" id="burial-deceased-name" name="deceased_name" placeholder=" ">
+                <label class="ctc-or2-caption" for="burial-deceased-name">1. Name</label>
+            </div>
+            <div class="ctc-or2-row">
+                <div class="ctc-or2-cell ctc-or2-cell--captioned">
+                    <input type="text" id="burial-nationality" name="nationality" placeholder=" ">
+                    <label class="ctc-or2-caption" for="burial-nationality">2. Nationality</label>
+                </div>
+                <div class="ctc-or2-cell ctc-or2-cell--captioned">
+                    <input type="number" id="burial-age" name="age" placeholder=" " min="0" max="200">
+                    <label class="ctc-or2-caption" for="burial-age">3. Age (Years)</label>
+                </div>
+                <div class="ctc-or2-cell ctc-or2-cell--captioned">
+                    <input type="text" id="burial-sex" name="sex" placeholder=" ">
+                    <label class="ctc-or2-caption" for="burial-sex">Sex</label>
+                </div>
+            </div>
+            <div class="ctc-or2-row">
+                <div class="ctc-or2-cell ctc-or2-cell--captioned ctc-or2-cell--date filled">
+                    <input type="date" id="burial-date-of-death" name="date_of_death">
+                    <label class="ctc-or2-caption" for="burial-date-of-death">4. Date of Death</label>
+                </div>
+                <div class="ctc-or2-cell ctc-or2-cell--captioned">
+                    <input type="text" id="burial-cause-of-death" name="cause_of_death" placeholder=" ">
+                    <label class="ctc-or2-caption" for="burial-cause-of-death">5. Cause of Death</label>
+                </div>
+            </div>
+            <div class="ctc-or2-cell ctc-or2-cell--captioned">
+                <input type="text" id="burial-cemetery-name" name="cemetery_name" placeholder=" ">
+                <label class="ctc-or2-caption" for="burial-cemetery-name">6. Name of Cemetery</label>
+            </div>
+
+            
+            <p class="burial-disinter-note">* In case of disinterment — enabled only when “Disinter” is selected</p>
+            <div class="burial-disinter-group" id="burialDisinterGroup">
+                <div class="ctc-or2-row">
+                    <div class="ctc-or2-cell ctc-or2-cell--captioned">
+                        <input type="text" id="burial-infectious" name="infectious" placeholder=" " disabled>
+                        <label class="ctc-or2-caption" for="burial-infectious">7. Infectious / Non-infectious</label>
+                    </div>
+                    <div class="ctc-or2-cell ctc-or2-cell--captioned">
+                        <input type="text" id="burial-embalmed" name="embalmed" placeholder=" " disabled>
+                        <label class="ctc-or2-caption" for="burial-embalmed">8. Body Embalmed / Not</label>
+                    </div>
+                </div>
+                <div class="ctc-or2-cell ctc-or2-cell--captioned">
+                    <input type="text" id="burial-disposition" name="disposition" placeholder=" " disabled>
+                    <label class="ctc-or2-caption" for="burial-disposition">9. Disposition of Remains</label>
+                </div>
+            </div>
+
+            
+            <div class="ctc-or2-bar"><p>Fee Receipt</p></div>
+            <div class="ctc-or2-row">
+                <div class="ctc-or2-cell ctc-or2-cell--captioned burial-cell--peso">
+                    <input type="number" id="burial-fee-amount" name="fee_amount" placeholder=" " min="0" step="0.01">
+                    <label class="ctc-or2-caption" for="burial-fee-amount">10. Amount of Fee (per Ordinance)</label>
+                </div>
+                <div class="ctc-or2-cell ctc-or2-cell--captioned ctc-or2-cell--date filled">
+                    <input type="date" id="burial-date-issued" name="date_issued" value="2026-07-06">
+                    <label class="ctc-or2-caption" for="burial-date-issued">Date Issued</label>
+                </div>
+            </div>
+
+            <div class="burial-cert">
+                <p class="burial-cert-text">
+                    I hereby certify that I have this day issued this burial permit and have received the fee above stated in the amount of
+                    <span class="burial-cert-amount" data-burial-preview="fee_amount_words">₱ 0.00</span>.
+                </p>
+                <div class="ctc-or2-cell ctc-or2-cell--captioned burial-sig-input">
+                    <input type="text" id="burial-municipal-secretary" name="municipal_secretary" placeholder=" " value="">
+                    <label class="ctc-or2-caption" for="burial-municipal-secretary">Municipal Secretary / Treasurer</label>
+                </div>
+            </div>
+
+            <div class="ctc-or2-actions">
+                <a href="http://treasury-management.test/collections/transaction-entry" class="burial-cancel-btn">Cancel</a>
+                <button type="submit" class="ctc-or2-proceed-btn" id="burialProceedBtn">Proceed</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="ctc-preview-overlay" id="burialPreviewOverlay">
+    <div class="ctc-preview-wrap">
+        <div class="ctc-preview-modal burial-preview-modal">
+            <div class="ctc-preview-close-row">
+                <button type="button" class="ctc-preview-close-btn" id="burialPreviewCloseBtn" aria-label="Close preview">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="currentColor" stroke="none" viewBox="0 0 24 24"><path d="m16.192 6.344-4.243 4.242-4.242-4.242-1.414 1.414L10.535 12l-4.242 4.242 1.414 1.414 4.242-4.242 4.243 4.242 1.414-1.414L13.364 12l4.242-4.242z"/></svg>                </button>
+            </div>
+
+            <div class="burial-doc">
+                <div class="burial-doc-meta">
+                    <span>Accountable Form No. 51</span><span>Revised 1993</span><span>ORIGINAL</span>
+                </div>
+
+                <div class="burial-doc-masthead">
+                    <div class="burial-doc-mast-top">
+                        <div class="burial-doc-mast-title">OFFICIAL RECEIPT</div>
+                        <div class="burial-doc-mast-sub">OF THE REPUBLIC OF THE PHILIPPINES</div>
+                    </div>
+                    <div class="burial-doc-mast-bottom">
+                        <div class="burial-doc-seal"><span class="burial-doc-seal-circle">SEAL</span></div>
+                        <div class="burial-doc-no">N<sup>o</sup> <span class="bval" data-burial-preview="certificate_number"></span> <span class="bval" data-burial-preview="series_letter"></span></div>
+                    </div>
+                </div>
+
+                <div class="burial-doc-title">CITY/MUNICIPAL BURIAL PERMIT AND<br>FEE RECEIPT</div>
+
+                <div class="burial-doc-mr">Mr. <span class="bfill" data-burial-preview="applicant_name"></span></div>
+
+                <div class="burial-doc-dr">
+                    <div class="burial-doc-dr-label">Dr.</div>
+                    <div class="burial-doc-dr-fields">
+                        <div class="burial-doc-dr-row">To the City/Municipality of: <span class="bval" data-burial-preview="city_municipality"></span></div>
+                        <div class="burial-doc-dr-row">Province of: <span class="bval" data-burial-preview="province"></span></div>
+                    </div>
+                </div>
+
+                <div class="burial-doc-perm">
+                    <span>Permission is hereby granted</span>
+                    <div class="burial-doc-perm-box">
+                        <div class="burial-doc-perm-opt" data-perm-value="Inter">Inter</div>
+                        <div class="burial-doc-perm-opt" data-perm-value="Disinter">Disinter</div>
+                        <div class="burial-doc-perm-opt" data-perm-value="Remove">Remove</div>
+                    </div>
+                    <span>the remains of&mdash;</span>
+                </div>
+
+                <table class="burial-doc-items">
+                    <tr><td>1.</td><td>Name <span class="bfill" data-burial-preview="deceased_name"></span></td></tr>
+                    <tr><td>2.</td><td>Nationality <span class="bfill" data-burial-preview="nationality"></span></td></tr>
+                    <tr><td>3.</td><td>Age <span class="bfill" data-burial-preview="age"></span> years. Sex <span class="bfill" data-burial-preview="sex"></span></td></tr>
+                    <tr><td>4.</td><td>Date of death <span class="bfill" data-burial-preview="date_of_death"></span></td></tr>
+                    <tr><td>5.</td><td>Cause of death <span class="bfill" data-burial-preview="cause_of_death"></span></td></tr>
+                    <tr><td>6.</td><td>Name of cemetery <span class="bfill" data-burial-preview="cemetery_name"></span></td></tr>
+                    <tr class="burial-doc-disinter"><td></td><td>* In case of disinterment&mdash;</td></tr>
+                    <tr><td>*7.</td><td>Infectious or non-infectious <span class="bfill" data-burial-preview="infectious"></span></td></tr>
+                    <tr><td>*8.</td><td>Body embalmed or not embalmed <span class="bfill" data-burial-preview="embalmed"></span></td></tr>
+                    <tr><td>*9.</td><td>Disposition of remains <span class="bfill" data-burial-preview="disposition"></span></td></tr>
+                    <tr><td>10.</td><td>Amount of the fee per city/municipal ordinance</td></tr>
+                </table>
+
+                <div class="burial-doc-footgrid">
+                    <div class="burial-doc-footgrid-row">
+                        <div class="burial-doc-footgrid-cell burial-doc-footgrid-cell--l">No. <span class="bval" data-burial-preview="certificate_number"></span></div>
+                        <div class="burial-doc-footgrid-cell burial-doc-footgrid-cell--r">Dated: <span class="bval" data-burial-preview="date_issued"></span></div>
+                    </div>
+                    <div class="burial-doc-footgrid-row">
+                        <div class="burial-doc-footgrid-cell burial-doc-footgrid-cell--l">&#8369; <span class="bval" data-burial-preview="fee_amount"></span></div>
+                        <div class="burial-doc-footgrid-cell burial-doc-footgrid-cell--r"></div>
+                    </div>
+                    <div class="burial-doc-footgrid-row">
+                        <div class="burial-doc-footgrid-cell burial-doc-footgrid-cell--l">City/Municipality</div>
+                        <div class="burial-doc-footgrid-cell burial-doc-footgrid-cell--r">Province</div>
+                    </div>
+                    <div class="burial-doc-footgrid-row">
+                        <div class="burial-doc-footgrid-cell burial-doc-footgrid-cell--full">Date <span class="bval">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> , 20<span class="bval" data-burial-preview="date_issued_yy"></span></div>
+                    </div>
+                </div>
+
+                <p class="burial-doc-cert">
+                    <span class="burial-doc-cert-sc">I hereby certify</span> that I have this day issued this burial permit and have received the fee above stated in the amount of &#8369; <span class="bfill" data-burial-preview="fee_amount"></span>
+                </p>
+
+                <div class="burial-doc-sig">
+                    <div class="burial-doc-sig-inner">
+                        <div class="burial-doc-sig-city">City <span class="bfill" data-burial-preview="municipal_secretary"></span></div>
+                        <div class="burial-doc-sig-title">Municipal Secretary</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="burial-preview-actions">
+                <button type="button" class="ctc-preview-print-btn burial-print-btn" id="burialPreviewPrintBtn">Print</button>
+                <button type="button" class="ctc-or2-proceed-btn" id="burialPreviewSaveBtn">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <script>
+        (function () {
+            const form = document.getElementById('burialForm');
+            if (!form) return;
+
+            // Floating-label "filled" state (matches the OR/RPT + Marriage forms).
+            const updateCellState = (input) => {
+                const cell = input.closest('.ctc-or2-cell');
+                if (cell && !cell.classList.contains('ctc-or2-cell--date')) {
+                    cell.classList.toggle('filled', input.value.trim() !== '');
+                }
+            };
+            form.querySelectorAll('.ctc-or2-cell input').forEach((input) => {
+                updateCellState(input);
+                input.addEventListener('input', () => updateCellState(input));
+            });
+
+            // Fields 7–9 enable only for a disinterment.
+            const disinterGroup = document.getElementById('burialDisinterGroup');
+            const disinterInputs = disinterGroup.querySelectorAll('input');
+            const applyPermission = () => {
+                const isDisinter = form.querySelector('input[name="permission_type"]:checked')?.value === 'Disinter';
+                disinterGroup.classList.toggle('is-disabled', !isDisinter);
+                disinterInputs.forEach((input) => {
+                    input.disabled = !isDisinter;
+                    if (!isDisinter) {
+                        input.value = '';
+                        updateCellState(input);
+                    }
+                });
+            };
+            form.querySelectorAll('input[name="permission_type"]').forEach((r) => r.addEventListener('change', () => { applyPermission(); syncPreviews(); }));
+            applyPermission();
+
+            const num2 = (v) => {
+                const n = parseFloat(v);
+                return isNaN(n) ? '' : n.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            };
+            const fmtDate = (v) => {
+                if (!v) return '';
+                const d = new Date(v + 'T00:00:00');
+                return isNaN(d) ? v : d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            };
+
+            // Mirror the form into the preview modal (faithful replica).
+            const syncPreviews = () => {
+                document.querySelectorAll('[data-burial-preview]').forEach((el) => {
+                    const name = el.dataset.burialPreview;
+                    if (name === 'fee_amount') {
+                        el.textContent = num2(form.querySelector('[name="fee_amount"]').value);
+                        return;
+                    }
+                    if (name === 'date_of_death' || name === 'date_issued') {
+                        el.textContent = fmtDate(form.querySelector(`[name="${name}"]`)?.value);
+                        return;
+                    }
+                    if (name === 'date_issued_yy') {
+                        const v = form.querySelector('[name="date_issued"]').value;
+                        el.textContent = v ? v.slice(2, 4) : '';
+                        return;
+                    }
+                    const input = form.querySelector(`[name="${name}"]`);
+                    if (input) el.textContent = input.value || '';
+                });
+                // Highlight the chosen permission in the Inter/Disinter/Remove box.
+                const perm = form.querySelector('input[name="permission_type"]:checked')?.value;
+                document.querySelectorAll('.burial-doc-perm-opt').forEach((opt) => {
+                    opt.classList.toggle('is-selected', opt.dataset.permValue === perm);
+                });
+            };
+            form.querySelectorAll('input').forEach((input) => input.addEventListener('input', syncPreviews));
+            syncPreviews();
+
+            // Preview modal.
+            const previewOverlay = document.getElementById('burialPreviewOverlay');
+            document.getElementById('burialPreviewCloseBtn').addEventListener('click', () => previewOverlay.classList.remove('open'));
+
+            // Proceed: validate required, then preview.
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const nameInput = form.querySelector('#burial-deceased-name');
+                const isEmpty = !nameInput.value.trim();
+                nameInput.closest('.ctc-or2-cell').classList.toggle('has-error', isEmpty);
+                if (isEmpty) { nameInput.focus(); return; }
+                syncPreviews();
+                previewOverlay.classList.add('open');
+            });
+            form.querySelector('#burial-deceased-name').addEventListener('input', function () {
+                if (this.value.trim()) this.closest('.ctc-or2-cell').classList.remove('has-error');
+            });
+
+            // Save from the preview.
+            const saveBtn = document.getElementById('burialPreviewSaveBtn');
+            saveBtn.addEventListener('click', () => {
+                saveBtn.disabled = true;
+                const original = saveBtn.textContent;
+                saveBtn.textContent = 'Saving…';
+                fetch(form.action, {
+                    method: 'POST',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    body: new FormData(form),
+                })
+                    .then((r) => { if (!r.ok) throw new Error('save'); return r.json(); })
+                    .then((data) => { window.location.href = data.redirect; })
+                    .catch(() => {
+                        saveBtn.disabled = false;
+                        saveBtn.textContent = original;
+                        showToast('Action could not be completed', 'Something went wrong while saving. Please try again.', 'error');
+                    });
+            });
+
+            document.getElementById('burialPreviewPrintBtn').addEventListener('click', () => window.print());
+        })();
+    </script>
+	</main>
+
+	
+	<div class="app-toast" id="appToast" role="status" aria-live="polite">
+		<span class="app-toast-icon" id="appToastIcon" aria-hidden="true"></span>
+		<div class="app-toast-text">
+			<p class="app-toast-title" id="appToastTitle"></p>
+			<p class="app-toast-subtitle" id="appToastSubtitle"></p>
+		</div>
+	</div>
+
+	
+	<script>
+	// ── Global toast (success / error feedback) ───────────────────────────
+	(function () {
+		const ICONS = {
+			success: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>',
+			error: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>',
+		};
+
+		let toastTimer;
+
+		window.showToast = function (title, subtitle = '', type = 'success') {
+			const toast = document.getElementById('appToast');
+			if (!toast) return;
+
+			const titleEl = document.getElementById('appToastTitle');
+			const subtitleEl = document.getElementById('appToastSubtitle');
+			const iconEl = document.getElementById('appToastIcon');
+			const variant = type === 'error' ? 'error' : 'success';
+
+			titleEl.textContent = title;
+			subtitleEl.textContent = subtitle || '';
+			subtitleEl.style.display = subtitle ? '' : 'none';
+			iconEl.innerHTML = ICONS[variant];
+
+			toast.classList.remove('app-toast--success', 'app-toast--error');
+			toast.classList.add('app-toast--' + variant, 'show');
+
+			clearTimeout(toastTimer);
+			toastTimer = setTimeout(() => toast.classList.remove('show'), 3500);
+		};
+	})();
+
+	// ── Live clock ────────────────────────────────────────────────────────
+	// The header clock is driven solely by updateDateTime() in resources/js/app.js
+	// (the Vite-bundled script). A second inline clock used to run here too; both
+	// wrote #live-date every second with different day formats ("July 04" vs
+	// "July 4"), so they alternated and made the date jitter. Removed the duplicate.
+
+	// ── Notification bell ────────────────────────────────────────────────
+	(function () {
+		const bellBtn    = document.getElementById('notifBellBtn');
+		if (!bellBtn) return;
+
+		const dropdown   = document.getElementById('notifDropdown');
+		const badge      = document.getElementById('notifBadge');
+		const list       = document.getElementById('notifList');
+		const countLabel = document.getElementById('notifDropdownCount');
+		const csrf       = () => document.querySelector('meta[name="csrf-token"]')?.content ?? '';
+		let isOpen = false;
+
+		function updateBadge(count) {
+			if (count > 0) {
+				badge.textContent = count > 99 ? '99+' : count;
+				badge.style.display = '';
+				bellBtn.classList.add('has-unread');
+			} else {
+				badge.style.display = 'none';
+				bellBtn.classList.remove('has-unread');
+			}
+			if (countLabel) {
+				countLabel.textContent = count > 0 ? count + ' new' : '';
+			}
+		}
+
+		function fetchCount() {
+			fetch('/notifications/count', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+				.then(r => r.json())
+				.then(d => updateBadge(d.count ?? 0))
+				.catch(() => {});
+		}
+
+		function tagFor(type) {
+			if (type === 'request_rejected') {
+				return '<span class="notif-type-tag notif-type-tag--rejected">Request Rejected</span>';
+			}
+			return '<span class="notif-type-tag">Cancel Request</span>';
+		}
+
+		function actionFor(type) {
+			if (type === 'request_rejected') return '<span class="notif-review-btn">View →</span>';
+			return '<span class="notif-review-btn">Review →</span>';
+		}
+
+		function renderNotifications(items) {
+			const hasUnseen = items.some(i => i.seen === false);
+			const emptyText = false
+				? 'No pending requests'
+				: 'No new notifications';
+
+			if (!items.length) {
+				list.innerHTML =
+					'<div class="notif-empty">' +
+						'<svg class="notif-empty-icon" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>' +
+						'<span class="notif-empty-text">' + emptyText + '</span>' +
+					'</div>';
+				return;
+			}
+
+			list.innerHTML = items.map(function (item) {
+				const unseenClass = (item.seen === false) ? ' notif-item--unseen' : '';
+				return '<a href="' + item.url + '" class="notif-item' + unseenClass + '">' +
+					'<div class="notif-item-top">' +
+						tagFor(item.type) +
+						'<span class="notif-time">' + item.created_at + '</span>' +
+					'</div>' +
+					'<div class="notif-item-body">' +
+						'<div class="notif-desc">' +
+							'<span class="notif-serial">' + (item.serial || '—') + '</span>' +
+							'<span class="notif-payee">' + (item.payee || '—') + '</span>' +
+						'</div>' +
+						actionFor(item.type) +
+					'</div>' +
+				'</a>';
+			}).join('');
+		}
+
+		function markSeen() {
+			fetch('/notifications/mark-seen', {
+				method: 'POST',
+				headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrf() },
+			})
+			.then(() => updateBadge(0))
+			.catch(() => {});
+		}
+
+		function loadNotifications() {
+			list.innerHTML = '<div class="notif-loading">Loading…</div>';
+			fetch('/notifications', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+				.then(r => r.json())
+				.then(d => {
+					const items = d.items ?? [];
+					renderNotifications(items);
+					// Non-admin: mark unseen rejections as seen after viewing
+					const hasUnseen = items.some(i => i.seen === false);
+					if (hasUnseen) markSeen();
+				})
+				.catch(() => { list.innerHTML = '<div class="notif-loading">Could not load notifications.</div>'; });
+		}
+
+		function openDropdown() {
+			isOpen = true;
+			dropdown.classList.add('open');
+			bellBtn.setAttribute('aria-expanded', 'true');
+			dropdown.setAttribute('aria-hidden', 'false');
+			loadNotifications();
+		}
+
+		function closeDropdown() {
+			isOpen = false;
+			dropdown.classList.remove('open');
+			bellBtn.setAttribute('aria-expanded', 'false');
+			dropdown.setAttribute('aria-hidden', 'true');
+		}
+
+		bellBtn.addEventListener('click', function (e) {
+			e.stopPropagation();
+			isOpen ? closeDropdown() : openDropdown();
+		});
+
+		document.addEventListener('click', function (e) {
+			if (isOpen && !dropdown.contains(e.target) && e.target !== bellBtn) closeDropdown();
+		});
+
+		document.addEventListener('keydown', function (e) {
+			if (e.key === 'Escape' && isOpen) closeDropdown();
+		});
+
+		fetchCount();
+		setInterval(fetchCount, 30000);
+	})();
+
+	// ── Quick entry footer bar ───────────────────────────────────────────
+	(function () {
+		const bar = document.getElementById('quickEntryBar');
+		if (!bar) return;
+
+		const toggle = document.getElementById('quickEntryToggle');
+		const STORAGE_KEY = 'quickEntryCollapsed';
+
+		// Reserve space at the bottom of the page so the fixed bar never
+		// covers page content (tables, pagination, action buttons).
+		function applyPadding() {
+			document.body.style.paddingBottom = bar.offsetHeight + 'px';
+		}
+
+		function setCollapsed(collapsed) {
+			bar.classList.toggle('collapsed', collapsed);
+			toggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+			applyPadding();
+		}
+
+		setCollapsed(localStorage.getItem(STORAGE_KEY) === '1');
+
+		toggle.addEventListener('click', function () {
+			const collapsed = !bar.classList.contains('collapsed');
+			localStorage.setItem(STORAGE_KEY, collapsed ? '1' : '0');
+			setCollapsed(collapsed);
+		});
+
+		window.addEventListener('resize', applyPadding);
+		window.addEventListener('load', applyPadding);
+	})();
+	</script>
+</body>
+</html>
