@@ -273,14 +273,43 @@
                         }, 3000);
                     };
 
-                    var openBatchModal = function (batchRequestId) {
+                    // Adds `delta` to the trailing numeric run of a serial number,
+                    // preserving any non-numeric prefix and the digit padding
+                    // width (e.g. "2026-00001" + 4 => "2026-00005"). Mirrors
+                    // FormBatch's PHP trailing-digits logic on the client side
+                    // so the Ending Serial can be prefilled from a requested
+                    // quantity without a round trip to the server.
+                    var addToSerial = function (serial, delta) {
+                        const match = /(\d+)$/.exec(serial || '');
+                        if (!match) return serial || '';
+
+                        const digits = match[1];
+                        const prefix = serial.slice(0, serial.length - digits.length);
+                        const next = parseInt(digits, 10) + delta;
+
+                        return prefix + String(next).padStart(digits.length, '0');
+                    };
+
+                    var openBatchModal = function (batchRequestId, quantity) {
                         modalTitle.textContent = `Add new batch of ${formCode}`;
                         modalForm.action = `/official-receipts-accountable-forms/${formStockId}/batches`;
 
                         const nextEl = document.getElementById('reportLogNextSerial');
+                        const startingSerial = (nextEl && nextEl.dataset.nextSerial) ? nextEl.dataset.nextSerial : '';
+
                         const ssnInput = modalForm.querySelector('[name="starting_serial_number"]');
                         if (ssnInput) {
-                            ssnInput.value = (nextEl && nextEl.dataset.nextSerial) ? nextEl.dataset.nextSerial : '';
+                            ssnInput.value = startingSerial;
+                        }
+
+                        // Fulfilling a batch request: prefill Ending Serial too,
+                        // so the range covers exactly the requested quantity
+                        // (e.g. starting 6551387, qty 5 => ending 6551391). Admin
+                        // can still edit it before saving.
+                        const esnInput = modalForm.querySelector('[name="ending_serial_number"]');
+                        if (esnInput) {
+                            const qty = parseInt(quantity, 10);
+                            esnInput.value = (startingSerial && qty > 0) ? addToSerial(startingSerial, qty - 1) : '';
                         }
 
                         const requestIdInput = modalForm.querySelector('[name="batch_request_id"]');
@@ -296,7 +325,7 @@
 
                     document.getElementById('reportLogAddBatchBtn').addEventListener('click', function (event) {
                         event.preventDefault();
-                        openBatchModal(null);
+                        openBatchModal(null, null);
                     });
 
                     document.getElementById('formBatchCloseBtn').addEventListener('click', closeBatchModal);
@@ -392,7 +421,7 @@
                         event.preventDefault();
                         const overlay = document.getElementById('formBatchModalOverlay');
                         if (overlay && typeof openBatchModal === 'function') {
-                            openBatchModal(fulfillBtn.dataset.requestId);
+                            openBatchModal(fulfillBtn.dataset.requestId, fulfillBtn.dataset.quantity);
                         }
                         return;
                     }

@@ -31,7 +31,7 @@
                     <span class="batch-request-date">{{ $batchRequest->created_at->format('M j, Y') }}</span>
                 </div>
                 <div class="table-actions">
-                    <button type="button" class="action-btn action-view js-fulfill-batch-request" data-request-id="{{ $batchRequest->id }}">Fulfill</button>
+                    <button type="button" class="action-btn action-view js-fulfill-batch-request" data-request-id="{{ $batchRequest->id }}" data-quantity="{{ $batchRequest->quantity }}">Fulfill</button>
                     <button type="button" class="action-btn action-export js-reject-batch-request" data-request-id="{{ $batchRequest->id }}">Reject</button>
                 </div>
             </div>
