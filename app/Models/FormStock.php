@@ -125,6 +125,19 @@ class FormStock extends Model
     }
 
     /**
+     * Same as availableQty(), but scoped to only the batches assigned to one
+     * collector (by name, matching the `assigned_to` column) — what a
+     * Collector account should see as "their" remaining stock, instead of
+     * the form's total across every collector.
+     */
+    public function availableQtyForCollector(string $collectorName): int
+    {
+        return $this->batches
+            ->where('assigned_to', $collectorName)
+            ->sum(fn (FormBatch $batch) => $batch->remainingQty());
+    }
+
+    /**
      * Validates a proposed new batch serial range against everything already
      * on record for this form and returns a user-facing "Error in adding
      * batch" message (listing the offending serials) when it must be blocked,

@@ -48,7 +48,11 @@
         </thead>
         <tbody>
             @forelse ($forms as $form)
-                @php $availableQty = $form->availableQty(); @endphp
+                @php
+                    $availableQty = auth()->user()?->hasRole('collector')
+                        ? $form->availableQtyForCollector(auth()->user()->name)
+                        : $form->availableQty();
+                @endphp
                 <tr>
                     <td class="{{ $qtyClass($availableQty) }}">{{ $availableQty }}</td>
                     <td>{{ $form->form_name }}</td>

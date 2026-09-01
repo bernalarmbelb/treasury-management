@@ -64,11 +64,15 @@ class AppServiceProvider extends ServiceProvider
             ->get();
 
         $links = collect();
+        $collectorName = auth()->user()->hasRole('collector') ? auth()->user()->name : null;
+        $qtyFor = fn (FormStock $form) => $collectorName !== null
+            ? $form->availableQtyForCollector($collectorName)
+            : $form->availableQty();
 
         foreach (self::QUICK_ENTRY_FORMS as $code => $meta) {
             $available = $forms
                 ->where('form_code', $code)
-                ->filter(fn (FormStock $form) => $form->availableQty() > 0);
+                ->filter(fn (FormStock $form) => $qtyFor($form) > 0);
 
             if ($available->isEmpty()) {
                 continue;
@@ -76,7 +80,7 @@ class AppServiceProvider extends ServiceProvider
 
             $links->push([
                 'label' => $meta['label'],
-                'qty' => $available->sum(fn (FormStock $form) => $form->availableQty()),
+                'qty' => $available->sum($qtyFor),
                 // Relative path (absolute: false) so links resolve against the
                 // current host — works on the real domain and the localhost preview.
                 'url' => route($meta['route'], $available->first()->id, false),
