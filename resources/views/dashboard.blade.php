@@ -1,28 +1,11 @@
 <x-layout>
     <div class="x-header-container">
-        <x-header title="Dashboard" :tmpRoute="route('home')" routeName="home">
-            <x-slot:actions>
-                @php
-                    $dashMonths = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-                @endphp
-                <form class="dash-filter" method="GET" action="{{ route('home') }}" aria-label="Dashboard period filter">
-                    <select name="month" class="dash-filter-select js-cs" data-cs-inline>
-                        @foreach ($dashMonths as $i => $m)
-                            <option value="{{ $i + 1 }}" @selected($month === $i + 1)>{{ $m }}</option>
-                        @endforeach
-                    </select>
-                    <select name="year" class="dash-filter-select js-cs" data-cs-inline>
-                        @for ($y = now()->year; $y >= 2020; $y--)
-                            <option value="{{ $y }}" @selected($year === $y)>{{ $y }}</option>
-                        @endfor
-                    </select>
-                    <button type="submit" class="dash-filter-go">Generate</button>
-                </form>
-            </x-slot:actions>
-        </x-header>
+        <x-header title="Dashboard" :tmpRoute="route('home')" routeName="home" />
     </div>
 
-    @include('partials.select-enhancer')
+    @php
+        $dashMonths = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    @endphp
 
     @php
         $lowRows = collect($forms['rows'])->filter(fn ($r) => $r['remaining'] < 50)->values();
@@ -48,6 +31,20 @@
     @endphp
 
     <div class="dash-wrap">
+
+        <form class="dash-filter" method="GET" action="{{ route('home') }}" aria-label="Dashboard period filter">
+            <select name="month" class="dash-filter-select js-cs" data-cs-inline>
+                @foreach ($dashMonths as $i => $m)
+                    <option value="{{ $i + 1 }}" @selected($month === $i + 1)>{{ $m }}</option>
+                @endforeach
+            </select>
+            <select name="year" class="dash-filter-select js-cs" data-cs-inline>
+                @for ($y = now()->year; $y >= 2020; $y--)
+                    <option value="{{ $y }}" @selected($year === $y)>{{ $y }}</option>
+                @endfor
+            </select>
+            <button type="submit" class="dash-filter-go">Filter</button>
+        </form>
 
         <div class="dash-kpis">
             <div class="dash-kpi">
@@ -301,6 +298,8 @@
         </div>
 
     </div>
+
+    @include('partials.select-enhancer')
 
     @push('scripts')
     <script>

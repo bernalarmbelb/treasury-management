@@ -7999,11 +7999,12 @@ select.form-batch-input {
     color: var(--fonts-black-50);
 }
 
-/* ---- Period filter (Today / This Week / This Month) ---- */
+/* ---- Period filter (Month / Year) ---- */
 .dash-filter {
     display: flex;
     align-items: center;
     gap: 8px;
+    margin: 16px 0 20px;
 }
 
 .dash-filter-go {
