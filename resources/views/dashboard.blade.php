@@ -2,14 +2,27 @@
     <div class="x-header-container">
         <x-header title="Dashboard" :tmpRoute="route('home')" routeName="home">
             <x-slot:actions>
-                <div class="dash-filter" role="group" aria-label="Dashboard period filter">
-                    <a href="{{ route('home', ['range' => 'today']) }}" class="dash-filter-btn {{ $range === 'today' ? 'active' : '' }}">Today</a>
-                    <a href="{{ route('home', ['range' => 'week']) }}" class="dash-filter-btn {{ $range === 'week' ? 'active' : '' }}">This Week</a>
-                    <a href="{{ route('home', ['range' => 'month']) }}" class="dash-filter-btn {{ $range === 'month' ? 'active' : '' }}">This Month</a>
-                </div>
+                @php
+                    $dashMonths = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+                @endphp
+                <form class="dash-filter" method="GET" action="{{ route('home') }}" aria-label="Dashboard period filter">
+                    <select name="month" class="dash-filter-select js-cs" data-cs-inline>
+                        @foreach ($dashMonths as $i => $m)
+                            <option value="{{ $i + 1 }}" @selected($month === $i + 1)>{{ $m }}</option>
+                        @endforeach
+                    </select>
+                    <select name="year" class="dash-filter-select js-cs" data-cs-inline>
+                        @for ($y = now()->year; $y >= 2020; $y--)
+                            <option value="{{ $y }}" @selected($year === $y)>{{ $y }}</option>
+                        @endfor
+                    </select>
+                    <button type="submit" class="dash-filter-go">Generate</button>
+                </form>
             </x-slot:actions>
         </x-header>
     </div>
+
+    @include('partials.select-enhancer')
 
     @php
         $lowRows = collect($forms['rows'])->filter(fn ($r) => $r['remaining'] < 50)->values();
@@ -92,7 +105,7 @@
             <div class="dash-stack">
 
                 <div class="dash-card">
-                    <h3><span>Collections Trend</span><span class="dash-m">Daily &middot; {{ ucfirst($range) }}</span></h3>
+                    <h3><span>Collections Trend</span><span class="dash-m">Daily &middot; {{ \Illuminate\Support\Carbon::create($year, $month, 1)->format('F Y') }}</span></h3>
                     <div id="dash-trend" class="dash-chart-area"></div>
                     <div class="dash-mini-stats">
                         <span>Total <b>&#8369;{{ number_format($trend['total'], 2) }}</b></span>

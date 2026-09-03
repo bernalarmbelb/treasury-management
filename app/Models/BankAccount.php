@@ -11,6 +11,7 @@ class BankAccount extends Model
         'bank_name',
         'account_number',
         'account_name',
+        'fund',
         'is_active',
         'opening_balance',
     ];

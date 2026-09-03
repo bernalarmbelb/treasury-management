@@ -154,6 +154,16 @@
                     <input type="text" class="cqm-input" id="new_account_name" autocomplete="off" value="Municipality of Prieto Diaz">
                 </div>
                 <div class="cqm-field">
+                    <label class="cqm-label" for="new_fund">Fund</label>
+                    <select class="cqm-select js-cs" id="new_fund">
+                        <option value="">— None —</option>
+                        <option value="General Fund">General Fund</option>
+                        <option value="Trust Fund">Trust Fund</option>
+                        <option value="Special Education Fund">Special Education Fund</option>
+                    </select>
+                    <span class="cqm-hint">Optional. Used to group this account's checks/deposits by fund in reports.</span>
+                </div>
+                <div class="cqm-field">
                     <label class="cqm-label" for="new_opening_balance">Opening Balance</label>
                     <input type="number" step="0.01" min="0" class="cqm-input" id="new_opening_balance" placeholder="0.00">
                     <span class="cqm-hint">Optional. This account's starting balance, used to compute the dashboard's Cash Position.</span>
@@ -271,6 +281,7 @@
             const bankName = document.getElementById('new_bank_name');
             const accountNumber = document.getElementById('new_account_number');
             const accountName = document.getElementById('new_account_name');
+            const fund = document.getElementById('new_fund');
             const openingBalance = document.getElementById('new_opening_balance');
             const saveBtn = document.getElementById('saveAddAccountBtn');
             const csrf = () => document.querySelector('meta[name="csrf-token"]')?.content ?? '';
@@ -298,6 +309,7 @@
                         bank_name: bankName.value.trim(),
                         account_number: accountNumber.value.trim(),
                         account_name: accountName.value.trim(),
+                        fund: fund.value,
                         opening_balance: openingBalance.value.trim(),
                     }),
                 })
@@ -321,6 +333,8 @@
                         select.dispatchEvent(new Event('change'));
                         bankName.value = '';
                         accountNumber.value = '';
+                        fund.value = '';
+                        fund.dispatchEvent(new Event('change'));
                         openingBalance.value = '';
                         close();
                         if (window.showToast) showToast('Bank account added', d.label, 'success');

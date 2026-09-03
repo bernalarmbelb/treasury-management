@@ -29,6 +29,7 @@
         .cqm-dd-opt.sel .cqm-dd-tick { opacity: 1; }
         .toolbar .go { height: 38px; padding: 0 18px; border: none; border-radius: 8px; background: #427AB5; color: #fff; font-family: inherit; font-weight: 600; font-size: 13.5px; cursor: pointer; }
         .toolbar .print { height: 38px; padding: 0 18px; border: 1px solid #427AB5; border-radius: 8px; background: rgba(66,122,181,.08); color: #427AB5; font-family: inherit; font-weight: 600; font-size: 13.5px; cursor: pointer; margin-left: auto; }
+        .toolbar .export { height: 38px; padding: 0 20px; border: none; border-radius: 8px; background: #427AB5; color: #fff; font-family: inherit; font-weight: 700; font-size: 13.5px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; }
         .doc { background: #fff; border: 1px solid #E3E8EF; border-radius: 10px; padding: 26px 28px; }
         .doc h1 { text-align: center; font-size: 18px; font-weight: 800; letter-spacing: .04em; margin: 0 0 14px; }
         .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 20px; font-size: 13px; margin-bottom: 14px; }
@@ -41,8 +42,9 @@
         tr.cancelled td { color: #a63b50; font-style: italic; }
         tfoot td { font-weight: 800; }
         .cert { margin-top: 22px; font-size: 12.5px; }
-        .sign { display: flex; justify-content: flex-end; margin-top: 40px; }
+        .sign { display: flex; justify-content: flex-end; gap: 32px; margin-top: 40px; }
         .sign-block { display: inline-flex; flex-direction: column; align-items: center; min-width: 260px; }
+        .sign-block:last-child { min-width: 140px; }
         .sign-rule { width: 100%; border-top: 1px solid #333; }
         .sign-name { width: 100%; text-align: center; font-family: inherit; font-weight: 700; font-size: 14px; color: #1f2733; border: 1px solid transparent; border-radius: 6px; padding: 4px 6px; margin-top: 4px; background: transparent; }
         .sign-name:hover { border-color: #e1e7ef; }
@@ -116,6 +118,7 @@
         </div>
         <button class="go" type="submit">Generate</button>
         <button class="print" type="button" onclick="window.print()">Print</button>
+        <a class="export" id="exportBtn" href="#">Export Excel</a>
     </form>
 
     <div class="doc">
@@ -124,7 +127,9 @@
             <span><b>Agency:</b> Municipality of Prieto Diaz, Sorsogon</span>
             <span><b>Period Covered:</b> {{ \Illuminate\Support\Carbon::create()->month($month)->format('F') }} {{ $year }}</span>
             <span><b>Bank Name:</b> {{ $account?->bank_name ?? '—' }}</span>
-            <span><b>Account No.:</b> {{ $account?->account_number ?? '—' }}</span>
+            <span><b>Account No.:</b> {{ $account?->account_number ?? '—' }}{{ $account?->fund ? ' (' . strtoupper($account->fund) . ')' : '' }}</span>
+            <span><b>Report No.:</b>&nbsp;</span>
+            <span><b>Sheet No.:</b>&nbsp;</span>
         </div>
 
         <table>
@@ -133,7 +138,7 @@
                     <th>Check Date</th>
                     <th>Check No.</th>
                     <th>DV No. / Payroll</th>
-                    <th>Resp. Center Code</th>
+                    <th>Responsibility Center Code</th>
                     <th>Payee</th>
                     <th>Nature of Payment</th>
                     <th class="num">Amount</th>
@@ -164,7 +169,7 @@
             </tfoot>
         </table>
 
-        <p class="cert">I hereby certify that this Report of Checks Issued is a full, true and correct statement of all checks released by me in payment for obligations for the period stated and shown in the attached disbursement vouchers.</p>
+        <p class="cert">I hereby certify that this Report of Checks Issued in ___ sheet(s) is a full, true and correct statement of all checks released by me in payment for obligations for the period stated and shown in the attached disbursement vouchers.</p>
 
         <div class="sign">
             <div class="sign-block">
@@ -172,6 +177,10 @@
                 <input type="text" class="sign-name" id="treasurerName" value="Gemma D. Ferrer" aria-label="Municipal Treasurer name" autocomplete="off">
                 <div class="sign-role">Municipal Treasurer</div>
                 <div class="sign-hint">Click the name to edit</div>
+            </div>
+            <div class="sign-block">
+                <div class="sign-rule"></div>
+                <div class="sign-role">Date</div>
             </div>
         </div>
     </div>
@@ -226,6 +235,17 @@
             if (saved && saved.trim() !== '') treasurer.value = saved;
             treasurer.addEventListener('input', () => localStorage.setItem('cqm_treasurer_name', treasurer.value));
         }
+
+        document.getElementById('exportBtn').addEventListener('click', function (e) {
+            e.preventDefault();
+            const params = new URLSearchParams({
+                bank_account_id: @json((string) $account?->id),
+                month: @json((string) $month),
+                year: @json((string) $year),
+                treasurer_name: treasurer ? treasurer.value.trim() : '',
+            });
+            window.location.href = @json(route('cheque-management.report.export', [], false)) + '?' + params.toString();
+        });
     })();
 </script>
 </body>

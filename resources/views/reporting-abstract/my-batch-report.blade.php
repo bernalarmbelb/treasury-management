@@ -41,6 +41,7 @@
         td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
         td.center { text-align: center; }
         tfoot td { font-weight: 800; }
+        tbody tr.marker-row td { font-weight: 700; font-style: italic; background: #f8fafc; }
         .cert { margin-top: 22px; font-size: 12.5px; }
         .sign { display: flex; justify-content: flex-end; margin-top: 40px; }
         .sign-block { display: inline-flex; flex-direction: column; align-items: center; min-width: 260px; }
@@ -132,7 +133,7 @@
             </thead>
             <tbody>
                 @forelse ($rows as $row)
-                    <tr>
+                    <tr class="{{ $row[0] === 'sub-total' ? 'marker-row' : '' }}">
                         <td>{{ $row[0] }}</td>
                         <td class="num">{{ $row[1] }}</td>
                         <td class="center">{{ $row[2] }}</td>

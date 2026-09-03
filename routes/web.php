@@ -1434,13 +1434,13 @@ Route::get('/reporting-abstract', function (\Illuminate\Http\Request $request) {
             ['label' => 'My Batch Accountability Report', 'slug' => null, 'url' => route('reporting-abstract.my-batch-report', [], false)],
         ])
         : collect([
-            ['label' => "Treasurer's Monthly Report of Accountability for Accountable Forms", 'slug' => 'treasurers-monthly'],
-            ['label' => 'Consolidated Report of Accountability for Accountable Forms (CRAAF)', 'slug' => 'craaf'],
-            ['label' => 'Summary of Community Tax Certificate', 'slug' => 'summary-ctc'],
+            ['label' => "Treasurer's Monthly Report of Accountability for Accountable Forms", 'slug' => null, 'url' => route('reporting-abstract.report', ['report' => 'treasurers-monthly'], false)],
+            ['label' => 'Consolidated Report of Accountability for Accountable Forms (CRAAF)', 'slug' => null, 'url' => route('reporting-abstract.report', ['report' => 'craaf'], false)],
+            ['label' => 'Summary of Community Tax Certificate', 'slug' => null, 'url' => route('reporting-abstract.report', ['report' => 'summary-ctc'], false)],
             ['label' => 'Reports of Checks Issued', 'slug' => null, 'url' => route('cheque-management.report', [], false)],
-            ['label' => 'Report of Collection and Deposit', 'slug' => 'collections-deposits'],
-            ['label' => 'Report of Accountability for Accountable Forms (RAAF)', 'slug' => 'raaf'],
-            ['label' => 'Abstract of Community Tax Certificate', 'slug' => 'abstract-ctc'],
+            ['label' => 'Report of Collection and Deposit', 'slug' => null, 'url' => route('reporting-abstract.report', ['report' => 'collections-deposits'], false)],
+            ['label' => 'Report of Accountability for Accountable Forms (RAAF)', 'slug' => null, 'url' => route('reporting-abstract.raaf-report', [], false)],
+            ['label' => 'Abstract of Community Tax Certificate', 'slug' => null, 'url' => route('reporting-abstract.report', ['report' => 'abstract-ctc'], false)],
         ]);
 
     $reports = $reports
@@ -1492,7 +1492,7 @@ Route::get('/reporting-abstract/my-batch-report', function (\Illuminate\Http\Req
 
     $collectorName = $request->user()?->name ?? '';
 
-    [$rows, $totals] = ram_per_collector_rows($from, $to, 'Total', $collectorName);
+    [$rows, $totals] = ram_per_collector_rows($from, $to, 'Total', $collectorName, true);
 
     return view('reporting-abstract.my-batch-report', [
         'rows' => $rows,
@@ -1503,28 +1503,128 @@ Route::get('/reporting-abstract/my-batch-report', function (\Illuminate\Http\Req
     ]);
 })->name('reporting-abstract.my-batch-report');
 
-Route::get('/reporting-abstract/{report}/preview', function (\Illuminate\Http\Request $request, string $report) {
+/**
+ * Report of Accountability for Accountable Forms (RAAF) — one filed report
+ * per Accountable Officer (matching the reference: 8 separate officer
+ * filings, not a system-wide rollup), picked from a dropdown. Standalone
+ * printable page, styled after my-batch-report/cheque-management's report.
+ * Not part of the generic {report}/report dispatch below since its toolbar
+ * needs an officer picker instead of a From/To range.
+ */
+Route::get('/reporting-abstract/raaf/report', function (\Illuminate\Http\Request $request) {
+    $month = (int) ($request->input('month') ?: now()->month);
+    $month = ($month >= 1 && $month <= 12) ? $month : now()->month;
+
+    $year = (int) ($request->input('year') ?: now()->year);
+    $year = ($year >= 1900 && $year <= now()->year) ? $year : now()->year;
+
+    $from = \Illuminate\Support\Carbon::create($year, $month, 1)->startOfMonth();
+    $to = (clone $from)->endOfMonth();
+
+    $officers = \App\Models\FormBatch::whereNotNull('assigned_to')
+        ->where('assigned_to', '!=', '')
+        ->distinct()
+        ->orderBy('assigned_to')
+        ->pluck('assigned_to');
+
+    $officerName = $request->input('officer') ?: $officers->first() ?? '';
+
+    $built = ram_build_raaf($from, $to, $officerName);
+    $periodLabel = \Illuminate\Support\Carbon::create()->month($month)->format('F') . ' ' . $year;
+
+    return view('reporting-abstract.report', [
+        'slug'           => 'raaf',
+        'title'          => $built['title'],
+        'sections'       => $built['sections'],
+        'period'         => $periodLabel,
+        'month'          => $month,
+        'year'           => $year,
+        'officers'       => $officers,
+        'officerName'    => $officerName,
+        'agencyLines'    => [],
+        'officeNote'     => null,
+        'periodPrefix'   => $built['periodPrefix'],
+        'showOfficerRow' => false,
+        'certification'  => $built['certification'],
+    ]);
+})->name('reporting-abstract.raaf-report');
+
+Route::get('/reporting-abstract/raaf/export', function (\Illuminate\Http\Request $request) {
+    $month = (int) ($request->input('month') ?: now()->month);
+    $year = (int) ($request->input('year') ?: now()->year);
+    $officerName = (string) $request->input('officer', '');
+
+    $from = \Illuminate\Support\Carbon::create($year, $month, 1)->startOfMonth();
+    $to = (clone $from)->endOfMonth();
+
+    $built = ram_build_raaf($from, $to, $officerName);
+
+    $periodLabel = \Illuminate\Support\Carbon::create()->month($month)->format('F') . ' ' . $year;
+    $safeOfficer = \Illuminate\Support\Str::slug($officerName ?: 'officer');
+    $filename = "raaf-{$safeOfficer}-{$year}-{$month}.xlsx";
+
+    \App\Models\ActivityLog::record('Reporting & Abstract - Export Report - RAAF - ' . $officerName . ' - ' . $periodLabel);
+
+    return export_ram_report_xlsx($built, $periodLabel, null, null, $filename, $request->input('certified_by'));
+})->name('reporting-abstract.raaf-export');
+
+/**
+ * Standalone printable page for the 5 remaining RAM reports — same treatment
+ * as cheque-management/report and reporting-abstract/my-batch-report (own
+ * toolbar with From/To pickers, own <style>, no <x-layout>). Defaults to
+ * the current month when opened fresh from the report list.
+ */
+Route::get('/reporting-abstract/{report}/report', function (\Illuminate\Http\Request $request, string $report) {
     if (! in_array($report, ram_report_slugs(), true)) {
         abort(404);
     }
 
+    $now = now();
     $validated = $request->validate([
-        'from_month' => ['required', 'integer', 'min:1', 'max:12'],
-        'from_year'  => ['required', 'integer', 'min:1900', 'max:' . now()->year],
-        'to_month'   => ['required', 'integer', 'min:1', 'max:12'],
-        'to_year'    => ['required', 'integer', 'min:1900', 'max:' . now()->year],
+        'from_month' => ['nullable', 'integer', 'min:1', 'max:12'],
+        'from_year'  => ['nullable', 'integer', 'min:1900', 'max:' . $now->year],
+        'to_month'   => ['nullable', 'integer', 'min:1', 'max:12'],
+        'to_year'    => ['nullable', 'integer', 'min:1900', 'max:' . $now->year],
     ]);
 
-    [$fromDate, $toDate, $periodLabel] = ram_resolve_period($validated);
+    $period = [
+        'from_month' => $validated['from_month'] ?? $now->month,
+        'from_year'  => $validated['from_year'] ?? $now->year,
+        'to_month'   => $validated['to_month'] ?? $now->month,
+        'to_year'    => $validated['to_year'] ?? $now->year,
+    ];
+
+    [$fromDate, $toDate, $periodLabel] = ram_resolve_period($period);
 
     $built = ram_build_report($report, $fromDate, $toDate);
 
-    return response()->json([
-        'title'    => $built['title'],
-        'period'   => $periodLabel,
-        'sections' => $built['sections'],
+    $periodPrefix = $built['periodPrefix'] ?? 'For the period of';
+
+    // Treasurer's Monthly/CRAAF use a "From [Month] 1 TO [Month] [day], [year]"
+    // day-range sentence (matching the reference and the .xlsx export) instead
+    // of the generic "For the period of [Month Year]" phrasing.
+    if (in_array($report, ['treasurers-monthly', 'craaf'], true)) {
+        $monthNames = ['', 'JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
+        $periodLabel = $monthNames[$period['from_month']] . ' 1 TO ' . $monthNames[$period['to_month']] . ' ' . $toDate->day . ', ' . $period['to_year'];
+        $periodPrefix = 'From';
+    }
+
+    return view('reporting-abstract.report', [
+        'slug'           => $report,
+        'title'          => $built['title'],
+        'sections'       => $built['sections'],
+        'period'         => $periodLabel,
+        'fromMonth'      => $period['from_month'],
+        'fromYear'       => $period['from_year'],
+        'toMonth'        => $period['to_month'],
+        'toYear'         => $period['to_year'],
+        'agencyLines'    => $built['agencyLines'] ?? [],
+        'officeNote'     => $built['officeNote'] ?? null,
+        'periodPrefix'   => $periodPrefix,
+        'showOfficerRow' => $built['showOfficerRow'] ?? true,
+        'certification'  => $built['certification'] ?? null,
     ]);
-})->name('reporting-abstract.preview');
+})->name('reporting-abstract.report');
 
 Route::get('/reporting-abstract/{report}/export', function (\Illuminate\Http\Request $request, string $report) {
     if (! in_array($report, ram_report_slugs(), true)) {
@@ -1538,6 +1638,7 @@ Route::get('/reporting-abstract/{report}/export', function (\Illuminate\Http\Req
         'to_year'      => ['required', 'integer', 'min:1900', 'max:' . now()->year],
         'officer_name' => ['nullable', 'string', 'max:100'],
         'designation'  => ['nullable', 'string', 'max:100'],
+        'certified_by' => ['nullable', 'string', 'max:100'],
     ]);
 
     [$fromDate, $toDate, $periodLabel] = ram_resolve_period($validated);
@@ -1559,12 +1660,13 @@ Route::get('/reporting-abstract/{report}/export', function (\Illuminate\Http\Req
             $headerPeriod,
             $validated['officer_name'] ?? null,
             $validated['designation'] ?? null,
-            $filename
+            $filename,
+            $validated['certified_by'] ?? null
         );
     }
 
     if ($report === 'abstract-ctc') {
-        return export_abstract_ctc_xlsx($built, $periodLabel, $filename);
+        return export_abstract_ctc_xlsx($built, $periodLabel, $filename, $validated['certified_by'] ?? null);
     }
 
     return export_ram_report_xlsx(
@@ -1572,7 +1674,8 @@ Route::get('/reporting-abstract/{report}/export', function (\Illuminate\Http\Req
         $periodLabel,
         $validated['officer_name'] ?? null,
         $validated['designation'] ?? null,
-        $filename
+        $filename,
+        $validated['certified_by'] ?? null
     );
 })->name('reporting-abstract.export');
 // ── Bank Deposit & Reconciliation (Phase 2a: read-only logs) ──────────────
@@ -1885,6 +1988,7 @@ Route::post('/cheque-management/bank-accounts', function (\Illuminate\Http\Reque
         'bank_name'       => ['required', 'string', 'max:255'],
         'account_number'  => ['required', 'string', 'max:100', 'unique:bank_accounts,account_number'],
         'account_name'    => ['required', 'string', 'max:255'],
+        'fund'            => ['nullable', 'string', 'in:General Fund,Trust Fund,Special Education Fund'],
         'opening_balance' => ['nullable', 'numeric', 'min:0'],
     ]);
 
@@ -1903,6 +2007,7 @@ Route::post('/cheque-management/bank-accounts', function (\Illuminate\Http\Reque
         'bank_name'       => $account->bank_name,
         'account_number'  => $account->account_number,
         'account_name'    => $account->account_name,
+        'fund'            => $account->fund,
         'opening_balance' => $account->opening_balance,
         'label'           => $account->bank_name . ' · ' . $account->account_number,
     ]);
@@ -1935,6 +2040,30 @@ Route::get('/cheque-management/report', function (\Illuminate\Http\Request $requ
 
     return view('cheque-management.report', compact('accounts', 'account', 'cheques', 'month', 'year'));
 })->name('cheque-management.report');
+
+Route::get('/cheque-management/report/export', function (\Illuminate\Http\Request $request) {
+    $accounts = \App\Models\BankAccount::orderBy('bank_name')->get();
+    $account = $accounts->firstWhere('id', (int) $request->input('bank_account_id'));
+
+    $month = (int) $request->input('month', now()->month);
+    $year = (int) $request->input('year', now()->year);
+
+    $cheques = \App\Models\Cheque::query()
+        ->where('bank_account_id', $account?->id)
+        ->whereNull('archived_at')
+        ->whereMonth('cheque_date', $month)
+        ->whereYear('cheque_date', $year)
+        ->orderBy('cheque_date')
+        ->orderBy('check_number')
+        ->get();
+
+    $periodLabel = \Illuminate\Support\Carbon::create()->month($month)->format('F') . ' ' . $year;
+    $filename = 'reports-of-checks-issued-' . ($account?->account_number ?: 'account') . "-{$year}-{$month}.xlsx";
+
+    \App\Models\ActivityLog::record('Cheque Management - Export Report - ' . ($account?->bank_name ?? 'Unknown Account') . ' - ' . $periodLabel);
+
+    return export_cheque_report_xlsx($cheques, $account, $month, $year, $request->input('treasurer_name'), $filename);
+})->name('cheque-management.report.export');
 
 Route::get('/cheque-management/{cheque}', function (\App\Models\Cheque $cheque) {
     return view('cheque-management.view', ['cheque' => $cheque->load('bankAccount')]);
@@ -2020,7 +2149,7 @@ if (! function_exists('ram_report_slugs')) {
 
 function ram_report_slugs(): array
 {
-    return ['treasurers-monthly', 'craaf', 'summary-ctc', 'raaf', 'abstract-ctc', 'collections-deposits'];
+    return ['treasurers-monthly', 'craaf', 'summary-ctc', 'abstract-ctc', 'collections-deposits'];
 }
 
 /**
@@ -2042,68 +2171,6 @@ function ram_resolve_period(array $validated): array
 }
 
 /**
- * The amount actually collected for a morphed transaction. Field name
- * differs per form: CTC/OR-RPT use `amount_paid`, OR uses `total`,
- * Marriage Certificate has no fee at all.
- */
-function ram_transaction_amount($transaction): float
-{
-    if ($transaction === null) {
-        return 0.0;
-    }
-
-    return (float) ($transaction->amount_paid ?? $transaction->total ?? 0);
-}
-
-/**
- * Beginning/received/issued/remaining breakdown for one form stock over a
- * period, used by both the Treasurer's Monthly Report and (via the same
- * underlying numbers) CRAAF and RAAF's Section C. "Issued" is read straight
- * off TransactionLog (one row = one consumed serial, regardless of later
- * cancellation, matching how FormBatch::usedQty() already treats it
- * elsewhere). For form stocks with no ORAF batches on record, the on-hand
- * figure falls back to the static `qty` column since there is no historical
- * batch trail to reconstruct a prior balance from.
- */
-function ram_form_stock_breakdown(\App\Models\FormStock $formStock, \Illuminate\Support\Carbon $from, \Illuminate\Support\Carbon $to): array
-{
-    $batches = $formStock->batches;
-
-    $receivedBefore = $batches->filter(fn ($b) => $b->purchase_date && $b->purchase_date->lt($from))->sum(fn ($b) => $b->startingQty());
-    $receivedSince  = $batches->filter(fn ($b) => $b->purchase_date && $b->purchase_date->between($from, $to))->sum(fn ($b) => $b->startingQty());
-
-    $issuedBefore = \App\Models\TransactionLog::where('form_type', $formStock->form_code)->where('transacted_at', '<', $from)->count();
-    $issuedSince  = \App\Models\TransactionLog::where('form_type', $formStock->form_code)->whereBetween('transacted_at', [$from, $to])->count();
-
-    if ($batches->isEmpty()) {
-        $onHandLast  = $formStock->qty;
-        $serialRange = '—';
-    } else {
-        $onHandLast = max(0, $receivedBefore - $issuedBefore);
-
-        $batchesBefore = $batches->filter(fn ($b) => $b->purchase_date && $b->purchase_date->lt($from))->values();
-        $serialRange = $batchesBefore->isEmpty()
-            ? '—'
-            : $batchesBefore->first()->starting_serial_number . ' – ' . $batchesBefore->last()->displayEndingSerialNumber();
-    }
-
-    $remaining = max(0, $onHandLast + $receivedSince - $issuedSince);
-
-    $remarks = $batches->filter(fn ($b) => $b->purchase_date && $b->purchase_date->between($from, $to))
-        ->pluck('added_by')->filter()->unique()->implode(', ');
-
-    return [
-        'form'         => $formStock->form_name,
-        'on_hand_qty'  => $onHandLast,
-        'serial_range' => $serialRange,
-        'received'     => $receivedSince,
-        'issued'       => $issuedSince,
-        'remaining'    => $remaining,
-        'remarks'      => $remarks ?: '—',
-    ];
-}
-
-/**
  * Abstract of Community Tax Certificate — per-transaction listing for the
  * period (Individual + Corporation Cedula). "Tax" is split into CTC A (Basic
  * Community Tax) and CTC B (Additional Community Tax), matching the reference
@@ -2117,39 +2184,68 @@ function ram_build_abstract_ctc(\Illuminate\Support\Carbon $from, \Illuminate\Su
         ->with('transaction')
         ->orderBy('transacted_at')
         ->get()
-        ->filter(fn ($log) => $log->transaction !== null);
+        ->filter(fn ($log) => $log->transaction !== null || $log->status === 'Cancelled');
 
     $rows = [];
     $totalCtcA = 0;
     $totalCtcB = 0;
     $totalInterest = 0;
     $totalAmount = 0;
+    $leafCount = 0;
+
+    // Booklet pagination: every CTC_BOOKLET_PAGE_SIZE serials is one physical
+    // booklet page in the reference template, closed out with a "Sub Total"
+    // row and reopened on the next row with the same figures carried forward
+    // as "Balance Forwarded" — matching the government ledger convention.
+    $pageSize = 35;
 
     foreach ($logs as $log) {
-        $t = $log->transaction;
-        $ctcA = (float) $t->a_community_tax_due;                          // Basic Community Tax
-        $ctcB = max(0, (float) $t->total_community_tax_due - $ctcA);      // Additional Community Tax
-        $interest = (float) $t->interest;
-        $amount = (float) $t->amount_paid;
+        if ($log->status === 'Cancelled') {
+            $rows[] = [
+                $log->transacted_at->format('M d, Y'),
+                'Cancelled',
+                $log->serial_number,
+                '0.00', '0.00', '0.00', '0.00',
+            ];
+        } else {
+            $t = $log->transaction;
+            $ctcA = (float) $t->a_community_tax_due;                          // Basic Community Tax
+            $ctcB = max(0, (float) $t->total_community_tax_due - $ctcA);      // Additional Community Tax
+            $interest = (float) $t->interest;
+            $amount = (float) $t->amount_paid;
 
-        $rows[] = [
-            $log->transacted_at->format('M d, Y'),
-            $log->payee,
-            $log->serial_number,
-            number_format($ctcA, 2),
-            number_format($ctcB, 2),
-            number_format($interest, 2),
-            number_format($amount, 2),
-        ];
+            $rows[] = [
+                $log->transacted_at->format('M d, Y'),
+                $log->payee,
+                $log->serial_number,
+                number_format($ctcA, 2),
+                number_format($ctcB, 2),
+                number_format($interest, 2),
+                number_format($amount, 2),
+            ];
 
-        $totalCtcA += $ctcA;
-        $totalCtcB += $ctcB;
-        $totalInterest += $interest;
-        $totalAmount += $amount;
+            $totalCtcA += $ctcA;
+            $totalCtcB += $ctcB;
+            $totalInterest += $interest;
+            $totalAmount += $amount;
+        }
+
+        $leafCount++;
+
+        if ($leafCount === $pageSize && $log !== $logs->last()) {
+            $rows[] = ['', '', 'Sub Total', number_format($totalCtcA, 2), number_format($totalCtcB, 2), number_format($totalInterest, 2), number_format($totalAmount, 2)];
+            $rows[] = ['', '', 'Balance Forwarded', number_format($totalCtcA, 2), number_format($totalCtcB, 2), number_format($totalInterest, 2), number_format($totalAmount, 2)];
+            $leafCount = 0;
+        }
     }
 
     return [
         'title' => 'Abstract of Community Tax Certificate',
+        'agencyLines' => ['Republic of the Philippines', 'Province of Sorsogon', 'MUNICIPALITY OF PRIETO DIAZ'],
+        'officeNote' => 'Office of the Municipal Treasurer',
+        'periodPrefix' => 'For the month of',
+        'showOfficerRow' => false,
+        'certification' => ['label' => 'Certified correct;', 'role' => 'Municipal Treasurer'],
         'sections' => [[
             'heading' => null,
             'columns' => [
@@ -2162,18 +2258,22 @@ function ram_build_abstract_ctc(\Illuminate\Support\Carbon $from, \Illuminate\Su
                 ['label' => 'Total', 'align' => 'right'],
             ],
             'rows' => $rows,
-            'totals' => ['', '', 'Total', number_format($totalCtcA, 2), number_format($totalCtcB, 2), number_format($totalInterest, 2), number_format($totalAmount, 2)],
+            'totals' => ['', '', 'GRAND TOTAL', number_format($totalCtcA, 2), number_format($totalCtcB, 2), number_format($totalInterest, 2), number_format($totalAmount, 2)],
         ]],
     ];
 }
 
 /**
- * Summary of Community Tax Certificate — rollup by accountable officer
- * (the `treasurer_name` recorded on each CTC transaction). "Pages" follows
- * the CTC booklet convention of 1 certificate = 1 page.
+ * Summary of Community Tax Certificate — one row per (booklet page, officer)
+ * segment. A physical CTC booklet page holds CTC_BOOKLET_PAGE_SIZE leaves;
+ * a row closes whenever the accountable officer changes OR the running page
+ * fills, whichever comes first, so a page split mid-run between two officers
+ * still produces two rows sharing the same Page number.
  */
 function ram_build_summary_ctc(\Illuminate\Support\Carbon $from, \Illuminate\Support\Carbon $to): array
 {
+    $pageSize = 35;
+
     $logs = \App\Models\TransactionLog::whereIn('form_type', ['BIR0016', 'BIR0017'])
         ->whereBetween('transacted_at', [$from, $to])
         ->with('transaction')
@@ -2181,97 +2281,75 @@ function ram_build_summary_ctc(\Illuminate\Support\Carbon $from, \Illuminate\Sup
         ->get()
         ->filter(fn ($log) => $log->transaction !== null);
 
-    $groups = $logs->groupBy(fn ($log) => $log->transaction->treasurer_name ?: 'Unassigned');
-
     $rows = [];
-    $grandQty = 0;
     $grandAmount = 0;
 
-    foreach ($groups as $officer => $group) {
-        $serials = $group->pluck('serial_number');
-        $qty = $group->count();
-        $amount = $group->sum(fn ($log) => (float) $log->transaction->amount_paid);
+    $page = 1;
+    $leafCount = 0;
+    $segmentOfficer = null;
+    $segmentSerials = [];
+    $segmentAmount = 0;
+
+    $flush = function () use (&$rows, &$segmentOfficer, &$segmentSerials, &$segmentAmount, &$page, &$grandAmount) {
+        if ($segmentOfficer === null) {
+            return;
+        }
 
         $rows[] = [
-            $qty,
-            $serials->first() . ' – ' . $serials->last(),
-            $qty,
-            number_format($amount, 2),
-            $officer,
+            $page,
+            count($segmentSerials),
+            reset($segmentSerials) . ' – ' . end($segmentSerials),
+            number_format($segmentAmount, 2),
+            $segmentOfficer,
         ];
 
-        $grandQty += $qty;
-        $grandAmount += $amount;
+        $grandAmount += $segmentAmount;
+
+        $segmentOfficer = null;
+        $segmentSerials = [];
+        $segmentAmount = 0;
+    };
+
+    foreach ($logs as $log) {
+        $officer = $log->transaction->treasurer_name ?: 'Unassigned';
+
+        if ($segmentOfficer !== null && $officer !== $segmentOfficer) {
+            $flush();
+        }
+
+        $segmentOfficer = $officer;
+        $segmentSerials[] = $log->serial_number;
+        $segmentAmount += (float) $log->transaction->amount_paid;
+        $leafCount++;
+
+        if ($leafCount === $pageSize) {
+            $flush();
+            $page++;
+            $leafCount = 0;
+        }
     }
+    $flush();
 
     return [
         'title' => 'Summary of Community Tax Certificate',
+        'agencyLines' => ['Republic of the Philippines', 'Province of Sorsogon', 'MUNICIPALITY OF PRIETO DIAZ'],
+        'officeNote' => 'Office of the Municipal Treasurer',
+        'periodPrefix' => 'For the month of',
+        'showOfficerRow' => false,
+        'certification' => ['label' => 'Certified correct;', 'role' => 'Municipal Treasurer'],
+        'pageOrientation' => 'portrait',
         'sections' => [[
             'heading' => null,
             'columns' => [
                 ['label' => 'Pages', 'align' => 'right'],
-                ['label' => 'CTC No. Range', 'align' => 'left'],
                 ['label' => 'Qty', 'align' => 'right'],
+                ['label' => 'OR No.', 'align' => 'left'],
                 ['label' => 'Amount', 'align' => 'right'],
                 ['label' => 'Accountable Officer', 'align' => 'left'],
             ],
             'rows' => $rows,
-            'totals' => ['', 'GRAND TOTAL', $grandQty, number_format($grandAmount, 2), ''],
+            'totals' => ['', '', 'GRAND TOTAL', number_format($grandAmount, 2), ''],
         ]],
-    ];
-}
-
-/**
- * Treasurer's Monthly Report of Accountability for Accountable Forms — one
- * row per form stock (all 8 accountable forms in the system), system-wide
- * (this system tracks a single Treasury custody, not per-collector
- * inventory). When $withTotals is true, a B-TOTAL row is appended — used by
- * CRAAF to consolidate the same breakdown.
- */
-function ram_build_treasurers_monthly(\Illuminate\Support\Carbon $from, \Illuminate\Support\Carbon $to, bool $withTotals = false): array
-{
-    $rows = [];
-    $totalReceived = 0;
-    $totalIssued = 0;
-    $totalRemaining = 0;
-
-    foreach (\App\Models\FormStock::orderBy('form_name')->get() as $formStock) {
-        $b = ram_form_stock_breakdown($formStock, $from, $to);
-
-        $rows[] = [
-            $b['form'],
-            $b['on_hand_qty'] . ' (' . $b['serial_range'] . ')',
-            $b['received'],
-            $b['issued'],
-            $b['remaining'],
-            $b['remarks'],
-        ];
-
-        $totalReceived += $b['received'];
-        $totalIssued += $b['issued'];
-        $totalRemaining += $b['remaining'];
-    }
-
-    $section = [
-        'heading' => null,
-        'columns' => [
-            ['label' => 'Forms', 'align' => 'left'],
-            ['label' => 'On Hand Last Report', 'align' => 'left'],
-            ['label' => 'Received Since', 'align' => 'right'],
-            ['label' => 'Issued Since', 'align' => 'right'],
-            ['label' => 'Remaining on Hand', 'align' => 'right'],
-            ['label' => 'Remarks', 'align' => 'left'],
-        ],
-        'rows' => $rows,
-    ];
-
-    if ($withTotals) {
-        $section['totals'] = ['B-TOTAL', '', $totalReceived, $totalIssued, $totalRemaining, ''];
-    }
-
-    return [
-        'title' => "Treasurer's Monthly Report of Accountability for Accountable Forms",
-        'sections' => [$section],
     ];
 }
 
@@ -2332,7 +2410,7 @@ function ram_serial_range_label(string $start, string $end): string
  * collector). Returns [$rows, $totals] with $totals summing the 4 Quantity
  * columns; the caller supplies the totals label ("Total" vs "B-TOTAL").
  */
-function ram_per_collector_rows(\Illuminate\Support\Carbon $from, \Illuminate\Support\Carbon $to, string $totalLabel, ?string $onlyAssignedTo = null): array
+function ram_per_collector_rows(\Illuminate\Support\Carbon $from, \Illuminate\Support\Carbon $to, string $totalLabel, ?string $onlyAssignedTo = null, bool $withSubtotals = false): array
 {
     $rows = [];
     $totalOnHand = 0;
@@ -2364,6 +2442,11 @@ function ram_per_collector_rows(\Illuminate\Support\Carbon $from, \Illuminate\Su
             ->where('transacted_at', '<=', $to)
             ->get()
             ->map(fn ($l) => ['n' => $trailingNumber($l->serial_number), 'within' => $l->transacted_at->betweenIncluded($from, $to)]);
+
+        $formOnHand = 0;
+        $formReceived = 0;
+        $formIssued = 0;
+        $formRemaining = 0;
 
         $first = true;
         foreach ($batches as $batch) {
@@ -2406,11 +2489,20 @@ function ram_per_collector_rows(\Illuminate\Support\Carbon $from, \Illuminate\Su
             ];
 
             $first = false;
-            $totalOnHand += $purchasedBefore ? $starting : 0;
-            $totalReceived += $purchasedWithin ? $starting : 0;
-            $totalIssued += $issuedWithin;
-            $totalRemaining += $remaining;
+            $formOnHand += $purchasedBefore ? $starting : 0;
+            $formReceived += $purchasedWithin ? $starting : 0;
+            $formIssued += $issuedWithin;
+            $formRemaining += $remaining;
         }
+
+        if ($withSubtotals) {
+            $rows[] = ['sub-total', $formOnHand ?: '', '', $formReceived ?: '', '', $formIssued ?: '', '', $formRemaining ?: '', '', ''];
+        }
+
+        $totalOnHand += $formOnHand;
+        $totalReceived += $formReceived;
+        $totalIssued += $formIssued;
+        $totalRemaining += $formRemaining;
     }
 
     $totals = [$totalLabel, $totalOnHand, '', $totalReceived, '', $totalIssued, '', $totalRemaining, '', ''];
@@ -2456,17 +2548,17 @@ function ram_per_collector_section(array $rows, array $totals): array
  * Treasurer's Monthly Report of Accountability for Accountable Forms — a
  * per-collector listing (one row per ORAF batch, grouped by form, collector
  * in Remarks) matching the Treasurers_Monthly_Report reference file. Used
- * for both the preview modal and the dedicated export
+ * for both the standalone report page and the dedicated export
  * (export_treasurers_monthly_xlsx()) so what's previewed/printed matches the
- * download. Separate from ram_build_treasurers_monthly() above, which RAAF's
- * Section C still uses unchanged (simpler flat-column shape).
+ * download.
  */
 function ram_build_treasurers_monthly_detailed(\Illuminate\Support\Carbon $from, \Illuminate\Support\Carbon $to): array
 {
-    [$rows, $totals] = ram_per_collector_rows($from, $to, 'Total');
+    [$rows, $totals] = ram_per_collector_rows($from, $to, 'Total', null, true);
 
     return [
         'title' => "Treasurer's Monthly Report of Accountability for Accountable Forms",
+        'certification' => ['label' => 'CERTIFIED CORRECT:', 'role' => 'Municipal Treasurer'],
         'sections' => [ram_per_collector_section($rows, $totals)],
     ];
 }
@@ -2479,7 +2571,7 @@ function ram_build_treasurers_monthly_detailed(\Illuminate\Support\Carbon $from,
  * Total row. "Province or City" is hardcoded — it's always this
  * municipality and isn't user-entered elsewhere in the system.
  */
-function export_treasurers_monthly_xlsx(array $built, string $periodLabel, ?string $officerName, ?string $designation, string $filename): \Symfony\Component\HttpFoundation\StreamedResponse
+function export_treasurers_monthly_xlsx(array $built, string $periodLabel, ?string $officerName, ?string $designation, string $filename, ?string $certifiedBy = null): \Symfony\Component\HttpFoundation\StreamedResponse
 {
     $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
     $sheet = $spreadsheet->getActiveSheet();
@@ -2496,17 +2588,16 @@ function export_treasurers_monthly_xlsx(array $built, string $periodLabel, ?stri
     }
     $spreadsheet->getDefaultStyle()->getFont()->setName('Roboto');
 
-    // Print at actual size with NO fit-to-page scaling, mirroring the
-    // reference file: the column widths above already span the
-    // folio-landscape printable width, so no scaling is needed. Fit-to-page
-    // is explicitly disabled so Excel does not shrink the sheet, and the
-    // sheet is centered horizontally on the page.
+    // Letter landscape (8.5x11) is narrower than the Folio-sized reference
+    // file these column widths were tuned to, so shrink-to-fit-width is
+    // enabled as a safety margin — fit-to-height stays unbounded (0) so rows
+    // spill onto additional pages rather than shrinking illegibly.
     $sheet->getPageSetup()
         ->setOrientation(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_LANDSCAPE)
-        ->setPaperSize(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::PAPERSIZE_FOLIO)
+        ->setPaperSize(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::PAPERSIZE_LETTER)
         ->setFitToHeight(0)
-        ->setFitToWidth(0)
-        ->setFitToPage(false)
+        ->setFitToWidth(1)
+        ->setFitToPage(true)
         ->setHorizontalCentered(true);
     $sheet->getPageMargins()->setTop(0.5)->setBottom(0.2)->setLeft(0.2)->setRight(0.2);
 
@@ -2585,8 +2676,9 @@ function export_treasurers_monthly_xlsx(array $built, string $periodLabel, ?stri
                 'vertical' => $vCenter,
             ]);
         }
+        $isSubtotal = ($dataRow[0] ?? null) === 'sub-total';
         $sheet->getStyle("A{$row}:J{$row}")->applyFromArray([
-            'font' => ['name' => 'Roboto', 'size' => 8],
+            'font' => ['name' => 'Roboto', 'size' => 8, 'bold' => $isSubtotal, 'italic' => $isSubtotal],
             'borders' => ['allBorders' => $thin],
         ]);
         // Form-group label cell (column A) is bold in the reference.
@@ -2606,6 +2698,19 @@ function export_treasurers_monthly_xlsx(array $built, string $periodLabel, ?stri
             'font' => ['name' => 'Roboto', 'size' => 8, 'bold' => true],
             'borders' => ['allBorders' => $thin],
         ]);
+        $row++;
+    }
+
+    if (! empty($built['certification'])) {
+        $row += 2;
+        $sheet->setCellValue("A{$row}", $built['certification']['label']);
+        $sheet->getStyle("A{$row}")->getFont()->setName('Roboto')->setSize(10);
+        $row += 2;
+        $sheet->setCellValue("A{$row}", strtoupper($certifiedBy ?: 'Gemma D. Ferrer'));
+        $sheet->getStyle("A{$row}")->getFont()->setName('Roboto')->setSize(10)->setBold(true);
+        $row++;
+        $sheet->setCellValue("A{$row}", $built['certification']['role']);
+        $sheet->getStyle("A{$row}")->getFont()->setName('Roboto')->setSize(10);
     }
 
     $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
@@ -2637,148 +2742,235 @@ function ram_build_craaf(\Illuminate\Support\Carbon $from, \Illuminate\Support\C
 }
 
 /**
- * Report of Accountability for Accountable Forms — Section C reuses the
- * same system-wide form breakdown (renamed columns to match RAAF's
- * Beginning/Receipt/Issued/Ending wording); the second section summarizes
- * cash collections for the period. There is no remittance/deposit or cash
- * carry-over ledger in this system, so Beginning Balance and
- * Remittances/Deposit are shown as 0 rather than fabricated. Unlettered
- * (no "C."/"D." prefix) — the real filed RAAF sample
- * (docs/tasks/newtask-tmpfiles/RAAF .jpg) has no section lettering; the
- * C/D prefix previously used here was mistakenly copied from a different,
- * unrelated multi-page annex reference where those letters mark page 2 of
- * a document whose page 1 (sections A/B) was never provided.
+ * Report of Accountability for Accountable Forms — one filed report per
+ * Accountable Officer (matching the 8-officer reference set, each its own
+ * standalone page), not a system-wide rollup. Reuses ram_per_collector_rows()
+ * scoped to a single officer, with the trailing Remarks column dropped since
+ * the whole page is already scoped to that officer, and no "Cash Collections"
+ * section — none of the reference pages have one.
  */
-function ram_build_raaf(\Illuminate\Support\Carbon $from, \Illuminate\Support\Carbon $to): array
+function ram_build_raaf(\Illuminate\Support\Carbon $from, \Illuminate\Support\Carbon $to, string $officerName): array
 {
-    $sectionC = ram_build_treasurers_monthly($from, $to)['sections'][0];
+    [$rows, $totals] = ram_per_collector_rows($from, $to, 'Total', $officerName);
 
-    $collections = \App\Models\TransactionLog::whereBetween('transacted_at', [$from, $to])
-        ->with('transaction')
-        ->get()
-        ->sum(fn ($log) => ram_transaction_amount($log->transaction));
+    // Drop the trailing Remarks cell (index 9) — redundant once the report
+    // is already scoped to one officer.
+    $rows = array_map(fn ($row) => array_slice($row, 0, 9), $rows);
+    $totals = array_slice($totals, 0, 9);
 
     return [
-        'title' => 'Report of Accountability for Accountable Forms (RAAF)',
-        'sections' => [
-            [
-                'heading' => 'Accountability for Accountable Forms',
-                'columns' => [
-                    ['label' => 'Forms', 'align' => 'left'],
-                    ['label' => 'Beginning Balance', 'align' => 'left'],
-                    ['label' => 'Receipt', 'align' => 'right'],
-                    ['label' => 'Issued', 'align' => 'right'],
-                    ['label' => 'Ending Balance', 'align' => 'right'],
-                    ['label' => 'Remarks', 'align' => 'left'],
-                ],
-                'rows' => $sectionC['rows'],
+        'title' => 'Report of Accountability for Accountable Forms',
+        'periodPrefix' => 'Month of',
+        'certification' => ['label' => 'Certified correct;', 'role' => 'Accountable Officer'],
+        'pageOrientation' => 'portrait',
+        'sections' => [[
+            'heading' => null,
+            'groups' => [
+                ['label' => 'Name of Forms & Number', 'colspan' => 1],
+                ['label' => 'Beginning Balance', 'colspan' => 2, 'subcolumns' => ['Qty', 'Inclusive Ser. Nos. From/To']],
+                ['label' => 'Receipt', 'colspan' => 2, 'subcolumns' => ['Qty', 'Inclusive Ser. Nos. From/To']],
+                ['label' => 'Issued', 'colspan' => 2, 'subcolumns' => ['Qty', 'Inclusive Ser. Nos. From/To']],
+                ['label' => 'Ending Balance', 'colspan' => 2, 'subcolumns' => ['Qty', 'Inclusive Ser. Nos. From/To']],
             ],
-            [
-                'heading' => 'Summary of Collections and Remittances/Deposit',
-                'columns' => [
-                    ['label' => 'Beginning Balance', 'align' => 'right'],
-                    ['label' => 'Collections', 'align' => 'right'],
-                    ['label' => 'Remittances/Deposit', 'align' => 'right'],
-                    ['label' => 'Balance', 'align' => 'right'],
-                ],
-                'rows' => [[
-                    number_format(0, 2),
-                    number_format($collections, 2),
-                    number_format(0, 2),
-                    number_format($collections, 2),
-                ]],
+            'columns' => [
+                ['label' => 'Name of Forms & Number', 'align' => 'left'],
+                ['label' => 'Qty', 'align' => 'right'],
+                ['label' => 'Inclusive Ser. Nos. From/To', 'align' => 'left'],
+                ['label' => 'Qty', 'align' => 'right'],
+                ['label' => 'Inclusive Ser. Nos. From/To', 'align' => 'left'],
+                ['label' => 'Qty', 'align' => 'right'],
+                ['label' => 'Inclusive Ser. Nos. From/To', 'align' => 'left'],
+                ['label' => 'Qty', 'align' => 'right'],
+                ['label' => 'Inclusive Ser. Nos. From/To', 'align' => 'left'],
             ],
-        ],
+            'rows' => $rows,
+            'totals' => $totals,
+        ]],
     ];
 }
 
 /**
- * Report of Collections and Deposits — Section A lists every collection
- * (TransactionLog) recorded in the period, Section B lists every bank
- * deposit recorded in the period (Bank Deposit & Reconciliation), and
- * Section C summarizes the two so the treasurer can see how much of the
- * period's collections have not yet been deposited. Uses `TransactionLog
- * ->amount` directly (the normalized amount every collection form writes)
- * rather than `ram_transaction_amount()`, since the latter only reads the
- * morphed transaction's own `amount_paid`/`total` field and predates the
- * Marriage/Burial fee columns. Like the Treasurer's Monthly Report and RAAF,
- * this is system-wide — the system tracks a single Treasury custody, not
- * named per-collector accountable officers, so it does not split by officer
- * the way the paper form's "Name of Accountable Officer" field implies.
+ * Maps a transaction's form type to its funding source. Official Receipts
+ * (Form 5IC) already carry their own `fund` column (General/Trust/Special
+ * Education) and are read from there directly. Every other form defaults by
+ * type: Real Property Tax (Form 56/OR-RPT) is this LGU's Special Education
+ * Fund revenue (the SEF levy under RA 5447 / Local Government Code §235);
+ * every other accountable-form fee defaults to the General Fund. Adjust this
+ * mapping if your office's actual fund assignment differs.
+ */
+function ram_fund_for_transaction_log(\App\Models\TransactionLog $log): string
+{
+    if ($log->form_type === 'Form 5IC' && $log->transaction?->fund) {
+        return $log->transaction->fund;
+    }
+
+    return $log->form_type === 'Form 56' ? 'Special Education Fund' : 'General Fund';
+}
+
+/** Short receipt-type code for the Collections & Deposits ledger. */
+function ram_receipt_type_code(string $formType): string
+{
+    return match ($formType) {
+        'BIR0016' => 'CTC',
+        'BIR0017' => 'CTC Corp',
+        'Form 5IC' => 'OR',
+        default => \App\Models\TransactionLog::formName($formType),
+    };
+}
+
+/**
+ * The accountable officer whose ORAF batch a log's serial falls within —
+ * the same batch-range lookup ram_per_collector_rows() does per form, reused
+ * here per-transaction for the ledger's "Name of Collectors" column.
+ * $batchCache is keyed by form_type so each form's batch list is only
+ * queried once per report, not once per row.
+ */
+function ram_collector_for_log(\App\Models\TransactionLog $log, array &$batchCache): string
+{
+    if (! array_key_exists($log->form_type, $batchCache)) {
+        $batchCache[$log->form_type] = \App\Models\FormStock::where('form_code', $log->form_type)->first()?->batches ?? collect();
+    }
+
+    preg_match('/(\d+)$/', (string) $log->serial_number, $m);
+    $n = (int) ($m[1] ?? 0);
+
+    $batch = $batchCache[$log->form_type]->first(function ($b) use ($n) {
+        [$start, $end] = $b->serialRange();
+        return $n >= $start && $n <= $end;
+    });
+
+    return $batch?->assigned_to ?: ($batch?->added_by ?: 'Unassigned');
+}
+
+/**
+ * Report of Collections and Deposits — itemized per-transaction ledger split
+ * into General Fund / Trust Fund / Special Education Fund sections (matching
+ * the reference's fund-separated pages), each combining that fund's
+ * collections and deposits chronologically with a running balance, plus a
+ * compact per-fund summary. Deposits inherit their bank account's `fund`
+ * (defaulting to General Fund for accounts that haven't been tagged yet).
+ * "RCD No." is left blank — this system doesn't track a collection-and-
+ * deposit slip number distinct from the OR/CTC serial. "Opening Balance" is
+ * shown as 0 rather than fabricated — there's no prior-period carry-over
+ * ledger in this system (same convention RAAF and CRAAF use).
  */
 function ram_build_collections_and_deposits(\Illuminate\Support\Carbon $from, \Illuminate\Support\Carbon $to): array
 {
     $logs = \App\Models\TransactionLog::whereBetween('transacted_at', [$from, $to])
         ->whereNull('archived_at')
+        ->with('transaction')
         ->orderBy('transacted_at')
         ->get();
-
-    $collectionsTotal = (float) $logs->sum('amount');
-
-    $collectionRows = $logs->map(fn ($log) => [
-        $log->transacted_at->format('m/d/Y'),
-        $log->serial_number,
-        $log->payee,
-        \App\Models\TransactionLog::formName($log->form_type),
-        number_format((float) $log->amount, 2),
-    ])->all();
 
     $deposits = \App\Models\Deposit::with('bankAccount')
         ->whereBetween('deposit_date', [$from, $to])
         ->orderBy('deposit_date')
         ->get();
 
-    $depositsTotal = $deposits->sum(fn ($deposit) => $deposit->total());
+    $batchCache = [];
+    $sections = [];
 
-    $depositRows = $deposits->map(fn ($deposit) => [
-        $deposit->deposit_date->format('m/d/Y'),
-        $deposit->bankAccount?->label() ?? '—',
-        $deposit->slip_number ?: '—',
-        $deposit->prepared_by ?: '—',
-        number_format($deposit->total(), 2),
-    ])->all();
+    foreach (['General Fund', 'Trust Fund', 'Special Education Fund'] as $fund) {
+        $entries = [];
+
+        foreach ($logs->filter(fn ($log) => ram_fund_for_transaction_log($log) === $fund) as $log) {
+            $entries[] = [
+                'date' => $log->transacted_at,
+                'collector' => ram_collector_for_log($log, $batchCache),
+                'type' => ram_receipt_type_code($log->form_type),
+                'serial' => $log->serial_number,
+                'collections' => (float) $log->amount,
+                'deposits' => 0.0,
+            ];
+        }
+
+        foreach ($deposits->filter(fn ($d) => ($d->bankAccount?->fund ?: 'General Fund') === $fund) as $deposit) {
+            $entries[] = [
+                'date' => $deposit->deposit_date,
+                'collector' => $deposit->prepared_by ?: '—',
+                'type' => 'DEPOSIT',
+                'serial' => $deposit->slip_number ?: '—',
+                'collections' => 0.0,
+                'deposits' => $deposit->total(),
+            ];
+        }
+
+        usort($entries, fn ($a, $b) => $a['date'] <=> $b['date']);
+
+        $rows = [['', '', '', 'Opening Balance', '', '', number_format(0, 2)]];
+        $running = 0.0;
+        $fundCollections = 0.0;
+        $fundDeposits = 0.0;
+
+        foreach ($entries as $e) {
+            $running += $e['collections'] - $e['deposits'];
+            $fundCollections += $e['collections'];
+            $fundDeposits += $e['deposits'];
+
+            $rows[] = [
+                $e['date']->format('m/d/Y'),
+                '',
+                $e['collector'],
+                $e['type'],
+                $e['serial'],
+                $e['collections'] > 0 ? number_format($e['collections'], 2) : '',
+                $e['deposits'] > 0 ? number_format($e['deposits'], 2) : '',
+            ];
+        }
+
+        $rows[] = ['', '', '', 'Ending Balance', '', '', number_format($running, 2)];
+
+        $sections[] = [
+            'heading' => $fund,
+            'groups' => [
+                ['label' => 'Date', 'colspan' => 1],
+                ['label' => 'RCD No.', 'colspan' => 1],
+                ['label' => 'Name of Collectors', 'colspan' => 1],
+                ['label' => 'Receipt Type', 'colspan' => 1],
+                ['label' => "OR's Serial No.", 'colspan' => 1],
+                ['label' => 'Amount', 'colspan' => 2, 'subcolumns' => ['Collections', 'Deposits']],
+            ],
+            'columns' => [
+                ['label' => 'Date', 'align' => 'left'],
+                ['label' => 'RCD No.', 'align' => 'left'],
+                ['label' => 'Name of Collectors', 'align' => 'left'],
+                ['label' => 'Receipt Type', 'align' => 'left'],
+                ['label' => "OR's Serial No.", 'align' => 'left'],
+                ['label' => 'Collections', 'align' => 'right'],
+                ['label' => 'Deposits', 'align' => 'right'],
+            ],
+            'rows' => $rows,
+        ];
+
+        $sections[] = [
+            'heading' => $fund . ' Summary',
+            'columns' => [
+                ['label' => 'Beginning Balance', 'align' => 'right'],
+                ['label' => 'Total Remittances', 'align' => 'right'],
+                ['label' => 'Total Deposits', 'align' => 'right'],
+                ['label' => 'Ending on Hand', 'align' => 'right'],
+            ],
+            'rows' => [[
+                number_format(0, 2),
+                number_format($fundCollections, 2),
+                number_format($fundDeposits, 2),
+                number_format($running, 2),
+            ]],
+        ];
+    }
 
     return [
-        'title' => 'Report of Collections and Deposits',
-        'sections' => [
-            [
-                'heading' => 'A. Collections',
-                'columns' => [
-                    ['label' => 'Date', 'align' => 'left'],
-                    ['label' => 'Serial Number', 'align' => 'left'],
-                    ['label' => 'Payor', 'align' => 'left'],
-                    ['label' => 'Particulars', 'align' => 'left'],
-                    ['label' => 'Amount', 'align' => 'right'],
-                ],
-                'rows' => $collectionRows,
-                'totals' => ['', '', '', 'Total', number_format($collectionsTotal, 2)],
-            ],
-            [
-                'heading' => 'B. Deposits',
-                'columns' => [
-                    ['label' => 'Date', 'align' => 'left'],
-                    ['label' => 'Bank Account', 'align' => 'left'],
-                    ['label' => 'Deposit Slip No.', 'align' => 'left'],
-                    ['label' => 'Prepared By', 'align' => 'left'],
-                    ['label' => 'Amount', 'align' => 'right'],
-                ],
-                'rows' => $depositRows,
-                'totals' => ['', '', '', 'Total', number_format($depositsTotal, 2)],
-            ],
-            [
-                'heading' => 'C. Summary of Collections and Deposits',
-                'columns' => [
-                    ['label' => 'Total Collections', 'align' => 'right'],
-                    ['label' => 'Total Deposits', 'align' => 'right'],
-                    ['label' => 'Undeposited Balance', 'align' => 'right'],
-                ],
-                'rows' => [[
-                    number_format($collectionsTotal, 2),
-                    number_format($depositsTotal, 2),
-                    number_format($collectionsTotal - $depositsTotal, 2),
-                ]],
-            ],
+        'title' => 'Reports of Collections and Deposits',
+        'agencyLines' => ['Republic of the Philippines', 'Province of Sorsogon', 'Municipality of Prieto Diaz'],
+        'officeNote' => 'Office of the Municipal Treasurer',
+        'periodPrefix' => 'Period :',
+        'showOfficerRow' => false,
+        'certification' => [
+            'label' => 'I hereby certify that the reports issued is a full, true and correct statement of all collections and deposits stated in the attached Summary of Collections and Remittances/Deposits of LGU - Prieto Diaz, Sorsogon.',
+            'role' => 'Municipal Treasurer',
         ],
+        'pageOrientation' => 'landscape',
+        'sections' => $sections,
     ];
 }
 
@@ -2792,7 +2984,6 @@ function ram_build_report(string $slug, \Illuminate\Support\Carbon $from, \Illum
         'summary-ctc' => ram_build_summary_ctc($from, $to),
         'treasurers-monthly' => ram_build_treasurers_monthly_detailed($from, $to),
         'craaf' => ram_build_craaf($from, $to),
-        'raaf' => ram_build_raaf($from, $to),
         'collections-deposits' => ram_build_collections_and_deposits($from, $to),
     };
 }
@@ -2804,7 +2995,7 @@ function ram_build_report(string $slug, \Illuminate\Support\Carbon $from, \Illum
  * heading, bordered column-header row, data rows, and an optional bold
  * totals row).
  */
-function export_ram_report_xlsx(array $built, string $periodLabel, ?string $officerName, ?string $designation, string $filename): \Symfony\Component\HttpFoundation\StreamedResponse
+function export_ram_report_xlsx(array $built, string $periodLabel, ?string $officerName, ?string $designation, string $filename, ?string $certifiedBy = null): \Symfony\Component\HttpFoundation\StreamedResponse
 {
     $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
     $sheet = $spreadsheet->getActiveSheet();
@@ -2814,18 +3005,36 @@ function export_ram_report_xlsx(array $built, string $periodLabel, ?string $offi
 
     $row = 1;
 
+    foreach ($built['agencyLines'] ?? [] as $line) {
+        $sheet->setCellValue("A{$row}", $line);
+        $sheet->mergeCells("A{$row}:{$lastColLetter}{$row}");
+        $sheet->getStyle("A{$row}")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $row++;
+    }
+
+    if (! empty($built['officeNote'])) {
+        $sheet->setCellValue("A{$row}", $built['officeNote']);
+        $sheet->mergeCells("A{$row}:{$lastColLetter}{$row}");
+        $sheet->getStyle("A{$row}")->getFont()->setItalic(true);
+        $sheet->getStyle("A{$row}")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $row++;
+    }
+
     $sheet->setCellValue("A{$row}", strtoupper($built['title']));
     $sheet->mergeCells("A{$row}:{$lastColLetter}{$row}");
     $sheet->getStyle("A{$row}")->getFont()->setBold(true)->setSize(13);
     $sheet->getStyle("A{$row}")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
     $row++;
 
-    $sheet->setCellValue("A{$row}", 'Province of Sorsogon, Municipality of Prieto-Diaz');
-    $sheet->mergeCells("A{$row}:{$lastColLetter}{$row}");
-    $sheet->getStyle("A{$row}")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-    $row++;
+    if (empty($built['agencyLines'])) {
+        $sheet->setCellValue("A{$row}", 'Province of Sorsogon, Municipality of Prieto-Diaz');
+        $sheet->mergeCells("A{$row}:{$lastColLetter}{$row}");
+        $sheet->getStyle("A{$row}")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $row++;
+    }
 
-    $sheet->setCellValue("A{$row}", 'For the period of ' . strtoupper($periodLabel));
+    $periodPrefix = $built['periodPrefix'] ?? 'For the period of';
+    $sheet->setCellValue("A{$row}", $built['agencyLines'] ?? null ? "{$periodPrefix} {$periodLabel}" : $periodPrefix . ' ' . strtoupper($periodLabel));
     $sheet->mergeCells("A{$row}:{$lastColLetter}{$row}");
     $sheet->getStyle("A{$row}")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
     $row += 2;
@@ -2889,6 +3098,24 @@ function export_ram_report_xlsx(array $built, string $periodLabel, ?string $offi
         $row++;
     }
 
+    if (! empty($built['certification'])) {
+        $row++;
+        $sheet->setCellValue("A{$row}", $built['certification']['label']);
+        $row += 2;
+        $sheet->setCellValue("A{$row}", strtoupper($certifiedBy ?: 'Gemma D. Ferrer'));
+        $sheet->getStyle("A{$row}")->getFont()->setBold(true);
+        $row++;
+        $sheet->setCellValue("A{$row}", $built['certification']['role']);
+    }
+
+    if (($built['pageOrientation'] ?? null) === 'portrait') {
+        $sheet->getPageSetup()->setOrientation(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_PORTRAIT);
+        $sheet->getPageSetup()->setPaperSize(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::PAPERSIZE_LETTER);
+    } elseif (($built['pageOrientation'] ?? null) === 'landscape') {
+        $sheet->getPageSetup()->setOrientation(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_LANDSCAPE);
+        $sheet->getPageSetup()->setPaperSize(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::PAPERSIZE_LETTER);
+    }
+
     foreach (range('A', $lastColLetter) as $col) {
         $sheet->getColumnDimension($col)->setAutoSize(true);
     }
@@ -2909,7 +3136,7 @@ function export_ram_report_xlsx(array $built, string $periodLabel, ?string $offi
  * Total), and a Sub Total / Add / GRAND TOTAL footer. Portrait, horizontally
  * centered, 0.7" margins, with the reference column widths.
  */
-function export_abstract_ctc_xlsx(array $built, string $periodLabel, string $filename): \Symfony\Component\HttpFoundation\StreamedResponse
+function export_abstract_ctc_xlsx(array $built, string $periodLabel, string $filename, ?string $certifiedBy = null): \Symfony\Component\HttpFoundation\StreamedResponse
 {
     $A = \PhpOffice\PhpSpreadsheet\Style\Alignment::class;
     $B = \PhpOffice\PhpSpreadsheet\Style\Border::class;
@@ -2970,8 +3197,9 @@ function export_abstract_ctc_xlsx(array $built, string $periodLabel, string $fil
                 $sheet->getStyle("{$letter}{$row}")->getAlignment()->setHorizontal($A::HORIZONTAL_LEFT);
             }
         }
+        $isPageMarker = in_array($dataRow[2] ?? null, ['Sub Total', 'Balance Forwarded'], true);
         $sheet->getStyle("A{$row}:{$lastCol}{$row}")->applyFromArray([
-            'font' => ['size' => 8, 'name' => 'Roboto'],
+            'font' => ['size' => 8, 'name' => 'Roboto', 'bold' => $isPageMarker, 'italic' => $isPageMarker],
             'alignment' => ['vertical' => $A::VERTICAL_CENTER],
             'borders' => ['allBorders' => ['borderStyle' => $B::BORDER_THIN]],
         ]);
@@ -3006,6 +3234,19 @@ function export_abstract_ctc_xlsx(array $built, string $periodLabel, string $fil
 
     $footer('GRAND TOTAL:');
     $sheet->setCellValue("{$lastCol}{$row}", "=SUM({$lastCol}{$subTotalRow}:{$lastCol}{$addRow})");
+    $row++;
+
+    if (! empty($built['certification'])) {
+        $row += 2;
+        $sheet->setCellValue("A{$row}", $built['certification']['label']);
+        $sheet->getStyle("A{$row}")->getFont()->setName('Roboto')->setSize(10);
+        $row += 2;
+        $sheet->setCellValue("A{$row}", strtoupper($certifiedBy ?: 'Gemma D. Ferrer'));
+        $sheet->getStyle("A{$row}")->getFont()->setName('Roboto')->setSize(10)->setBold(true);
+        $row++;
+        $sheet->setCellValue("A{$row}", $built['certification']['role']);
+        $sheet->getStyle("A{$row}")->getFont()->setName('Roboto')->setSize(10);
+    }
 
     // ── Column widths (reference template) ──
     $sheet->getColumnDimension('A')->setWidth(15.33203125);
@@ -3019,6 +3260,134 @@ function export_abstract_ctc_xlsx(array $built, string $periodLabel, string $fil
     $sheet->getPageSetup()->setOrientation(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_PORTRAIT);
     $sheet->getPageSetup()->setHorizontalCentered(true);
     $sheet->getPageMargins()->setLeft(0.7)->setRight(0.7)->setTop(0.7)->setBottom(0.7)->setHeader(0.3)->setFooter(0.3);
+
+    $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+
+    return response()->streamDownload(function () use ($writer) {
+        $writer->save('php://output');
+    }, $filename, [
+        'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    ]);
+}
+
+/**
+ * .xlsx export for the Cheque Management "Reports of Checks Issued" page,
+ * matching the on-screen report and the municipality's reference template:
+ * letterhead + meta block, a bordered 7-column table, a TOTAL row, the
+ * certification paragraph, and a Municipal Treasurer / Date signature row.
+ * Landscape Letter — the reference's Payee/Nature of Payment columns need
+ * the extra width.
+ */
+function export_cheque_report_xlsx(\Illuminate\Support\Collection $cheques, ?\App\Models\BankAccount $account, int $month, int $year, ?string $treasurerName, string $filename): \Symfony\Component\HttpFoundation\StreamedResponse
+{
+    $A = \PhpOffice\PhpSpreadsheet\Style\Alignment::class;
+    $B = \PhpOffice\PhpSpreadsheet\Style\Border::class;
+    $F = \PhpOffice\PhpSpreadsheet\Style\Fill::class;
+    $NUM = \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC;
+    $lastCol = 'G';
+
+    $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+    $sheet = $spreadsheet->getActiveSheet();
+
+    $periodLabel = \Illuminate\Support\Carbon::create()->month($month)->format('F') . ' ' . $year;
+
+    $row = 1;
+    $sheet->setCellValue("A{$row}", 'REPORTS OF CHECKS ISSUED');
+    $sheet->mergeCells("A{$row}:{$lastCol}{$row}");
+    $sheet->getStyle("A{$row}")->getFont()->setBold(true)->setSize(14);
+    $sheet->getStyle("A{$row}")->getAlignment()->setHorizontal($A::HORIZONTAL_CENTER);
+    $row++;
+
+    foreach ([
+        'Agency: Municipality of Prieto Diaz, Sorsogon',
+        'Period Covered: ' . $periodLabel,
+        'Bank Name: ' . ($account?->bank_name ?? '—'),
+        'Account No.: ' . ($account?->account_number ?? '—') . ($account?->fund ? ' (' . strtoupper($account->fund) . ')' : ''),
+    ] as $line) {
+        $sheet->setCellValue("A{$row}", $line);
+        $sheet->mergeCells("A{$row}:{$lastCol}{$row}");
+        $row++;
+    }
+    $row++;
+
+    $headers = ['Check Date', 'Check No.', 'DV No. / Payroll', 'Responsibility Center Code', 'Payee', 'Nature of Payment', 'Amount'];
+    foreach ($headers as $i => $label) {
+        $letter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($i + 1);
+        $sheet->setCellValue("{$letter}{$row}", $label);
+    }
+    $sheet->getStyle("A{$row}:{$lastCol}{$row}")->applyFromArray([
+        'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+        'fill' => ['fillType' => $F::FILL_SOLID, 'startColor' => ['rgb' => '2C4A6E']],
+        'borders' => ['allBorders' => ['borderStyle' => $B::BORDER_THIN]],
+        'alignment' => ['horizontal' => $A::HORIZONTAL_CENTER, 'wrapText' => true],
+    ]);
+    $row++;
+
+    $total = 0;
+    foreach ($cheques as $cheque) {
+        $cancelled = $cheque->status === 'Cancelled';
+        if (! $cancelled) {
+            $total += (float) $cheque->amount;
+        }
+
+        $sheet->setCellValue("A{$row}", $cheque->cheque_date->format('m.d.y'));
+        $sheet->setCellValue("B{$row}", $cheque->check_number);
+        $sheet->setCellValue("E{$row}", $cancelled ? 'cancelled' : ($cheque->pay_to_order_of ?: '—'));
+        $sheet->setCellValue("F{$row}", $cancelled ? '' : ($cheque->nature_of_payment ?: '—'));
+        if (! $cancelled) {
+            $sheet->setCellValueExplicit("G{$row}", (float) $cheque->amount, $NUM);
+            $sheet->getStyle("G{$row}")->getAlignment()->setHorizontal($A::HORIZONTAL_RIGHT);
+        }
+        $sheet->getStyle("A{$row}:{$lastCol}{$row}")->applyFromArray([
+            'borders' => ['allBorders' => ['borderStyle' => $B::BORDER_THIN]],
+        ]);
+        $sheet->getStyle("A{$row}")->getAlignment()->setHorizontal($A::HORIZONTAL_CENTER);
+        $sheet->getStyle("B{$row}")->getAlignment()->setHorizontal($A::HORIZONTAL_CENTER);
+        if ($cancelled) {
+            $sheet->getStyle("A{$row}:{$lastCol}{$row}")->getFont()->setItalic(true)->getColor()->setRGB('A63B50');
+        }
+        $row++;
+    }
+
+    $sheet->mergeCells("A{$row}:F{$row}");
+    $sheet->setCellValue("A{$row}", 'TOTAL');
+    $sheet->getStyle("A{$row}")->getAlignment()->setHorizontal($A::HORIZONTAL_RIGHT);
+    $sheet->setCellValueExplicit("G{$row}", $total, $NUM);
+    $sheet->getStyle("A{$row}:{$lastCol}{$row}")->applyFromArray([
+        'font' => ['bold' => true],
+        'borders' => ['allBorders' => ['borderStyle' => $B::BORDER_THIN]],
+    ]);
+    $row += 2;
+
+    $sheet->setCellValue("A{$row}", 'I hereby certify that this Report of Checks Issued in ___ sheet(s) is a full, true and correct statement of all checks released by me in payment for obligations for the period stated and shown in the attached disbursement vouchers.');
+    $sheet->mergeCells("A{$row}:{$lastCol}{$row}");
+    $sheet->getStyle("A{$row}")->getAlignment()->setWrapText(true);
+    $sheet->getRowDimension($row)->setRowHeight(30);
+    $row += 3;
+
+    $sheet->setCellValue("E{$row}", strtoupper($treasurerName ?: 'Gemma D. Ferrer'));
+    $sheet->mergeCells("E{$row}:{$lastCol}{$row}");
+    $sheet->getStyle("E{$row}:{$lastCol}{$row}")->applyFromArray([
+        'font' => ['bold' => true],
+        'alignment' => ['horizontal' => $A::HORIZONTAL_CENTER],
+    ]);
+    $row++;
+    $sheet->setCellValue("E{$row}", 'Municipal Treasurer');
+    $sheet->mergeCells("E{$row}:{$lastCol}{$row}");
+    $sheet->getStyle("E{$row}:{$lastCol}{$row}")->getAlignment()->setHorizontal($A::HORIZONTAL_CENTER);
+
+    $sheet->getColumnDimension('A')->setWidth(11);
+    $sheet->getColumnDimension('B')->setWidth(11);
+    $sheet->getColumnDimension('C')->setWidth(14);
+    $sheet->getColumnDimension('D')->setWidth(16);
+    $sheet->getColumnDimension('E')->setWidth(28);
+    $sheet->getColumnDimension('F')->setWidth(26);
+    $sheet->getColumnDimension('G')->setWidth(14);
+
+    $sheet->getPageSetup()->setOrientation(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_LANDSCAPE);
+    $sheet->getPageSetup()->setPaperSize(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::PAPERSIZE_LETTER);
+    $sheet->getPageSetup()->setHorizontalCentered(true);
+    $sheet->getPageMargins()->setLeft(0.5)->setRight(0.5)->setTop(0.5)->setBottom(0.5)->setHeader(0.3)->setFooter(0.3);
 
     $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
 

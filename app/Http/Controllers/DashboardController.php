@@ -9,15 +9,22 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
-        $range = in_array($request->input('range'), ['today', 'week', 'month'], true)
-            ? $request->input('range') : 'month';
+        $now = now();
 
-        $m = ($request->filled('from') && $request->filled('to'))
-            ? DashboardMetrics::forDates($request->input('from'), $request->input('to'))
-            : DashboardMetrics::forRange($range);
+        $month = (int) ($request->input('month') ?: $now->month);
+        $month = ($month >= 1 && $month <= 12) ? $month : $now->month;
+
+        $year = (int) ($request->input('year') ?: $now->year);
+        $year = ($year >= 2020 && $year <= $now->year) ? $year : $now->year;
+
+        $from = \Illuminate\Support\Carbon::create($year, $month, 1)->startOfMonth();
+        $to = $from->copy()->endOfMonth();
+
+        $m = DashboardMetrics::forDates($from->toDateString(), $to->toDateString());
 
         return view('dashboard', [
-            'range'          => $range,
+            'month'          => $month,
+            'year'           => $year,
             'cash'           => $m->cashPosition(),
             'collections'    => $m->collections(),
             'disbursed'      => $m->disbursed(),

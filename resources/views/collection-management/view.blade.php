@@ -54,8 +54,13 @@
         .cm-empty { color: var(--muted, #6b7685); font-style: italic; text-align: center; }
         .cm-words { font-size: 14px; color: var(--ink, #1f2733); }
         .cm-words .cm-l { display: block; margin-bottom: 3px; }
-        .cm-payrow { display: flex; flex-wrap: wrap; gap: 12px 40px; }
-        .cm-payrow > div { display: flex; flex-direction: column; gap: 3px; }
+        .cm-pay-strip { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; padding: 12px 22px; border-top: 1px solid var(--line, #E3E8EF); background: var(--surface-2, #F7F9FB); }
+        .cm-pay-strip-l { display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 600; color: var(--ink, #1f2733); }
+        .cm-pay-strip-l .icon { width: 16px; height: 16px; color: var(--primary, #427AB5); flex-shrink: 0; }
+        .cm-pay-strip-r { display: flex; gap: 28px; flex-wrap: wrap; }
+        .cm-pay-field { display: flex; flex-direction: column; gap: 1px; }
+        .cm-pay-field span:first-child { font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted, #6b7685); }
+        .cm-pay-field span:last-child { font-size: 12.5px; font-weight: 600; color: var(--ink, #1f2733); }
         @media (max-width: 640px) { .cm-kv { grid-template-columns: 1fr 1fr; } .cm-summary .cm-sum-amt { text-align: left; } }
     </style>
 
@@ -148,41 +153,54 @@
             @else
                 {{-- ══ Clean read-only screen view ══════════════════════════ --}}
                 <div class="cm-screen">
-                    <div class="cm-card cm-summary">
-                        <div>
-                            <div class="cm-sum-l">{{ $formName }} · {{ $log->serial_number }}</div>
-                            <div class="cm-sum-n">{{ $log->payee }}</div>
-                            <div class="cm-sum-m">Issued {{ $log->transacted_at->format('F j, Y') }}</div>
-                        </div>
-                        <div class="cm-sum-amt">
-                            <div class="cm-sum-al">Amount</div>
-                            <div class="cm-sum-av">₱ {{ number_format((float) $log->amount, 2) }}</div>
-                        </div>
-                    </div>
-
-                    @if($log->payment_method)
                     <div class="cm-card">
-                        <div class="cm-h"><span class="cm-k">Payment</span></div>
-                        <div class="cm-b">
-                            <div class="cm-payrow">
-                                <div><span class="cm-l">Method</span><span class="cm-v">{{ ucwords(str_replace('_', ' ', $log->payment_method)) }}</span></div>
-                                <div><span class="cm-l">Amount</span><span class="cm-v" style="font-variant-numeric:tabular-nums">₱ {{ number_format((float) $log->amount, 2) }}</span></div>
-                                @if($log->payment_method === 'cheque')
-                                    <div><span class="cm-l">Bank</span><span class="cm-v">{{ $log->payer_bank_name ?: '—' }}</span></div>
-                                    <div><span class="cm-l">Cheque No.</span><span class="cm-v">{{ $log->payment_reference ?: '—' }}</span></div>
-                                    <div><span class="cm-l">Cheque Date</span><span class="cm-v">{{ optional($log->payment_reference_date)->format('m/d/Y') ?: '—' }}</span></div>
-                                @elseif($log->payment_method === 'online')
-                                    <div><span class="cm-l">Channel</span><span class="cm-v">{{ $log->payment_channel ?: '—' }}</span></div>
-                                    <div><span class="cm-l">Reference</span><span class="cm-v">{{ $log->payment_reference ?: '—' }}</span></div>
-                                    <div><span class="cm-l">Date</span><span class="cm-v">{{ optional($log->payment_reference_date)->format('m/d/Y') ?: '—' }}</span></div>
-                                @elseif($log->payment_method === 'money_order')
-                                    <div><span class="cm-l">MO No.</span><span class="cm-v">{{ $log->payment_reference ?: '—' }}</span></div>
-                                    <div><span class="cm-l">Date</span><span class="cm-v">{{ optional($log->payment_reference_date)->format('m/d/Y') ?: '—' }}</span></div>
-                                @endif
+                        <div class="cm-summary">
+                            <div>
+                                <div class="cm-sum-l">{{ $formName }} · {{ $log->serial_number }}</div>
+                                <div class="cm-sum-n">{{ $log->payee }}</div>
+                                <div class="cm-sum-m">Issued {{ $log->transacted_at->format('F j, Y') }}</div>
+                            </div>
+                            <div class="cm-sum-amt">
+                                <div class="cm-sum-al">Amount</div>
+                                <div class="cm-sum-av">₱ {{ number_format((float) $log->amount, 2) }}</div>
                             </div>
                         </div>
+
+                        @if($log->payment_method)
+                        <div class="cm-pay-strip">
+                            <div class="cm-pay-strip-l">
+                                @if($log->payment_method === 'cheque')
+                                    <x-bx-receipt class="icon" />
+                                @elseif($log->payment_method === 'online')
+                                    <x-bx-credit-card class="icon" />
+                                @elseif($log->payment_method === 'money_order')
+                                    <x-bx-envelope class="icon" />
+                                @else
+                                    <x-bx-wallet class="icon" />
+                                @endif
+                                Paid via {{ ucwords(str_replace('_', ' ', $log->payment_method)) }}
+                            </div>
+                            @if($log->payment_method === 'cheque')
+                                <div class="cm-pay-strip-r">
+                                    <div class="cm-pay-field"><span>Bank</span><span>{{ $log->payer_bank_name ?: '—' }}</span></div>
+                                    <div class="cm-pay-field"><span>Cheque No.</span><span>{{ $log->payment_reference ?: '—' }}</span></div>
+                                    <div class="cm-pay-field"><span>Cheque Date</span><span>{{ optional($log->payment_reference_date)->format('m/d/Y') ?: '—' }}</span></div>
+                                </div>
+                            @elseif($log->payment_method === 'online')
+                                <div class="cm-pay-strip-r">
+                                    <div class="cm-pay-field"><span>Channel</span><span>{{ $log->payment_channel ?: '—' }}</span></div>
+                                    <div class="cm-pay-field"><span>Reference</span><span>{{ $log->payment_reference ?: '—' }}</span></div>
+                                    <div class="cm-pay-field"><span>Date</span><span>{{ optional($log->payment_reference_date)->format('m/d/Y') ?: '—' }}</span></div>
+                                </div>
+                            @elseif($log->payment_method === 'money_order')
+                                <div class="cm-pay-strip-r">
+                                    <div class="cm-pay-field"><span>MO No.</span><span>{{ $log->payment_reference ?: '—' }}</span></div>
+                                    <div class="cm-pay-field"><span>Date</span><span>{{ optional($log->payment_reference_date)->format('m/d/Y') ?: '—' }}</span></div>
+                                </div>
+                            @endif
+                        </div>
+                        @endif
                     </div>
-                    @endif
 
                     @switch($log->form_type)
                         @case('Form 5IC')
