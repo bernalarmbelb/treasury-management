@@ -32,6 +32,8 @@
         @include('official-receipt-accountable-forms.partials.report-preview-modal')
     </div>
 
+    @include('partials.select-enhancer')
+
     @push('scripts')
         <style>
             @page { size: 11in 8.5in landscape; margin: 0.4in; }
@@ -73,6 +75,7 @@
                         .then((html) => {
                             container.innerHTML = html;
                             window.history.replaceState({}, '', url);
+                            window.cqmEnhanceSelects?.(container);
                         });
                 }
 
@@ -195,6 +198,7 @@
                             })
                             .then((html) => {
                                 container.innerHTML = html;
+                                window.cqmEnhanceSelects?.(container);
                                 closeBatchModal();
                                 showSuccessAlert(currentFormCode);
                             })

@@ -17,7 +17,7 @@
                 <input type="search" name="search" class="search-input" id="records-search-input" placeholder="Search User or Activity" value="{{ request('search') }}" autocomplete="off">
             </form>
 
-            <select name="module" id="records-module-select" class="module-filter-select">
+            <select name="module" id="records-module-select" class="module-filter-select js-cs">
                 <option value="">All Modules</option>
                 @foreach ($modules as $option)
                     <option value="{{ $option }}" @selected($module === $option)>{{ $option }}</option>
@@ -31,6 +31,8 @@
             @include('records.partials.records-table')
         </div>
     </div>
+
+    @include('partials.select-enhancer')
 
     @push('scripts')
         <script>
@@ -63,6 +65,7 @@
                         .then((html) => {
                             container.innerHTML = html;
                             window.history.replaceState({}, '', url);
+                            window.cqmEnhanceSelects?.(container);
                             updateExportLink(params);
                         });
                 }

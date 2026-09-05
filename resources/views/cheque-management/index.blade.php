@@ -8,11 +8,7 @@
     @endphp
 
     <div class="x-header-container sub-nav-sticky">
-        <x-header title="Cheque Management" :tmpRoute="$tmpRoute" :routeName="$routeName">
-            <x-slot:actions>
-                @include('cheque-management.partials.sub-nav')
-            </x-slot:actions>
-        </x-header>
+        <x-header title="Cheque Management" :tmpRoute="$tmpRoute" :routeName="$routeName" />
     </div>
 
     <style>
@@ -41,6 +37,8 @@
                 <input type="date" class="date-filter-input" id="dateFilterEnd" value="{{ $dateEnd }}">
                 <button type="button" class="btn btn-light date-filter-btn" id="dateFilterBtn">Filter</button>
             </div>
+
+            @include('cheque-management.partials.sub-nav')
         </div>
 
         <div class="filter-breadcrumbs" id="filterBreadcrumbs"></div>

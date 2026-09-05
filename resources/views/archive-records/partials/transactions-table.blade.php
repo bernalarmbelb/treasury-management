@@ -100,7 +100,7 @@
                 <input type="hidden" name="date_end" value="{{ request('date_end') }}">
             @endif
             <label for="per_page" class="per-page-label">Rows per page</label>
-            <select name="per_page" id="per_page" class="form-select form-select-sm per-page-select" onchange="this.form.submit()">
+            <select name="per_page" id="per_page" class="form-select form-select-sm per-page-select js-cs" data-cs-inline onchange="this.form.submit()">
                 @foreach ($perPageOptions as $option)
                     <option value="{{ $option }}" @selected($perPage === $option)>{{ $option }}</option>
                 @endforeach

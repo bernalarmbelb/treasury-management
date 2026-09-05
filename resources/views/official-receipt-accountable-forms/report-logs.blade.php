@@ -44,6 +44,8 @@
         @endif
     </div>
 
+    @include('partials.select-enhancer')
+
     @push('scripts')
         <script>
             (function () {
@@ -65,6 +67,7 @@
                         .then((html) => {
                             container.innerHTML = html;
                             window.history.replaceState({}, '', url);
+                            window.cqmEnhanceSelects?.(container);
                         });
                 }
 

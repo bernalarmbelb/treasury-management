@@ -24,7 +24,7 @@ function updateDateTime() {
     hours = hours % 12 || 12;
     hours = String(hours).padStart(2, '0');
 
-    document.getElementById('live-date').textContent = `${dayName} - ${monthName} ${day}, ${year}`;
+    document.getElementById('live-date').textContent = `${dayName}, ${monthName} ${day}, ${year}`;
     document.getElementById('live-time').textContent = `${hours}:${minutes}:${seconds} ${ampm}`;
 }
 

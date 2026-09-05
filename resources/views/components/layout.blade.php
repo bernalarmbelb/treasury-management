@@ -18,11 +18,6 @@
 		</a>
 
 		<div class="nav-profile">
-			<div class="nav-datetime">
-				<span id="live-date" class="nav-date"></span>
-				<span id="live-time" class="nav-time"></span>
-			</div>
-
 			<div class="nav-bell-wrapper" id="notifBellWrapper">
 				<button type="button" class="nav-bell-btn" id="notifBellBtn" aria-label="Notifications" aria-expanded="false">
 					<svg class="nav-bell-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -41,21 +36,41 @@
 				</div>
 			</div>
 
-			<div class="nav-user">
-				<div class="nav-user-avatar">
-					<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-						<path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-					</svg>
-				</div>
-				<div class="nav-user-info">
-					<span class="nav-user-name">{{ auth()->user()?->name }}</span>
-					<div class="nav-user-meta">
-						<span class="nav-user-role">{{ auth()->user()?->roles->first()?->name ?? 'User' }}</span>
-						<form method="POST" action="{{ route('logout') }}" style="display:inline;">
-							@csrf
-							<button type="submit" class="nav-logout-btn">Logout</button>
-						</form>
+			<div class="nav-divider" aria-hidden="true"></div>
+
+			@php
+				$navUserName = auth()->user()?->name ?? '';
+				$navNameParts = preg_split('/\s+/', trim($navUserName));
+				$navInitials = strtoupper(substr($navNameParts[0] ?? '', 0, 1) . substr($navNameParts[count($navNameParts) - 1] ?? '', 0, 1));
+				$navUserRole = ucfirst(auth()->user()?->roles->first()?->name ?? 'User');
+			@endphp
+
+			<div class="nav-user-wrapper" id="navUserWrapper">
+				<button type="button" class="nav-user-chip" id="navUserChip" aria-haspopup="true" aria-expanded="false">
+					<span class="nav-user-avatar">{{ $navInitials }}</span>
+					<span class="nav-user-info">
+						<span class="nav-user-name">{{ $navUserName }}</span>
+						<span class="nav-user-role">{{ $navUserRole }}</span>
+					</span>
+					<svg class="nav-user-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+				</button>
+
+				<div class="nav-user-dropdown" id="navUserDropdown" aria-hidden="true">
+					<div class="nav-user-dropdown-head">
+						<span class="nav-user-dropdown-avatar">{{ $navInitials }}</span>
+						<div>
+							<div class="nav-user-dropdown-name">{{ $navUserName }}</div>
+							<span class="nav-user-dropdown-role">{{ $navUserRole }}</span>
+						</div>
 					</div>
+					<hr class="nav-user-dropdown-rule">
+					<form method="POST" action="{{ route('logout') }}">
+						@csrf
+						<button type="submit" class="nav-user-dropdown-logout">
+							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+							Log out
+						</button>
+					</form>
 				</div>
 			</div>
 		</div>
@@ -114,8 +129,8 @@
 		{{ $slot }}
 	</main>
 
-	@if (($quickEntryForms ?? collect())->isNotEmpty())
-		<div class="quick-entry-bar" id="quickEntryBar">
+	<div class="quick-entry-bar" id="quickEntryBar">
+		@if (($quickEntryForms ?? collect())->isNotEmpty())
 			<button type="button" class="quick-entry-toggle" id="quickEntryToggle" aria-label="Toggle quick entry links" aria-expanded="true">
 				<span class="qe-icon" aria-hidden="true">
 					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 3 14h7v8l10-12h-7z"/></svg>
@@ -132,8 +147,15 @@
 					</a>
 				@endforeach
 			</div>
+		@endif
+
+		<div class="footer-datetime">
+			<svg class="footer-datetime-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+			<span id="live-date" class="footer-date"></span>
+			<span class="footer-datetime-sep" aria-hidden="true">&middot;</span>
+			<span id="live-time" class="footer-time"></span>
 		</div>
-	@endif
+	</div>
 
 	<div class="app-toast" id="appToast" role="status" aria-live="polite">
 		<span class="app-toast-icon" id="appToastIcon" aria-hidden="true"></span>
@@ -289,6 +311,8 @@
 
 		function openDropdown() {
 			isOpen = true;
+			document.getElementById('navUserDropdown')?.classList.remove('open');
+			document.getElementById('navUserChip')?.classList.remove('open');
 			dropdown.classList.add('open');
 			bellBtn.setAttribute('aria-expanded', 'true');
 			dropdown.setAttribute('aria-hidden', 'false');
@@ -319,7 +343,51 @@
 		setInterval(fetchCount, 30000);
 	})();
 
-	// ── Quick entry footer bar ───────────────────────────────────────────
+	// ── User menu dropdown ───────────────────────────────────────────────
+	(function () {
+		const chip = document.getElementById('navUserChip');
+		if (!chip) return;
+
+		const dropdown = document.getElementById('navUserDropdown');
+		let isOpen = false;
+
+		function closeNotifDropdown() {
+			document.getElementById('notifDropdown')?.classList.remove('open');
+			document.getElementById('notifBellBtn')?.setAttribute('aria-expanded', 'false');
+		}
+
+		function openDropdown() {
+			isOpen = true;
+			closeNotifDropdown();
+			dropdown.classList.add('open');
+			chip.classList.add('open');
+			chip.setAttribute('aria-expanded', 'true');
+			dropdown.setAttribute('aria-hidden', 'false');
+		}
+
+		function closeDropdown() {
+			isOpen = false;
+			dropdown.classList.remove('open');
+			chip.classList.remove('open');
+			chip.setAttribute('aria-expanded', 'false');
+			dropdown.setAttribute('aria-hidden', 'true');
+		}
+
+		chip.addEventListener('click', function (e) {
+			e.stopPropagation();
+			isOpen ? closeDropdown() : openDropdown();
+		});
+
+		document.addEventListener('click', function (e) {
+			if (isOpen && !dropdown.contains(e.target) && e.target !== chip) closeDropdown();
+		});
+
+		document.addEventListener('keydown', function (e) {
+			if (e.key === 'Escape' && isOpen) closeDropdown();
+		});
+	})();
+
+	// ── Footer bar (date/time + quick entry links) ───────────────────────
 	(function () {
 		const bar = document.getElementById('quickEntryBar');
 		if (!bar) return;
@@ -332,6 +400,12 @@
 		function applyPadding() {
 			document.body.style.paddingBottom = bar.offsetHeight + 'px';
 		}
+
+		window.addEventListener('resize', applyPadding);
+		window.addEventListener('load', applyPadding);
+		applyPadding();
+
+		if (!toggle) return;
 
 		function setCollapsed(collapsed) {
 			bar.classList.toggle('collapsed', collapsed);
@@ -346,9 +420,6 @@
 			localStorage.setItem(STORAGE_KEY, collapsed ? '1' : '0');
 			setCollapsed(collapsed);
 		});
-
-		window.addEventListener('resize', applyPadding);
-		window.addEventListener('load', applyPadding);
 	})();
 	</script>
 </body>

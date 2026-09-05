@@ -23,12 +23,12 @@
                 <div class="orabf-export-range-col">
                     <span class="orabf-export-range-label">From</span>
                     <div class="orabf-export-range-selects">
-                        <select name="from_month" class="form-batch-input orabf-export-select" required>
+                        <select name="from_month" class="form-batch-input orabf-export-select js-cs" required>
                             @foreach ($months as $i => $month)
                                 <option value="{{ $i + 1 }}" @selected($currentMonth === $i + 1)>{{ $month }}</option>
                             @endforeach
                         </select>
-                        <select name="from_year" class="form-batch-input orabf-export-select orabf-export-select--year" required>
+                        <select name="from_year" class="form-batch-input orabf-export-select orabf-export-select--year js-cs" required>
                             @for ($y = $currentYear; $y >= 2020; $y--)
                                 <option value="{{ $y }}" @selected($currentYear === $y)>{{ $y }}</option>
                             @endfor
@@ -44,12 +44,12 @@
                 <div class="orabf-export-range-col">
                     <span class="orabf-export-range-label">To</span>
                     <div class="orabf-export-range-selects">
-                        <select name="to_month" class="form-batch-input orabf-export-select" required>
+                        <select name="to_month" class="form-batch-input orabf-export-select js-cs" required>
                             @foreach ($months as $i => $month)
                                 <option value="{{ $i + 1 }}" @selected($currentMonth === $i + 1)>{{ $month }}</option>
                             @endforeach
                         </select>
-                        <select name="to_year" class="form-batch-input orabf-export-select orabf-export-select--year" required>
+                        <select name="to_year" class="form-batch-input orabf-export-select orabf-export-select--year js-cs" required>
                             @for ($y = $currentYear; $y >= 2020; $y--)
                                 <option value="{{ $y }}" @selected($currentYear === $y)>{{ $y }}</option>
                             @endfor

@@ -11,10 +11,7 @@
                 </p>
             </div>
         </div>
-        <div class="ctc-tabs-row">
-            <a href="{{ route('transaction-entry') }}" class="ctc-tab">Transactions Log</a>
-            <div class="ctc-tab active">New Entry</div>
-        </div>
+        @include('collection-management.transaction-entry.partials.form-tabs')
     </div>
 
     <div class="collection-content">

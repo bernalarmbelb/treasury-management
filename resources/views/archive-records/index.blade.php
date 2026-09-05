@@ -25,22 +25,6 @@
                 parentRouteName="archives"
             />
         @endif
-        <div style="display:flex; align-items: center; border: 0px solid red; margin: 0px;">
-            <button class="nav-scroll-btn nav-scroll-left" id="scrollLeft">&#8249;</button>
-            <nav class="navigation-bar" id="navigationBar">
-                <p><a href="{{ route('archives', ['tab' => 'collection-management']) }}"
-                      class="{{ $tab === 'collection-management' ? 'active' : '' }}">
-                    Collection Management
-                </a></p>
-                @unless (auth()->user()?->hasRole('collector'))
-                <p><a href="{{ route('archives', ['tab' => 'user-management']) }}"
-                      class="{{ $tab === 'user-management' ? 'active' : '' }}">
-                    User Management
-                </a></p>
-                @endunless
-            </nav>
-            <button class="nav-scroll-btn nav-scroll-right" id="scrollRight">&#8250;</button>
-        </div>
     </div>
 
     <div class="collection-content">
@@ -88,6 +72,8 @@
                     <input type="date" class="date-filter-input" id="dateFilterEnd" value="{{ $dateEnd }}" placeholder="End">
                     <button type="button" class="btn btn-light date-filter-btn" id="dateFilterBtn">Filter</button>
                 </div>
+
+                @include('archive-records.partials.sub-nav', ['tab' => $tab])
             </div>
 
             <div class="filter-breadcrumbs" id="filterBreadcrumbs"></div>
@@ -155,6 +141,8 @@
                            placeholder="Search Name / Email"
                            value="{{ request('search') }}" autocomplete="off">
                 </form>
+
+                @include('archive-records.partials.sub-nav', ['tab' => $tab])
             </div>
 
             @include('archive-records.partials.bulk-action-bar')
@@ -165,6 +153,8 @@
 
         @endif
     </div>
+
+    @include('partials.select-enhancer')
 
     @push('scripts')
     <script>
@@ -187,6 +177,7 @@
                 .then(html => {
                     container.innerHTML = html;
                     window.history.replaceState({}, '', url);
+                    window.cqmEnhanceSelects?.(container);
                     updateBulkBar();
                 });
         }

@@ -14,11 +14,7 @@
             :parentTitle="$parentTitle"
             :parentRoute="$parentRoute"
             :parentRouteName="$parentRouteName"
-        >
-            <x-slot:actions>
-                @include('user-management.partials.sub-nav', ['active' => 'logs'])
-            </x-slot:actions>
-        </x-header>
+        />
     </div>
 
     <div class="collection-content">
@@ -27,13 +23,15 @@
                 <input type="search" name="search" class="search-input" id="um-logs-search-input" placeholder="Search User" value="{{ request('search') }}" autocomplete="off">
             </form>
 
-            <a href="{{ route('user-management.logs.export', [], false) }}" class="um-export-btn">Export Log</a>
+            @include('user-management.partials.sub-nav', ['active' => 'logs'])
         </div>
 
         <div id="um-logs-table-container">
             @include('user-management.partials.logs-table')
         </div>
     </div>
+
+    @include('partials.select-enhancer')
 
     @push('scripts')
         <script>
@@ -55,6 +53,7 @@
                         .then((html) => {
                             container.innerHTML = html;
                             window.history.replaceState({}, '', url);
+                            window.cqmEnhanceSelects?.(container);
                         });
                 }
 

@@ -8,11 +8,7 @@
         <x-header title="User Management"
             :tmpRoute="$tmpRoute"
             :routeName="$routeName"
-        >
-            <x-slot:actions>
-                @include('user-management.partials.sub-nav', ['active' => null])
-            </x-slot:actions>
-        </x-header>
+        />
     </div>
 
     <div class="collection-content">
@@ -20,6 +16,8 @@
             <form class="search-group" role="search" method="GET" id="um-search-form">
                 <input type="search" name="search" class="search-input" id="um-search-input" placeholder="Search User" value="{{ request('search') }}" autocomplete="off">
             </form>
+
+            @include('user-management.partials.sub-nav', ['active' => null])
         </div>
 
         <div id="um-users-table-container">
@@ -32,6 +30,8 @@
         @include('user-management.partials.reset-password-result-modal')
         @include('user-management.partials.disable-activate-modal')
     </div>
+
+    @include('partials.select-enhancer')
 
     @push('scripts')
         <script>
@@ -61,6 +61,7 @@
                         .then((html) => {
                             container.innerHTML = html;
                             window.history.replaceState({}, '', url);
+                            window.cqmEnhanceSelects?.(container);
                         });
                 }
 
@@ -297,6 +298,7 @@
                         })
                         .then((html) => {
                             container.innerHTML = html;
+                            window.cqmEnhanceSelects?.(container);
                             closeAddUserModal();
                             showToast('User added successfully');
                         })
@@ -380,6 +382,7 @@
                         })
                         .then((html) => {
                             container.innerHTML = html;
+                            window.cqmEnhanceSelects?.(container);
                             closeEditUserModal();
                             showToast('User updated successfully');
                         })
@@ -584,6 +587,7 @@
                         .then((response) => response.text())
                         .then((html) => {
                             container.innerHTML = html;
+                            window.cqmEnhanceSelects?.(container);
                             closeConfirmModal();
                             showToast('User status updated successfully');
                         })

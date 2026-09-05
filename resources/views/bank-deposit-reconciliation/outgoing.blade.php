@@ -7,11 +7,7 @@
     @endphp
 
     <div class="x-header-container sub-nav-sticky">
-        <x-header title="Bank Deposit & Reconciliation" :tmpRoute="route('bank-deposit-reconciliation')" routeName="bank-deposit-reconciliation">
-            <x-slot:actions>
-                @include('bank-deposit-reconciliation.partials.sub-nav')
-            </x-slot:actions>
-        </x-header>
+        <x-header title="Bank Deposit & Reconciliation" :tmpRoute="route('bank-deposit-reconciliation')" routeName="bank-deposit-reconciliation" />
     </div>
 
     @include('bank-deposit-reconciliation.partials.styles')
@@ -30,6 +26,8 @@
                 <input type="date" class="date-filter-input" id="dateFilterEnd" value="{{ $dateEnd }}">
                 <button type="button" class="btn btn-light date-filter-btn" id="dateFilterBtn">Filter</button>
             </div>
+
+            @include('bank-deposit-reconciliation.partials.sub-nav')
         </div>
 
         <div id="bdr-table-container">

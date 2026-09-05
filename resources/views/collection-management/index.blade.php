@@ -9,15 +9,6 @@
             :tmpRoute="$tmpRoute"
             :routeName="$routeName"
         />
-        <div style="display:flex; align-items: center; border: 0px solid red; margin: 0px;"> 
-            <button class="nav-scroll-btn nav-scroll-left" id="scrollLeft">&#8249;</button>
-            <nav class="navigation-bar" id="navigationBar">
-                <p><a href="{{ route('collections') }}" class=" {{ request()->routeIs('collections') ? 'active' : '' }} "> Transaction Logs </a></p>
-
-                <p><a href="{{ route('transaction-entry') }}" class=" {{ request()->routeIs('transaction-entry') ? 'active' : '' }} ">Transaction Entry</a></p>
-            </nav>
-            <button class="nav-scroll-btn nav-scroll-right" id="scrollRight">&#8250;</button>
-        </div>
     </div>
 
     @php
@@ -60,6 +51,8 @@
                 <input type="date" class="date-filter-input" id="dateFilterEnd" value="{{ $dateEnd }}" placeholder="End">
                 <button type="button" class="btn btn-light date-filter-btn" id="dateFilterBtn">Filter</button>
             </div>
+
+            @include('collection-management.partials.sub-nav')
         </div>
 
         <div class="filter-breadcrumbs" id="filterBreadcrumbs"></div>
@@ -195,6 +188,8 @@
         </div>
     </div>
 
+    @include('partials.select-enhancer')
+
     @push('scripts')
         <script>
             (function () {
@@ -215,6 +210,7 @@
                         .then((html) => {
                             container.innerHTML = html;
                             window.history.replaceState({}, '', url);
+                            window.cqmEnhanceSelects?.(container);
                             resetBulkSelection();
                         });
                 }

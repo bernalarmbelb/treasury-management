@@ -29,11 +29,7 @@
             :parentTitle="$parentTitle"
             :parentRoute="$parentRoute"
             :parentRouteName="$parentRouteName"
-        >
-            <x-slot:actions>
-                @include('user-management.partials.sub-nav', ['active' => 'roles-permissions'])
-            </x-slot:actions>
-        </x-header>
+        />
     </div>
 
     <div class="collection-content">
@@ -43,6 +39,8 @@
                 <input type="text" id="umModuleSearch" placeholder="Search modules&hellip;" autocomplete="off">
             </div>
             <button type="submit" form="umPermissionsForm" class="um-save-btn">Save</button>
+
+            @include('user-management.partials.sub-nav', ['active' => 'roles-permissions'])
         </div>
 
         <form id="umPermissionsForm" method="POST" action="{{ route('user-management.roles-permissions.update', [], false) }}">

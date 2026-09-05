@@ -16,8 +16,10 @@
     .cqm-cs-value.is-placeholder { color: #98a2b3; font-weight: 400; }
     .cqm-cs-chev { width: 15px; height: 15px; flex-shrink: 0; color: #8893a3; transition: transform .18s ease; }
     .cqm-cs.open .cqm-cs-chev { transform: rotate(180deg); }
-    .cqm-cs-menu { position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 50; display: none; flex-direction: column; gap: 2px; min-width: 100%; max-height: 260px; overflow-y: auto; padding: 6px; background: #fff; border: 1px solid #e1e7ef; border-radius: 10px; box-shadow: 0 12px 30px rgba(20,30,50,.16); }
+    .cqm-cs-menu { position: absolute; top: calc(100% + 6px); left: 0; z-index: 950; display: none; flex-direction: column; gap: 2px; min-width: 100%; width: max-content; max-width: min(420px, 90vw); max-height: 260px; overflow-y: auto; padding: 6px; background: #fff; border: 1px solid #e1e7ef; border-radius: 10px; box-shadow: 0 12px 30px rgba(20,30,50,.16); }
     .cqm-cs.open .cqm-cs-menu { display: flex; }
+    /* Flipped when there isn't enough room below the trigger */
+    .cqm-cs.cqm-cs--up .cqm-cs-menu { top: auto; bottom: calc(100% + 6px); }
     .cqm-cs-opt { display: flex; align-items: center; gap: 8px; width: 100%; border: none; background: none; padding: 9px 11px; border-radius: 7px; text-align: left; font-family: 'Manrope', sans-serif; font-size: 14px; color: #1f2733; cursor: pointer; white-space: nowrap; }
     .cqm-cs-opt:hover { background: rgba(66,122,181,.08); }
     .cqm-cs-opt.sel { background: rgba(66,122,181,.12); font-weight: 600; }
@@ -93,13 +95,27 @@
                 });
             }
 
+            function positionMenu() {
+                wrap.classList.remove('cqm-cs--up');
+                const triggerRect = trigger.getBoundingClientRect();
+                const menuHeight = menu.getBoundingClientRect().height;
+                const spaceBelow = window.innerHeight - triggerRect.bottom;
+                const spaceAbove = triggerRect.top;
+                if (menuHeight > spaceBelow - 8 && spaceAbove > spaceBelow) {
+                    wrap.classList.add('cqm-cs--up');
+                }
+            }
+
             trigger.addEventListener('click', function (e) {
                 e.stopPropagation();
                 const willOpen = !wrap.classList.contains('open');
                 closeAll(wrap);
                 wrap.classList.toggle('open', willOpen);
                 trigger.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
-                if (willOpen) menu.querySelector('.cqm-cs-opt.sel')?.scrollIntoView({ block: 'nearest' });
+                if (willOpen) {
+                    positionMenu();
+                    menu.querySelector('.cqm-cs-opt.sel')?.scrollIntoView({ block: 'nearest' });
+                }
             });
 
             // Keep the custom UI in sync when the value changes (click, or programmatic).

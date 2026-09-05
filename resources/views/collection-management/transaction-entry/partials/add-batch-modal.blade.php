@@ -17,7 +17,7 @@
                     <p>Date of Registration</p>
                 </div>
                 <div class="form-batch-field-row">
-                    <select name="registration_month" class="form-batch-input" required>
+                    <select name="registration_month" class="form-batch-input js-cs" required>
                         <option value="" disabled selected>Month</option>
                         @foreach (['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'] as $i => $month)
                             <option value="{{ $i + 1 }}" @selected(($i + 1) === now()->month)>{{ $month }}</option>
@@ -33,7 +33,7 @@
                     <p>Date of Purchase</p>
                 </div>
                 <div class="form-batch-field-row">
-                    <select name="purchase_month" class="form-batch-input" required>
+                    <select name="purchase_month" class="form-batch-input js-cs" required>
                         <option value="" disabled selected>Month</option>
                         @foreach (['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'] as $i => $month)
                             <option value="{{ $i + 1 }}" @selected(($i + 1) === now()->month)>{{ $month }}</option>

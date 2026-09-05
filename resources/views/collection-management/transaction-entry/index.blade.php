@@ -12,15 +12,6 @@
             :parentRoute="route('collections')"
             parentRouteName="collections"
         />
-        <div style="display:flex; align-items: center; border: 0px solid red; margin: 0px;">
-            <button class="nav-scroll-btn nav-scroll-left" id="scrollLeft">&#8249;</button>
-            <nav class="navigation-bar" id="navigationBar">
-                <p><a href="{{ route('collections') }}" class=" {{ request()->routeIs('collections') ? 'active' : '' }} "> Transaction Logs </a></p>
-
-                <p><a href="{{ route('transaction-entry') }}" class=" {{ request()->routeIs('transaction-entry') ? 'active' : '' }} ">Transaction Entry</a></p>
-            </nav>
-            <button class="nav-scroll-btn nav-scroll-right" id="scrollRight">&#8250;</button>
-        </div>
     </div>
 
     <div class="collection-content">
@@ -28,6 +19,8 @@
             <form class="search-group" role="search" method="GET" id="form-stock-search-form">
                 <input type="search" name="search" class="search-input" id="form-stock-search-input" placeholder="Search Form" value="{{ request('search') }}" autocomplete="off">
             </form>
+
+            @include('collection-management.partials.sub-nav')
         </div>
 
         <div id="form-stocks-table-container">
@@ -36,6 +29,8 @@
 
         @include('collection-management.transaction-entry.partials.add-batch-modal')
     </div>
+
+    @include('partials.select-enhancer')
 
     @push('scripts')
         <script>
@@ -57,6 +52,7 @@
                         .then((html) => {
                             container.innerHTML = html;
                             window.history.replaceState({}, '', url);
+                            window.cqmEnhanceSelects?.(container);
                         });
                 }
 
@@ -183,6 +179,7 @@
                         })
                         .then((html) => {
                             container.innerHTML = html;
+                            window.cqmEnhanceSelects?.(container);
                             closeBatchModal();
                             showSuccessAlert(currentFormCode);
                         })
