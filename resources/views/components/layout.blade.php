@@ -64,23 +64,47 @@
 		<div class="" style="display:flex; width: 100%">
 			<button class="nav-scroll-btn nav-scroll-left" id="scrollLeft">&#8249;</button>
 			<nav class="navigation-bar" id="navigationBar">
-				<p><a href="{{ route('collections') }}" class=" {{ request()->routeIs('collections') || request()->routeIs('collections.view') || request()->routeIs('transaction-entry*') ? 'active' : '' }} "> Collections Management </a></p>
+				<p><a href="{{ route('collections') }}" class=" {{ request()->routeIs('collections') || request()->routeIs('collections.view') || request()->routeIs('transaction-entry*') ? 'active' : '' }} ">
+						<svg class="nav-link-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-6"/><path d="M2 7h20v5H2z"/><path d="M12 12v10"/><path d="M12 7c-1.5-3-6-3-6 0s4.5 3 6 0Zm0 0c1.5-3 6-3 6 0s-4.5 3-6 0Z"/></svg>
+						Collections Management
+					</a></p>
 
-				<p><a href="{{ route('official-receipts-accountable-forms') }}" class=" {{ request()->routeIs('official-receipts-accountable-forms') ? 'active' : '' }} ">Official Receipts & Accountable Forms</a></p>
+				<p><a href="{{ route('official-receipts-accountable-forms') }}" class=" {{ request()->routeIs('official-receipts-accountable-forms') ? 'active' : '' }} ">
+						<svg class="nav-link-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2h9l3 3v17l-2-1.5-2 1.5-2-1.5-2 1.5-2-1.5-2 1.5V2Z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>
+						Official Receipts & Accountable Forms
+					</a></p>
 
-				<p><a href="{{ route('reporting-abstract') }}" class=" {{ request()->routeIs('reporting-abstract') ? 'active' : '' }} ">Reporting & Abstract</a></p>
+				<p><a href="{{ route('reporting-abstract') }}" class=" {{ request()->routeIs('reporting-abstract') ? 'active' : '' }} ">
+						<svg class="nav-link-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M8 17V10M13 17V6M18 17v-4"/></svg>
+						Reporting & Abstract
+					</a></p>
 
 				@unless (auth()->user()?->hasRole('collector'))
-					<p><a href="{{ route('bank-deposit-reconciliation') }}" class=" {{ request()->routeIs('bank-deposit-reconciliation') ? 'active' : '' }} ">Banks Deposit & Reconciliation</a></p>
+					<p><a href="{{ route('bank-deposit-reconciliation') }}" class=" {{ request()->routeIs('bank-deposit-reconciliation') ? 'active' : '' }} ">
+							<svg class="nav-link-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10 12 3l9 7"/><path d="M5 10v10M9 10v10M15 10v10M19 10v10"/><path d="M3 20h18"/></svg>
+							Banks Deposit & Reconciliation
+						</a></p>
 
-					<p><a href="{{ route('cheque-management') }}" class=" {{ request()->routeIs('cheque-management') ? 'active' : '' }} ">Cheque Management</a></p>
+					<p><a href="{{ route('cheque-management') }}" class=" {{ request()->routeIs('cheque-management') ? 'active' : '' }} ">
+							<svg class="nav-link-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></svg>
+							Cheque Management
+						</a></p>
 
-					<p><a href="{{ route('user-management') }}" class=" {{ request()->routeIs('user-management*') ? 'active' : '' }} ">User Management</a></p>
+					<p><a href="{{ route('user-management') }}" class=" {{ request()->routeIs('user-management*') ? 'active' : '' }} ">
+							<svg class="nav-link-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+							User Management
+						</a></p>
 				@endunless
 
-				<p><a href="{{ route('records') }}" class=" {{ request()->routeIs('records') ? 'active' : '' }} ">Records</a></p>
+				<p><a href="{{ route('records') }}" class=" {{ request()->routeIs('records') ? 'active' : '' }} ">
+						<svg class="nav-link-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V6a2 2 0 0 1 2-2h5l2 2h5a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/></svg>
+						Records
+					</a></p>
 
-				<p><a href="{{ route('archives') }}" class=" {{ request()->routeIs('archives') ? 'active' : '' }} ">Archive</a></p>
+				<p><a href="{{ route('archives') }}" class=" {{ request()->routeIs('archives') ? 'active' : '' }} ">
+						<svg class="nav-link-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="5" rx="1"/><path d="M4 9v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9"/><path d="M10 13h4"/></svg>
+						Archive
+					</a></p>
 			</nav>
 			<button class="nav-scroll-btn nav-scroll-right" id="scrollRight">&#8250;</button>
 		</div>

@@ -69,7 +69,6 @@
                 <div class="filter-panel-header">
                     <div class="filter-panel-heading">
                         <p class="filter-panel-title">Filter By</p>
-                        <p class="filter-panel-subtitle">Pto. Diaz Treasury Management System</p>
                     </div>
                     <button type="button" class="filter-panel-close-btn" id="filterCloseBtn" aria-label="Close">
                         <x-bx-x class="icon" />
@@ -114,6 +113,7 @@
                 </div>
 
                 <div class="filter-apply-row">
+                    <button type="button" class="filter-clear-all-btn" id="filterClearAllBtn">Clear All</button>
                     <button type="button" class="filter-apply-btn" id="filterApplyBtn">Apply</button>
                 </div>
             </div>
@@ -418,17 +418,7 @@
                         clearBtn.className = 'filter-clear-btn';
                         clearBtn.textContent = 'Clear Filter';
 
-                        clearBtn.addEventListener('click', function () {
-                            filterPanel.querySelectorAll('[data-filter-label], input[name="form_type"]').forEach(function (input) {
-                                input.checked = false;
-                            });
-
-                            filterSelectForm.classList.remove('open');
-                            dateFilterGroup.classList.remove('open');
-                            dateFilterStart.value = '';
-                            dateFilterEnd.value = '';
-                            applyFilters();
-                        });
+                        clearBtn.addEventListener('click', resetAllFilters);
 
                         filterBreadcrumbs.appendChild(clearBtn);
                     }
@@ -436,10 +426,24 @@
                     filterBreadcrumbs.classList.toggle('visible', activeInputs.length > 0);
                 }
 
+                function resetAllFilters() {
+                    filterPanel.querySelectorAll('[data-filter-label], input[name="form_type"]').forEach(function (input) {
+                        input.checked = false;
+                    });
+
+                    filterSelectForm.classList.remove('open');
+                    dateFilterGroup.classList.remove('open');
+                    dateFilterStart.value = '';
+                    dateFilterEnd.value = '';
+                    applyFilters();
+                }
+
                 filterApplyBtn.addEventListener('click', function () {
                     applyFilters();
                     closeFilterModal();
                 });
+
+                document.getElementById('filterClearAllBtn')?.addEventListener('click', resetAllFilters);
 
                 updateBreadcrumbs();
 

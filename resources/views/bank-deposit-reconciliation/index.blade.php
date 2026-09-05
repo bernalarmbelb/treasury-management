@@ -44,7 +44,6 @@
                 <div class="filter-panel-header">
                     <div class="filter-panel-heading">
                         <p class="filter-panel-title">Filter By</p>
-                        <p class="filter-panel-subtitle">Pto. Diaz Treasury Management System</p>
                     </div>
                     <button type="button" class="filter-panel-close-btn" id="filterCloseBtn" aria-label="Close"><x-bx-x class="icon" /></button>
                 </div>
@@ -57,7 +56,10 @@
                         <label class="filter-option"><input type="checkbox" name="status" value="{{ $st }}" data-filter-label="{{ $st }}" @checked(in_array($st, request('status', [])))><span>{{ $st }}</span></label>
                     @endforeach
                 </div>
-                <div class="filter-apply-row"><button type="button" class="filter-apply-btn" id="filterApplyBtn">Apply</button></div>
+                <div class="filter-apply-row">
+                    <button type="button" class="filter-clear-all-btn" id="filterClearAllBtn">Clear All</button>
+                    <button type="button" class="filter-apply-btn" id="filterApplyBtn">Apply</button>
+                </div>
             </div>
         </div>
 
@@ -122,6 +124,14 @@
             }
             document.getElementById('dateFilterBtn').addEventListener('click', applyFilters);
             document.getElementById('filterApplyBtn').addEventListener('click', () => { applyFilters(); filterModalOverlay.classList.remove('open'); });
+            document.getElementById('filterClearAllBtn').addEventListener('click', () => {
+                filterDate.checked = false;
+                dateFilterGroup.classList.remove('open');
+                dateFilterStart.value = '';
+                dateFilterEnd.value = '';
+                filterPanel.querySelectorAll('input[name="type"], input[name="status"]').forEach((c) => { c.checked = false; });
+                applyFilters();
+            });
         })();
     </script>
     @endpush

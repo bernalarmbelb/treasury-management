@@ -524,6 +524,7 @@ h1, h2, h3, h4, h5, h6, p, ul, ol, li, figure, blockquote {
     align-items: center;
     padding: 10px;
     display: flex;
+    gap: 7px;
     height: 100%;
     width: fit-content;
     white-space: nowrap;
@@ -532,6 +533,15 @@ h1, h2, h3, h4, h5, h6, p, ul, ol, li, figure, blockquote {
     color: var(--light);
     font-weight: 400;
     border-bottom: 5px solid var(--dark);
+}
+
+.nav-link-icon {
+    flex: none;
+    opacity: 0.92;
+}
+.navigation-bar a:hover .nav-link-icon,
+.navigation-bar a.active .nav-link-icon {
+    opacity: 1;
 }
 
 #mgmt-subnav {
@@ -725,48 +735,74 @@ body {
 
 .filter-panel-title {
     margin: 0px;
-    font-family: var(--font-family-primary, 'Obviously', sans-serif);
+    font-family: var(--font-family-secondary, 'Manrope', sans-serif);
     font-weight: 600;
     font-size: 18px;
     letter-spacing: 0.9px;
     text-transform: uppercase;
-    color: #1877F2;
-}
-
-.filter-panel-subtitle {
-    margin: 0;
-    font-family: var(--font-family-primary, 'Obviously', sans-serif);
-    font-weight: 400;
-    font-size: 12px;
-    letter-spacing: 0.6px;
-    color: #666;
+    color: var(--primary, #427AB5);
 }
 
 .filter-options {
-    font-family: var(--font-family-primary);
+    font-family: var(--font-family-secondary, 'Manrope', sans-serif);
     align-items: center;
     display: flex;
-    gap: 24px;
-    padding: 20px 24px;
+    flex-wrap: wrap;
+    gap: 4px 8px;
+    padding: 16px 18px;
 }
 
 .filter-option {
     display: flex;
-    align-items: right;
+    align-items: center;
     margin: 0px;
+    padding: 6px 8px;
+    border-radius: 8px;
     gap: 8px;
     flex-shrink: 0;
     cursor: pointer;
     white-space: nowrap;
+    transition: background-color 0.15s ease;
+}
+
+.filter-option:hover,
+.filter-option:has(input:checked) {
+    background-color: rgba(66, 122, 181, 0.07);
 }
 
 .filter-option input[type="checkbox"],
 .filter-form-option input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
     width: 16px;
     height: 16px;
     margin: 0;
-    accent-color: var(--primary, #427AB5);
+    border: 1.5px solid #C6CDD6;
+    border-radius: 4px;
+    background-color: #fff;
     cursor: pointer;
+    position: relative;
+    flex-shrink: 0;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.filter-option input[type="checkbox"]:checked,
+.filter-form-option input[type="checkbox"]:checked {
+    background-color: var(--primary, #427AB5);
+    border-color: var(--primary, #427AB5);
+}
+
+.filter-option input[type="checkbox"]:checked::after,
+.filter-form-option input[type="checkbox"]:checked::after {
+    content: "";
+    position: absolute;
+    left: 4px;
+    top: 1px;
+    width: 4px;
+    height: 8px;
+    border: solid #fff;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
 }
 
 .filter-option span {
@@ -793,7 +829,7 @@ body {
 }
 
 .filter-select-form-title {
-    font-family: var(--font-family-primary);
+    font-family: var(--font-family-secondary, 'Manrope', sans-serif);
     margin: 0;
     font-size: 14px;
     font-weight: 700;
@@ -820,7 +856,15 @@ body {
     display: flex;
     align-items: flex-start;
     gap: 8px;
+    padding: 6px;
+    border-radius: 8px;
     cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.filter-form-option:hover,
+.filter-form-option:has(input:checked) {
+    background-color: rgba(66, 122, 181, 0.07);
 }
 
 .filter-form-option input[type="checkbox"] {
@@ -828,14 +872,13 @@ body {
 }
 
 .filter-form-option-label {
-    /* outline: 1px solid red; */
     display: flex;
     flex-direction: column;
     gap: 0;
     line-height: 1rem;
     leading-trim: both;
     text-edge: cap;
-    font-family: Obviously;
+    font-family: var(--font-family-secondary, 'Manrope', sans-serif);
     font-style: normal;
     font-weight: 400;
     line-height: normal;
@@ -845,7 +888,7 @@ body {
 
 .filter-form-option-name {
     font-size: 12px;
-    font-weight: 500;
+    font-weight: 700;
     letter-spacing: 0.6px;
     white-space: nowrap;
     color: #333;
@@ -861,6 +904,8 @@ body {
 .filter-apply-row {
     display: flex;
     justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
     width: 100%;
     padding: 14px 24px;
     border-top: 1px solid #e5e7eb;
@@ -886,6 +931,27 @@ body {
 .filter-apply-btn:hover {
     background-color: #3568a0;
     border-color: #3568a0;
+}
+
+.filter-clear-all-btn {
+    display: flex;
+    align-items: center;
+    height: 40px;
+    padding: 0 20px;
+    border: 1px solid var(--primary, #427AB5);
+    border-radius: 8px;
+    background-color: rgba(66, 122, 181, 0.08);
+    color: var(--primary, #427AB5);
+    font-family: var(--font-family-secondary, 'Manrope', sans-serif);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.filter-clear-all-btn:hover {
+    background-color: rgba(66, 122, 181, 0.15);
 }
 
 .filter-breadcrumbs {
@@ -1845,6 +1911,43 @@ body {
 select.form-batch-input {
     appearance: auto;
     cursor: pointer;
+}
+
+.form-batch-password-wrap {
+    position: relative;
+    width: 100%;
+}
+
+.form-batch-password-wrap .form-batch-input-full {
+    padding-right: 40px;
+}
+
+.form-batch-eye-btn {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: none;
+    background: none;
+    color: #8094AE;
+    cursor: pointer;
+    transition: color 0.15s ease;
+}
+
+.form-batch-eye-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+.form-batch-eye-btn:hover,
+.form-batch-eye-btn.is-on {
+    color: var(--primary, #427AB5);
 }
 
 .form-batch-actions {

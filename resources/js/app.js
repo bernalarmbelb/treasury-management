@@ -53,3 +53,15 @@ nav.addEventListener('scroll', updateButtons);
 window.addEventListener('resize', updateButtons);
 
 updateButtons();
+
+// ===== Password Visibility Toggle ===== //
+document.addEventListener('click', function (e) {
+    const btn = e.target.closest('[data-toggle-password]');
+    if (!btn) return;
+    const input = document.getElementById(btn.getAttribute('data-toggle-password'));
+    if (!input) return;
+    const reveal = input.type === 'password';
+    input.type = reveal ? 'text' : 'password';
+    btn.setAttribute('aria-label', reveal ? 'Hide password' : 'Show password');
+    btn.classList.toggle('is-on', reveal);
+});
