@@ -73,3 +73,48 @@ it('does not flag a batch with empty-string assigned_to as needing acknowledgeme
 
     expect($batch->needsAcknowledgement())->toBeFalse();
 });
+
+it('resets received_at when a batch is reassigned to a different collector', function () {
+    $admin = ackAdmin();
+    $batch = ackBatch(ackFormStock(), 'Juan Dela Cruz', now());
+
+    $this->actingAs($admin)
+        ->patchJson("/official-receipts-accountable-forms/batches/{$batch->id}/assign", [
+            'assigned_to' => 'Maria Santos',
+        ])
+        ->assertOk();
+
+    $batch->refresh();
+    expect($batch->assigned_to)->toBe('Maria Santos');
+    expect($batch->received_at)->toBeNull();
+});
+
+it('keeps received_at when the assign request repeats the same collector', function () {
+    $admin = ackAdmin();
+    $receivedAt = now()->subDay();
+    $batch = ackBatch(ackFormStock(), 'Juan Dela Cruz', $receivedAt);
+
+    $this->actingAs($admin)
+        ->patchJson("/official-receipts-accountable-forms/batches/{$batch->id}/assign", [
+            'assigned_to' => 'Juan Dela Cruz',
+        ])
+        ->assertOk();
+
+    $batch->refresh();
+    expect($batch->received_at?->timestamp)->toBe($receivedAt->timestamp);
+});
+
+it('resets received_at when a batch is unassigned', function () {
+    $admin = ackAdmin();
+    $batch = ackBatch(ackFormStock(), 'Juan Dela Cruz', now());
+
+    $this->actingAs($admin)
+        ->patchJson("/official-receipts-accountable-forms/batches/{$batch->id}/assign", [
+            'assigned_to' => '',
+        ])
+        ->assertOk();
+
+    $batch->refresh();
+    expect($batch->assigned_to)->toBeNull();
+    expect($batch->received_at)->toBeNull();
+});

@@ -1303,7 +1303,15 @@ Route::patch('/official-receipts-accountable-forms/batches/{batch}/assign', func
         'assigned_to' => ['nullable', 'string', 'max:150'],
     ]);
 
-    $batch->update(['assigned_to' => $validated['assigned_to'] ?: null]);
+    $newAssignee = $validated['assigned_to'] ?: null;
+    $changed = $newAssignee !== $batch->assigned_to;
+
+    $batch->update([
+        'assigned_to' => $newAssignee,
+        // Reassigning to anyone else (or unassigning) always requires a fresh
+        // acknowledgement, so any previous "Received" click is cleared.
+        'received_at' => $changed ? null : $batch->received_at,
+    ]);
 
     return response()->json(['assigned_to' => $batch->assigned_to]);
 })->name('official-receipts-accountable-forms.batches.assign');
