@@ -1316,6 +1316,20 @@ Route::patch('/official-receipts-accountable-forms/batches/{batch}/assign', func
     return response()->json(['assigned_to' => $batch->assigned_to]);
 })->name('official-receipts-accountable-forms.batches.assign');
 
+Route::post('/official-receipts-accountable-forms/batches/{batch}/receive', function (\Illuminate\Http\Request $request, \App\Models\FormBatch $batch) {
+    $user = $request->user();
+
+    if (! $user || $batch->assigned_to !== $user->name) {
+        return response()->json(['message' => 'Unauthorized.'], 403);
+    }
+
+    $batch->update(['received_at' => now()]);
+
+    \App\Models\ActivityLog::record('Official Receipts & Accountable Forms - Batch Received - ' . $batch->formStock?->form_name . ' - ' . $batch->starting_serial_number . ' to ' . $batch->displayEndingSerialNumber());
+
+    return response()->json(['received_at' => $batch->received_at->toIso8601String()]);
+})->name('official-receipts-accountable-forms.batches.receive');
+
 Route::get('/official-receipts-accountable-forms/{formStock}/preview', function (\Illuminate\Http\Request $request, \App\Models\FormStock $formStock) {
     $validated = $request->validate([
         'from_month' => ['required', 'integer', 'min:1', 'max:12'],

@@ -134,3 +134,36 @@ it('counts a received batch quantity toward availableQtyForCollector', function 
 
     expect($stock->availableQtyForCollector('Juan Dela Cruz'))->toBe(5);
 });
+
+it('lets the assigned collector mark their own batch as received', function () {
+    $collector = ackCollector('Juan Dela Cruz');
+    $batch = ackBatch(ackFormStock(), 'Juan Dela Cruz', null);
+
+    $this->actingAs($collector)
+        ->postJson("/official-receipts-accountable-forms/batches/{$batch->id}/receive")
+        ->assertOk();
+
+    expect($batch->fresh()->received_at)->not->toBeNull();
+});
+
+it('blocks a different collector from marking someone elses batch as received', function () {
+    $collector = ackCollector('Someone Else');
+    $batch = ackBatch(ackFormStock(), 'Juan Dela Cruz', null);
+
+    $this->actingAs($collector)
+        ->postJson("/official-receipts-accountable-forms/batches/{$batch->id}/receive")
+        ->assertStatus(403);
+
+    expect($batch->fresh()->received_at)->toBeNull();
+});
+
+it('blocks an admin from marking a collectors batch as received on their behalf', function () {
+    $admin = ackAdmin();
+    $batch = ackBatch(ackFormStock(), 'Juan Dela Cruz', null);
+
+    $this->actingAs($admin)
+        ->postJson("/official-receipts-accountable-forms/batches/{$batch->id}/receive")
+        ->assertStatus(403);
+
+    expect($batch->fresh()->received_at)->toBeNull();
+});
