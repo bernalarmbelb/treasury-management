@@ -67,3 +67,9 @@ it('does not flag an unassigned batch as needing acknowledgement', function () {
 
     expect($batch->needsAcknowledgement())->toBeFalse();
 });
+
+it('does not flag a batch with empty-string assigned_to as needing acknowledgement', function () {
+    $batch = ackBatch(ackFormStock(), '', null);
+
+    expect($batch->needsAcknowledgement())->toBeFalse();
+});

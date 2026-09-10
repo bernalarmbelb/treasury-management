@@ -72,7 +72,7 @@ class FormBatch extends Model
      */
     public function needsAcknowledgement(): bool
     {
-        return $this->assigned_to !== null && $this->received_at === null;
+        return $this->assigned_to !== null && $this->assigned_to !== '' && $this->received_at === null;
     }
 
     /**
