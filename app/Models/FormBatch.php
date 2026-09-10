@@ -14,12 +14,14 @@ class FormBatch extends Model
         'starting_serial_number',
         'ending_serial_number',
         'assigned_to',
+        'received_at',
         'added_by',
     ];
 
     protected $casts = [
         'registration_date' => 'date',
         'purchase_date' => 'date',
+        'received_at' => 'datetime',
     ];
 
     public function formStock(): BelongsTo
@@ -62,6 +64,15 @@ class FormBatch extends Model
     public function status(): string
     {
         return $this->remainingQty() === 0 ? 'Complete' : 'Incomplete';
+    }
+
+    /**
+     * Whether this batch is assigned to a collector who has not yet clicked
+     * "Received" to confirm they physically have the booklet.
+     */
+    public function needsAcknowledgement(): bool
+    {
+        return $this->assigned_to !== null && $this->received_at === null;
     }
 
     /**
