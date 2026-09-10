@@ -47,6 +47,7 @@ function qtyFormStock(): FormStock
         'ending_serial_number' => '0000005',
         'added_by' => 'System',
         'assigned_to' => 'Juan Dela Cruz',
+        'received_at' => now(),
     ]);
 
     $stock->batches()->create([

@@ -118,3 +118,19 @@ it('resets received_at when a batch is unassigned', function () {
     expect($batch->assigned_to)->toBeNull();
     expect($batch->received_at)->toBeNull();
 });
+
+it('excludes a pending (unacknowledged) batch quantity from availableQtyForCollector', function () {
+    $stock = ackFormStock();
+    ackBatch($stock, 'Juan Dela Cruz', null); // pending — 5 serials, not yet received
+
+    expect($stock->availableQtyForCollector('Juan Dela Cruz'))->toBe(0);
+    // The global total (used by Admin's view) is unaffected by acknowledgement.
+    expect($stock->availableQty())->toBe(5);
+});
+
+it('counts a received batch quantity toward availableQtyForCollector', function () {
+    $stock = ackFormStock();
+    ackBatch($stock, 'Juan Dela Cruz', now());
+
+    expect($stock->availableQtyForCollector('Juan Dela Cruz'))->toBe(5);
+});

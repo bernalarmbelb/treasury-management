@@ -134,6 +134,7 @@ class FormStock extends Model
     {
         return $this->batches
             ->where('assigned_to', $collectorName)
+            ->whereNotNull('received_at')
             ->sum(fn (FormBatch $batch) => $batch->remainingQty());
     }
 
