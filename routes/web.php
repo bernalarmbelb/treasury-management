@@ -956,6 +956,9 @@ Route::get('/notifications/count', function (\Illuminate\Http\Request $request) 
             + \App\Models\BatchRequest::where('requested_by', $user->id)
                 ->where('status', 'rejected')
                 ->whereNull('notified_at')
+                ->count()
+            + \App\Models\FormBatch::where('assigned_to', $user->name)
+                ->whereNull('received_at')
                 ->count();
     }
 
@@ -1031,7 +1034,24 @@ Route::get('/notifications', function (\Illuminate\Http\Request $request) {
                 'seen'       => (bool) $r->notified_at,
             ]);
 
-        $items = $cancelItems->concat($batchItems)
+        $batchAssignedItems = \App\Models\FormBatch::with('formStock')
+            ->where('assigned_to', $user->name)
+            ->whereNull('received_at')
+            ->get()
+            ->map(fn ($b) => [
+                'id'         => $b->id,
+                'type'       => 'batch_assigned',
+                'serial'     => $b->formStock?->form_name,
+                'payee'      => $b->starting_serial_number . ' – ' . $b->displayEndingSerialNumber(),
+                'created_at_raw' => $b->created_at,
+                'created_at' => $b->created_at->diffForHumans(),
+                'url'        => route('official-receipts-accountable-forms.report-logs', $b->form_stock_id),
+                // Stays "unseen" until the collector clicks Received; mark-seen
+                // only touches CancelRequest/BatchRequest.
+                'seen'       => false,
+            ]);
+
+        $items = $cancelItems->concat($batchItems)->concat($batchAssignedItems)
             ->sortByDesc('created_at_raw')
             ->take(20)
             ->map(fn ($item) => \Illuminate\Support\Arr::except($item, ['created_at_raw']))

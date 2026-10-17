@@ -204,3 +204,48 @@ it('never shows a Received button to an admin viewing the same row', function ()
     $response->assertSee('Pending Acknowledgement');
     $response->assertDontSee('js-receive-batch" data-batch-id=', false);
 });
+
+it('includes a pending batch assignment in the collectors notification count and list', function () {
+    $collector = ackCollector('Juan Dela Cruz');
+    $stock = ackFormStock();
+    ackBatch($stock, 'Juan Dela Cruz', null);
+
+    $this->actingAs($collector)
+        ->getJson('/notifications/count')
+        ->assertOk()
+        ->assertJsonPath('count', 1);
+
+    $this->actingAs($collector)
+        ->getJson('/notifications')
+        ->assertOk()
+        ->assertJsonPath('items.0.type', 'batch_assigned')
+        ->assertJsonPath('items.0.serial', 'Burial');
+});
+
+it('excludes a received batch from the collectors notification count and list', function () {
+    $collector = ackCollector('Juan Dela Cruz');
+    $stock = ackFormStock();
+    ackBatch($stock, 'Juan Dela Cruz', now());
+
+    $this->actingAs($collector)
+        ->getJson('/notifications/count')
+        ->assertOk()
+        ->assertJsonPath('count', 0);
+
+    $this->actingAs($collector)
+        ->getJson('/notifications')
+        ->assertOk()
+        ->assertJsonPath('items', []);
+});
+
+it('never surfaces batch_assigned notifications to admin', function () {
+    $admin = ackAdmin();
+    $stock = ackFormStock();
+    ackBatch($stock, 'Juan Dela Cruz', null);
+
+    $response = $this->actingAs($admin)->getJson('/notifications');
+
+    $response->assertOk();
+    $types = collect($response->json('items'))->pluck('type');
+    expect($types)->not->toContain('batch_assigned');
+});
