@@ -450,8 +450,29 @@
                     });
                 }
 
-                // ── Pending batch requests: fulfill / reject (Admin) ─────────────
+                // ── Pending batch requests: fulfill / reject (Admin) / receive (Collector) ──
                 container.addEventListener('click', function (event) {
+                    const receiveBtn = event.target.closest('.js-receive-batch');
+                    if (receiveBtn) {
+                        event.preventDefault();
+
+                        fetch(`/official-receipts-accountable-forms/batches/${receiveBtn.dataset.batchId}/receive`, {
+                            method: 'POST',
+                            headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrfToken },
+                        })
+                            .then((response) => response.json().then((data) => ({ ok: response.ok, data })))
+                            .then(({ ok, data }) => {
+                                if (!ok) {
+                                    showToast('Action could not be completed', data.message, 'error');
+                                    return;
+                                }
+                                showToast('Batch received', 'Thank you for confirming.');
+                                reloadTable();
+                            })
+                            .catch(() => showToast('Action could not be completed', 'Something went wrong. Please try again.', 'error'));
+                        return;
+                    }
+
                     const fulfillBtn = event.target.closest('.js-fulfill-batch-request');
                     if (fulfillBtn) {
                         event.preventDefault();

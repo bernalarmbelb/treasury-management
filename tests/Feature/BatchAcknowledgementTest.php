@@ -190,7 +190,7 @@ it('does not show a Received button once the batch is received', function () {
 
     $response->assertOk();
     $response->assertSee('Received');
-    $response->assertDontSee('js-receive-batch', false);
+    $response->assertDontSee('js-receive-batch" data-batch-id=', false);
 });
 
 it('never shows a Received button to an admin viewing the same row', function () {
@@ -202,5 +202,5 @@ it('never shows a Received button to an admin viewing the same row', function ()
 
     $response->assertOk();
     $response->assertSee('Pending Acknowledgement');
-    $response->assertDontSee('js-receive-batch', false);
+    $response->assertDontSee('js-receive-batch" data-batch-id=', false);
 });
