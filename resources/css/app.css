@@ -5140,6 +5140,22 @@ select.form-batch-input {
     color: var(--buttons-default-danger, #f0284a);
 }
 
+.status-pending-ack {
+    color: #cdc23e;
+}
+
+.status-received {
+    color: var(--buttons-default-success, #0fa958);
+}
+
+.status-badge-subtitle {
+    display: block;
+    color: #8893a3;
+    font-size: 11px;
+    font-weight: 400;
+    margin-top: 2px;
+}
+
 /* Export modal */
 .orabf-export-modal {
     width: 520px;

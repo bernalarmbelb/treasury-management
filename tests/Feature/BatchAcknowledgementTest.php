@@ -167,3 +167,40 @@ it('blocks an admin from marking a collectors batch as received on their behalf'
 
     expect($batch->fresh()->received_at)->toBeNull();
 });
+
+it('shows a Received button to the assigned collector on their pending batch row', function () {
+    $collector = ackCollector('Juan Dela Cruz');
+    $stock = ackFormStock();
+    $batch = ackBatch($stock, 'Juan Dela Cruz', null);
+
+    $response = $this->actingAs($collector)->get("/official-receipts-accountable-forms/{$stock->id}/report-logs");
+
+    $response->assertOk();
+    $response->assertSee('Pending Acknowledgement');
+    $response->assertSee('js-receive-batch', false);
+    $response->assertSee('data-batch-id="' . $batch->id . '"', false);
+});
+
+it('does not show a Received button once the batch is received', function () {
+    $collector = ackCollector('Juan Dela Cruz');
+    $stock = ackFormStock();
+    ackBatch($stock, 'Juan Dela Cruz', now());
+
+    $response = $this->actingAs($collector)->get("/official-receipts-accountable-forms/{$stock->id}/report-logs");
+
+    $response->assertOk();
+    $response->assertSee('Received');
+    $response->assertDontSee('js-receive-batch', false);
+});
+
+it('never shows a Received button to an admin viewing the same row', function () {
+    $admin = ackAdmin();
+    $stock = ackFormStock();
+    ackBatch($stock, 'Juan Dela Cruz', null);
+
+    $response = $this->actingAs($admin)->get("/official-receipts-accountable-forms/{$stock->id}/report-logs");
+
+    $response->assertOk();
+    $response->assertSee('Pending Acknowledgement');
+    $response->assertDontSee('js-receive-batch', false);
+});

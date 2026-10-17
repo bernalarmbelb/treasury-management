@@ -80,6 +80,8 @@
                         <x-dynamic-component :component="'bx-' . $icon" class="sort-icon {{ $iconClass }}" />
                     </a>
                 </th>
+                <th>Assigned Status</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -133,10 +135,31 @@
                         </span>
                     </td>
                     <td>{{ $batch->added_by }}</td>
+                    <td>
+                        @if (! $batch->assigned_to)
+                            <span>&mdash;</span>
+                        @elseif ($batch->needsAcknowledgement())
+                            <span class="status-badge status-pending-ack">Pending Acknowledgement</span>
+                        @else
+                            <span class="status-badge status-received">
+                                Received
+                                <span class="status-badge-subtitle">{{ $batch->received_at->format('M j, Y') }}</span>
+                            </span>
+                        @endif
+                    </td>
+                    <td>
+                        @if (auth()->user()?->hasRole('collector') && $batch->needsAcknowledgement())
+                            <div class="table-actions">
+                                <button type="button" class="action-btn action-view js-receive-batch" data-batch-id="{{ $batch->id }}">Received</button>
+                            </div>
+                        @else
+                            <span>&mdash;</span>
+                        @endif
+                    </td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="10" class="table-empty">No batches found.</td>
+                    <td colspan="12" class="table-empty">No batches found.</td>
                 </tr>
             @endforelse
         </tbody>
