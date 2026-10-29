@@ -553,7 +553,7 @@ class DummyReportPreviewSeeder extends Seeder
     }
 
     /** Spreads index i of n across the last ~10 weeks up to today, business hours. */
-    private function spreadDate(int $i, int $n): Carbon
+    protected function spreadDate(int $i, int $n): Carbon
     {
         $daysBack = (int) round((($n - 1 - $i) / max(1, $n - 1)) * 70);
 
