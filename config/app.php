@@ -69,6 +69,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Developer Impersonation
+    |--------------------------------------------------------------------------
+    |
+    | Lets an admin switch into the named collector's account from the header.
+    | Keep ALLOW_IMPERSONATION=false anywhere real users sign in.
+    |
+    */
+
+    'impersonate' => [
+        'enabled' => (bool) env('ALLOW_IMPERSONATION', false),
+        'collector' => env('IMPERSONATE_COLLECTOR', 'Ramon Torres'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Locale Configuration
     |--------------------------------------------------------------------------
     |

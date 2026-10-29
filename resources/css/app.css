@@ -8911,6 +8911,22 @@ select.form-batch-input {
     line-height: 0;
 }
 .nav-theme-btn:hover { background: rgba(51, 51, 51, 0.08); color: var(--fonts-black); }
+.nav-impersonate-btn {
+    height: 30px;
+    padding: 0 12px;
+    border: 1px dashed var(--primary);
+    border-radius: 8px;
+    background: rgba(66, 122, 181, 0.08);
+    color: var(--primary);
+    font-family: var(--font-family-secondary, 'Manrope', sans-serif);
+    font-size: 11.5px;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+}
+.nav-impersonate-btn:hover { background: rgba(66, 122, 181, 0.16); }
+.nav-impersonate-btn--active { border-style: solid; background: var(--warning); border-color: var(--warning); color: #fff; }
+.nav-impersonate-btn--active:hover { background: var(--warning); opacity: 0.9; }
 .nav-theme-sun { display: none; }
 html[data-theme="dark"] .nav-theme-moon { display: none; }
 html[data-theme="dark"] .nav-theme-sun { display: block; }
@@ -8951,6 +8967,7 @@ html[data-theme="dark"] .nav-theme-sun { display: block; }
     html[data-theme="dark"] .mc-send-btn--send,
     html[data-theme="dark"] .ctc-view-print-btn,
     html[data-theme="dark"] .ctc-modal-btn--primary,
+    html[data-theme="dark"] .nav-impersonate-btn--active,
     html[data-theme="dark"] .dash-qbtn.primary { filter: hue-rotate(180deg) invert(1); }
     html[data-theme="dark"] .navigation-bar,
     html[data-theme="dark"] .nav-scroll-btn { background: #0D1E33; outline-color: #0D1E33; }

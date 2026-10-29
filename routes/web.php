@@ -38,6 +38,34 @@ Route::post('/logout', function (\Illuminate\Http\Request $request) {
     return redirect()->route('login');
 })->name('logout');
 
+Route::post('/impersonate', function (\Illuminate\Http\Request $request) {
+    abort_unless(config('app.impersonate.enabled'), 404);
+    abort_unless($request->user()?->hasRole('admin'), 403);
+
+    $collector = \App\Models\User::where('name', config('app.impersonate.collector'))
+        ->where('status', \App\Models\User::STATUS_ACTIVATED)
+        ->get()
+        ->first(fn ($user) => $user->hasRole('collector'));
+    abort_unless($collector, 422, 'No active collector account matches the impersonation target.');
+
+    $adminId = $request->user()->id;
+    \Illuminate\Support\Facades\Auth::login($collector);
+    $request->session()->regenerate();
+    $request->session()->put('impersonator_id', $adminId);
+
+    return redirect()->route('home');
+})->name('impersonate.start');
+
+Route::post('/impersonate/stop', function (\Illuminate\Http\Request $request) {
+    $adminId = $request->session()->pull('impersonator_id');
+    abort_unless($adminId && config('app.impersonate.enabled'), 404);
+
+    \Illuminate\Support\Facades\Auth::login(\App\Models\User::findOrFail($adminId));
+    $request->session()->regenerate();
+
+    return redirect()->route('home');
+})->name('impersonate.stop');
+
 Route::get('/collections', function (\Illuminate\Http\Request $request) {
     $perPageOptions = [10, 25, 50, 100];
     $perPage = in_array((int) $request->input('per_page'), $perPageOptions) ? (int) $request->input('per_page') : 10;
