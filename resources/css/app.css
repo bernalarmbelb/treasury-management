@@ -8911,7 +8911,12 @@ select.form-batch-input {
     line-height: 0;
 }
 .nav-theme-btn:hover { background: rgba(51, 51, 51, 0.08); color: var(--fonts-black); }
+.nav-impersonate-form { display: flex; align-items: center; margin: 0; }
 .nav-impersonate-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
     height: 30px;
     padding: 0 12px;
     border: 1px dashed var(--primary);

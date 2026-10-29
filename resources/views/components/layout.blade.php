@@ -23,12 +23,12 @@
 		<div class="nav-profile">
 			@if (config('app.impersonate.enabled'))
 				@if (session()->has('impersonator_id'))
-					<form method="POST" action="{{ route('impersonate.stop') }}">
+					<form class="nav-impersonate-form" method="POST" action="{{ route('impersonate.stop') }}">
 						@csrf
 						<button type="submit" class="nav-impersonate-btn nav-impersonate-btn--active">Back to my account</button>
 					</form>
 				@elseif (auth()->user()?->hasRole('admin'))
-					<form method="POST" action="{{ route('impersonate.start') }}">
+					<form class="nav-impersonate-form" method="POST" action="{{ route('impersonate.start') }}">
 						@csrf
 						<button type="submit" class="nav-impersonate-btn">Impersonate {{ config('app.impersonate.collector') }}</button>
 					</form>
