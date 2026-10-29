@@ -7,25 +7,25 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
     <style>
         * { box-sizing: border-box; }
-        body { margin: 0; background: #eef1f5; font-family: 'Manrope', system-ui, sans-serif; color: #1f2733; padding: 24px; }
+        body { margin: 0; background: #eef1f5; font-family: 'Manrope', system-ui, sans-serif; color: #111827; padding: 24px; }
         .sheet { max-width: 980px; margin: 0 auto; }
         .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; background: #fff; border: 1px solid #E3E8EF; border-radius: 10px; padding: 14px 16px; margin-bottom: 18px; }
         .toolbar .fld { display: flex; flex-direction: column; gap: 4px; }
-        .toolbar label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #6b7685; }
+        .toolbar label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #374151; }
         .toolbar .range-arrow { display: flex; align-items: center; height: 40px; color: #9ca3af; }
         .toolbar .range-arrow svg { width: 16px; height: 16px; }
 
         /* Custom dropdown — mirrors the app's .assigned-to-* idiom, scaled up. */
         .ram-dd { position: relative; }
-        .ram-dd-trigger { display: flex; align-items: center; justify-content: space-between; gap: 10px; height: 40px; padding: 0 12px; border: 1px solid #d0d8e4; border-radius: 8px; background: #fff; font-family: inherit; font-size: 13.5px; color: #1f2733; cursor: pointer; transition: border-color .15s ease, box-shadow .15s ease; }
+        .ram-dd-trigger { display: flex; align-items: center; justify-content: space-between; gap: 10px; height: 40px; padding: 0 12px; border: 1px solid #d0d8e4; border-radius: 8px; background: #fff; font-family: inherit; font-size: 13.5px; color: #111827; cursor: pointer; transition: border-color .15s ease, box-shadow .15s ease; }
         .ram-dd-trigger:hover { border-color: #427AB5; }
         .ram-dd.open .ram-dd-trigger { border-color: #427AB5; box-shadow: 0 0 0 3px rgba(66,122,181,.14); }
         .ram-dd-value { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
-        .ram-dd-chev { width: 15px; height: 15px; flex-shrink: 0; color: #8893a3; transition: transform .18s ease; }
+        .ram-dd-chev { width: 15px; height: 15px; flex-shrink: 0; color: #4b5563; transition: transform .18s ease; }
         .ram-dd.open .ram-dd-chev { transform: rotate(180deg); }
         .ram-dd-menu { position: absolute; top: calc(100% + 6px); left: 0; z-index: 30; display: none; flex-direction: column; gap: 2px; min-width: 100%; width: max-content; max-height: 280px; overflow-y: auto; padding: 6px; background: #fff; border: 1px solid #e1e7ef; border-radius: 10px; box-shadow: 0 12px 30px rgba(20,30,50,.16); }
         .ram-dd.open .ram-dd-menu { display: flex; }
-        .ram-dd-opt { display: flex; align-items: center; gap: 8px; width: 100%; border: none; background: none; padding: 9px 11px; border-radius: 7px; text-align: left; font-family: inherit; font-size: 13.5px; color: #1f2733; cursor: pointer; white-space: nowrap; }
+        .ram-dd-opt { display: flex; align-items: center; gap: 8px; width: 100%; border: none; background: none; padding: 9px 11px; border-radius: 7px; text-align: left; font-family: inherit; font-size: 13.5px; color: #111827; cursor: pointer; white-space: nowrap; }
         .ram-dd-opt:hover { background: rgba(66,122,181,.08); }
         .ram-dd-opt.sel { background: rgba(66,122,181,.12); font-weight: 600; }
         .ram-dd-tick { width: 14px; height: 14px; flex-shrink: 0; color: #427AB5; opacity: 0; }
@@ -38,47 +38,52 @@
 
         .doc { background: #fff; border: 1px solid #E3E8EF; border-radius: 12px; overflow: hidden; box-shadow: 0 20px 48px rgba(15, 23, 35, .12); }
         .doc-header { padding: 24px 28px 18px; text-align: center; background: linear-gradient(180deg, rgba(66,122,181,.08), rgba(66,122,181,0) 90%); border-bottom: 1px solid #E3E8EF; }
-        .doc-header .agency { font-size: 12px; color: #6b7685; margin: 0; line-height: 1.4; }
-        .doc-header .agency:last-of-type { font-weight: 700; color: #1f2733; margin-bottom: 8px; }
-        .doc-header .office-note { font-size: 11px; font-style: italic; color: #6b7685; margin: 0 0 10px; }
+        .doc-header .agency { font-size: 12px; color: #374151; margin: 0; line-height: 1.4; }
+        .doc-header .agency:last-of-type { font-weight: 700; color: #111827; margin-bottom: 8px; }
+        .doc-header .office-note { font-size: 11px; font-style: italic; color: #374151; margin: 0 0 10px; }
         .doc-header h1 { font-size: 16px; font-weight: 800; letter-spacing: .03em; text-transform: uppercase; margin: 0 0 5px; }
-        .doc-header .office { font-size: 12px; color: #6b7685; margin: 0 0 3px; }
+        .doc-header .office { font-size: 12px; color: #374151; margin: 0 0 3px; }
         .doc-header .period { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: #427AB5; margin: 0; }
 
         .cert-block { padding: 22px 28px 6px; }
-        .cert-label { font-size: 12.5px; color: #1f2733; margin: 0 0 10px; }
-        .cert-name { display: block; font-family: inherit; font-weight: 700; font-size: 13.5px; color: #1f2733; border: 1px solid transparent; border-radius: 6px; padding: 3px 6px; margin: 0 0 2px -7px; background: transparent; min-width: 220px; }
+        .cert-label { font-size: 12.5px; color: #111827; margin: 0 0 10px; }
+        .cert-name { display: block; font-family: inherit; font-weight: 700; font-size: 13.5px; color: #111827; border: 1px solid transparent; border-radius: 6px; padding: 3px 6px; margin: 0 0 2px -7px; background: transparent; min-width: 220px; }
         .cert-name:hover { border-color: #e1e7ef; }
         .cert-name:focus { outline: none; border-color: #427AB5; box-shadow: 0 0 0 3px rgba(66,122,181,.14); background: #fff; }
-        .cert-role { font-size: 11.5px; color: #6b7685; }
+        .cert-role { font-size: 11.5px; color: #374151; }
 
         .officer-row { display: flex; border-bottom: 1px solid #E3E8EF; }
         .officer-col { flex: 1; padding: 12px 28px; display: flex; flex-direction: column; gap: 3px; }
         .officer-col + .officer-col { border-left: 1px solid #E3E8EF; align-items: flex-end; text-align: right; }
-        .officer-name { font-family: inherit; font-size: 12.5px; font-weight: 700; color: #1f2733; width: 100%; border: none; border-bottom: 1px dashed #b9c2cf; background: transparent; padding: 0 0 3px; }
+        .officer-name { font-family: inherit; font-size: 12.5px; font-weight: 700; color: #111827; width: 100%; border: none; border-bottom: 1px dashed #b9c2cf; background: transparent; padding: 0 0 3px; }
         .officer-col + .officer-col .officer-name { text-align: right; }
         .officer-name:focus { outline: none; border-bottom-color: #427AB5; }
         .officer-name::placeholder { color: #9aa5b4; font-style: italic; font-weight: 400; }
-        .officer-label { font-size: 10px; color: #8893a3; text-transform: uppercase; letter-spacing: .04em; }
+        .officer-label { font-size: 10px; color: #4b5563; text-transform: uppercase; letter-spacing: .04em; }
 
-        .section-heading { margin: 18px 28px 8px; font-size: 11px; font-weight: 800; color: #6b7685; text-transform: uppercase; letter-spacing: .05em; }
+        .section-heading { margin: 18px 28px 8px; font-size: 11px; font-weight: 800; color: #374151; text-transform: uppercase; letter-spacing: .05em; }
         .table-wrap { overflow-x: auto; margin: 18px 28px 0; border: 1px solid #E3E8EF; border-radius: 8px; }
         .doc table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
         .doc th, .doc td { border-bottom: 1px solid #E3E8EF; border-right: 1px solid #E3E8EF; padding: 8px; }
         .doc th:last-child, .doc td:last-child { border-right: none; }
-        .doc th { background: #f4f6f9; color: #6b7685; font-weight: 700; font-size: 10.5px; text-transform: uppercase; letter-spacing: .03em; text-align: center; height: 36px; }
+        .doc th { background: #f4f6f9; color: #374151; font-weight: 700; font-size: 10.5px; text-transform: uppercase; letter-spacing: .03em; text-align: center; height: 36px; }
         .doc td { text-align: center; font-variant-numeric: tabular-nums; }
         .doc tbody tr:nth-child(even) td { background: #f8fafc; }
         .doc td.num, .doc th.num { text-align: right; }
         .doc td.left, .doc th.left { text-align: left; }
-        .doc .empty-row td { text-align: center; color: #6b7685; font-style: italic; padding: 24px; }
+        .doc .empty-row td { text-align: center; color: #374151; font-style: italic; padding: 24px; }
         .doc tbody tr.marker-row td { font-weight: 700; font-style: italic; background: #f8fafc; }
         .doc tfoot td { font-weight: 800; background: rgba(66,122,181,.08) !important; }
 
         .doc-foot { height: 22px; }
 
         @media print {
+            @page { margin: 0.25in 0; }
             body { background: #fff; padding: 0; }
+            .sheet { max-width: none; margin: 0; }
+            .doc-header, .cert-block { padding-left: 0.25in; padding-right: 0.25in; }
+            .officer-col { padding-left: 0.25in; padding-right: 0.25in; }
+            .section-heading, .table-wrap { margin-left: 0.25in; margin-right: 0.25in; }
             .toolbar { display: none; }
             .doc { border: none; border-radius: 0; box-shadow: none; }
             .officer-name { border-bottom-color: #333; }
@@ -233,8 +238,7 @@
 
         <button class="go" type="submit">Generate</button>
         <div class="spacer"></div>
-        {{-- Print temporarily hidden per request; element + JS handler kept intact. --}}
-        <button class="print" type="button" onclick="window.print()" style="display: none;">Print</button>
+        <button class="print" type="button" onclick="window.print()">Print</button>
         <a class="export" id="exportBtn" href="#">Export Excel</a>
     </form>
 
