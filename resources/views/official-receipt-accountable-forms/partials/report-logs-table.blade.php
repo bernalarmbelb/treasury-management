@@ -184,21 +184,5 @@
             </select>
         </form>
     </div>
-    <div class="pagination-controls">
-        @if ($batches->onFirstPage())
-            <span class="page-btn" aria-disabled="true">Previous</span>
-        @else
-            <a class="page-btn" href="{{ $batches->previousPageUrl() }}">Previous</a>
-        @endif
-
-        @foreach ($batches->getUrlRange(1, $batches->lastPage()) as $page => $url)
-            <a class="page-btn {{ $page === $batches->currentPage() ? 'active' : '' }}" href="{{ $url }}">{{ $page }}</a>
-        @endforeach
-
-        @if ($batches->hasMorePages())
-            <a class="page-btn" href="{{ $batches->nextPageUrl() }}">Next</a>
-        @else
-            <span class="page-btn" aria-disabled="true">Next</span>
-        @endif
-    </div>
+    <x-pagination-controls :paginator="$batches" />
 </div>

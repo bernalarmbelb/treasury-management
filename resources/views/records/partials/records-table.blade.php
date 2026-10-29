@@ -73,21 +73,5 @@
             </select>
         </form>
     </div>
-    <div class="pagination-controls">
-        @if ($records->onFirstPage())
-            <span class="page-btn" aria-disabled="true">Previous</span>
-        @else
-            <a class="page-btn" href="{{ $records->previousPageUrl() }}">Previous</a>
-        @endif
-
-        @foreach ($records->getUrlRange(1, $records->lastPage()) as $page => $url)
-            <a class="page-btn {{ $page === $records->currentPage() ? 'active' : '' }}" href="{{ $url }}">{{ $page }}</a>
-        @endforeach
-
-        @if ($records->hasMorePages())
-            <a class="page-btn" href="{{ $records->nextPageUrl() }}">Next</a>
-        @else
-            <span class="page-btn" aria-disabled="true">Next</span>
-        @endif
-    </div>
+    <x-pagination-controls :paginator="$records" />
 </div>

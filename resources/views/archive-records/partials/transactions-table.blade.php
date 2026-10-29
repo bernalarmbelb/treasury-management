@@ -107,21 +107,5 @@
             </select>
         </form>
     </div>
-    <div class="pagination-controls">
-        @if ($transactions->onFirstPage())
-            <span class="page-btn" aria-disabled="true">Previous</span>
-        @else
-            <a class="page-btn" href="{{ $transactions->previousPageUrl() }}">Previous</a>
-        @endif
-
-        @foreach ($transactions->getUrlRange(1, $transactions->lastPage()) as $page => $url)
-            <a class="page-btn {{ $page === $transactions->currentPage() ? 'active' : '' }}" href="{{ $url }}">{{ $page }}</a>
-        @endforeach
-
-        @if ($transactions->hasMorePages())
-            <a class="page-btn" href="{{ $transactions->nextPageUrl() }}">Next</a>
-        @else
-            <span class="page-btn" aria-disabled="true">Next</span>
-        @endif
-    </div>
+    <x-pagination-controls :paginator="$transactions" />
 </div>

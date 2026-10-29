@@ -50,19 +50,5 @@
             </select>
         </form>
     </div>
-    <div class="pagination-controls">
-        @if ($ledger->onFirstPage())
-            <span class="page-btn" aria-disabled="true">Previous</span>
-        @else
-            <a class="page-btn" href="{{ $ledger->previousPageUrl() }}">Previous</a>
-        @endif
-        @foreach ($ledger->getUrlRange(1, $ledger->lastPage()) as $page => $url)
-            <a class="page-btn {{ $page === $ledger->currentPage() ? 'active' : '' }}" href="{{ $url }}">{{ $page }}</a>
-        @endforeach
-        @if ($ledger->hasMorePages())
-            <a class="page-btn" href="{{ $ledger->nextPageUrl() }}">Next</a>
-        @else
-            <span class="page-btn" aria-disabled="true">Next</span>
-        @endif
-    </div>
+    <x-pagination-controls :paginator="$ledger" />
 </div>
