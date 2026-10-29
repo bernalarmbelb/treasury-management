@@ -5,6 +5,9 @@
 	<meta name="csrf-token" content="{{ csrf_token() }}">
 	<title>Treasury Management System</title>
 	<link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
+	<script>
+		try { if (localStorage.getItem('theme') === 'dark') { document.documentElement.setAttribute('data-theme', 'dark'); } } catch (e) {}
+	</script>
 	 @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body>
@@ -18,6 +21,11 @@
 		</a>
 
 		<div class="nav-profile">
+			<button type="button" class="nav-theme-btn" id="themeToggleBtn" aria-label="Switch to dark theme" title="Toggle dark theme" style="background:none;border:0;padding:0;">
+				<svg class="nav-theme-moon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+				<svg class="nav-theme-sun" style="display:none" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+			</button>
+
 			<div class="nav-bell-wrapper" id="notifBellWrapper">
 				<button type="button" class="nav-bell-btn" id="notifBellBtn" aria-label="Notifications" aria-expanded="false">
 					<svg class="nav-bell-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -166,6 +174,27 @@
 	</div>
 
 	@stack('scripts')
+
+	<script>
+	// ── Dark theme toggle ─────────────────────────────────────────────────
+	(function () {
+		const btn = document.getElementById('themeToggleBtn');
+		const root = document.documentElement;
+		const sync = () => {
+			const dark = root.getAttribute('data-theme') === 'dark';
+			btn.setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme');
+			btn.querySelector('.nav-theme-moon').style.display = dark ? 'none' : 'block';
+			btn.querySelector('.nav-theme-sun').style.display = dark ? 'block' : 'none';
+		};
+		sync();
+		btn.addEventListener('click', () => {
+			const dark = root.getAttribute('data-theme') !== 'dark';
+			if (dark) { root.setAttribute('data-theme', 'dark'); } else { root.removeAttribute('data-theme'); }
+			try { localStorage.setItem('theme', dark ? 'dark' : 'light'); } catch (e) {}
+			sync();
+		});
+	})();
+	</script>
 
 	<script>
 	// ── Global toast (success / error feedback) ───────────────────────────

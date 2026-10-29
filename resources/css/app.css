@@ -662,7 +662,10 @@ body {
     padding: 24px 10px;
     background-color: var(--background-color, #F0F2F5);
     border: 1px solid var(--table-border, #D9D9D9);
-    padding: 0;
+    padding: 0 0 72px; /* clear the fixed Quick Entry bar */
+}
+@media print {
+    .main-container { padding-bottom: 0; }
 }
 
 .btn{ align-items: center; border-radius: 8px; cursor: pointer; display: inline-flex; font-family: var(--btn-primary-font); font-size: 14px; font-style: normal; font-weight: 500; gap: 10px; justify-content: center; leading-trim: both; letter-spacing: 0.05em; line-height: normal; overflow: hidden; width: fit-content; height: 42px; padding: 16px 24px; text-align: center; text-decoration: none; text-edge: cap; text-overflow: ellipsis; text-transform: uppercase; transition: background-color 0.3s ease, color 0.3s ease; outline: none; border: none; 
@@ -8885,4 +8888,72 @@ select.form-batch-input {
 .batch-request-date {
     color: #8893a3;
     font-size: 12px;
+}
+
+/* ===========================================================
+   Theme toggle + dark theme
+   ponytail: whole-page colour inversion instead of per-module
+   styling; swap for CSS variables if exact brand colours matter.
+   =========================================================== */
+.nav-theme-btn {
+    width: 34px;
+    height: 34px;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: rgba(51, 51, 51, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9px;
+    transition: background 0.15s, color 0.15s;
+    line-height: 0;
+}
+.nav-theme-btn:hover { background: rgba(51, 51, 51, 0.08); color: var(--fonts-black); }
+.nav-theme-sun { display: none; }
+html[data-theme="dark"] .nav-theme-moon { display: none; }
+html[data-theme="dark"] .nav-theme-sun { display: block; }
+
+@media screen {
+    html[data-theme="dark"] { background: #fff; filter: invert(0.93) hue-rotate(180deg); }
+    html[data-theme="dark"] img,
+    html[data-theme="dark"] video,
+    html[data-theme="dark"] canvas,
+    html[data-theme="dark"] .navigation-bar,
+    html[data-theme="dark"] .nav-scroll-btn,
+    html[data-theme="dark"] .quick-entry-link:hover,
+    html[data-theme="dark"] .page-btn.active,
+    html[data-theme="dark"] .dash-filter-go,
+    html[data-theme="dark"] .btn-primary,
+    html[data-theme="dark"] .btn-secondary,
+    html[data-theme="dark"] .btn-success,
+    html[data-theme="dark"] .btn-danger,
+    html[data-theme="dark"] .btn-warning,
+    html[data-theme="dark"] .btn-accent:hover,
+    html[data-theme="dark"] .btn-warning:hover,
+    html[data-theme="dark"] .btn-info:hover,
+    html[data-theme="dark"] .btn-light:hover,
+    html[data-theme="dark"] .nav-bell-badge,
+    html[data-theme="dark"] .quick-entry-count,
+    html[data-theme="dark"] .filter-apply-btn,
+    html[data-theme="dark"] .report-log-add-batch-btn,
+    html[data-theme="dark"] .bulk-btn--cancel,
+    html[data-theme="dark"] .form-batch-save-btn,
+    html[data-theme="dark"] .ctc-proceed-btn,
+    html[data-theme="dark"] .ctc-add-entry-btn,
+    html[data-theme="dark"] .ctc-add-entry-action-btn,
+    html[data-theme="dark"] .ctc-or2-proceed-btn,
+    html[data-theme="dark"] .ctcm-badge,
+    html[data-theme="dark"] .view-btn-primary,
+    html[data-theme="dark"] .um-save-btn,
+    html[data-theme="dark"] .mc-preview-close-btn,
+    html[data-theme="dark"] .mc-send-btn--send,
+    html[data-theme="dark"] .ctc-view-print-btn,
+    html[data-theme="dark"] .ctc-modal-btn--primary,
+    html[data-theme="dark"] .dash-qbtn.primary { filter: hue-rotate(180deg) invert(1); }
+    html[data-theme="dark"] .navigation-bar,
+    html[data-theme="dark"] .nav-scroll-btn { background: #0D1E33; outline-color: #0D1E33; }
+    html[data-theme="dark"] .navigation-bar a:hover,
+    html[data-theme="dark"] .navigation-bar a.active { color: #8DBDF0; border-bottom-color: #6FA8E0; }
 }
